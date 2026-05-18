@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Psiquê Oráculo | Painel Administrativo',
-  description: 'Aconselhamento terapêutico e autoconhecimento de alta classe.',
+  description: 'Aconselhamento terapêutico e autoconhecimento de alta classe em pisiqueoraculo.com.br',
 };
 
 export default function AdminPage() {

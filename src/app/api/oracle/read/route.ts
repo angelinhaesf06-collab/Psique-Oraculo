@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   try {
     const { tipoOraculo, tipoLeitura, pergunta, cartas, imagem, userId } = await req.json();
 
-    const model = getGeminiModel("gemini-1.5-flash");
+    const model = getGeminiModel();
 
     let prompt = "";
 
