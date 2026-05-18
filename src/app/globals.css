@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FCF9F1;
+  --foreground: #2C2420;
+  --oracle-gold: #D4AF37;
+  --oracle-red: #8B0000;
+  --oracle-cream: #FCF9F1;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-gold: var(--oracle-gold);
+  --color-ruby: var(--oracle-red);
+  --color-cream: var(--oracle-cream);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1A1614;
+    --foreground: #F5F0E6;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
