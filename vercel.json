@@ -1,0 +1,7 @@
+{
+  "cleanUrls": true,
+  "framework": "nextjs",
+  "domains": [
+    "pisiqueoraculo.com.br"
+  ]
+}
