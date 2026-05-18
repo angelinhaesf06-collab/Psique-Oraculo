@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FCF9F1;
+  --background: #D8C4BC; /* Taupe Rosado/Salmão Sofisticado */
   --foreground: #2C2420;
-  --oracle-gold: #D4AF37;
+  --oracle-gold: #B8860B; 
   --oracle-red: #8B0000;
-  --oracle-cream: #FCF9F1;
+  --oracle-cream: #D8C4BC;
 }
 
 @theme inline {
