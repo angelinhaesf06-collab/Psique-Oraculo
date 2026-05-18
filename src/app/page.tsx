@@ -67,8 +67,12 @@ export default function OraculoJornada() {
             <ChevronLeft size={16} /> Voltar
           </button>
         )}
-        <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center text-white shadow-lg ml-auto">
-          <Sparkles size={20} />
+        <div className="w-12 h-12 bg-gold rounded-full flex items-center justify-center text-white shadow-lg ml-auto overflow-hidden border-2 border-gold/50">
+          <img 
+            src="/assets/brand/icon-raw.avif" 
+            alt="Psiquê Ícone" 
+            className="w-full h-full object-cover scale-125 brightness-110 sepia-[0.3] hue-rotate-[10deg] saturate-150"
+          />
         </div>
       </div>
 
@@ -94,11 +98,11 @@ export default function OraculoJornada() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-400 opacity-90 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20" />
-                <div className="relative h-full p-8 flex flex-col justify-end items-start text-white">
+                <div className="relative h-full p-8 flex flex-col justify-center items-center text-center text-white pb-12">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-80">78 Arcanos (Maiores e Menores)</span>
                   <h3 className="text-3xl font-bold mb-2">Tarô</h3>
                   <p className="text-sm opacity-80 italic">Revelações profundas sobre sua jornada</p>
-                  <div className="absolute top-1/2 right-8 -translate-y-1/2 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md group-hover:bg-white/30 transition-all">
+                  <div className="absolute top-1/2 right-8 -translate-y-1/2 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md group-hover:bg-white/30 transition-all hidden md:flex">
                     <ChevronLeft className="rotate-180" size={20} />
                   </div>
                 </div>
@@ -111,11 +115,11 @@ export default function OraculoJornada() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-ruby to-rose-500 opacity-90 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20" />
-                <div className="relative h-full p-8 flex flex-col justify-end items-start text-white">
+                <div className="relative h-full p-8 flex flex-col justify-center items-center text-center text-white pb-12">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-80">Lenormand</span>
                   <h3 className="text-3xl font-bold mb-2">Baralho Cigano</h3>
                   <p className="text-sm opacity-80 italic">Orientações práticas para seu dia a dia</p>
-                  <div className="absolute top-1/2 right-8 -translate-y-1/2 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md group-hover:bg-white/30 transition-all">
+                  <div className="absolute top-1/2 right-8 -translate-y-1/2 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md group-hover:bg-white/30 transition-all hidden md:flex">
                     <ChevronLeft className="rotate-180" size={20} />
                   </div>
                 </div>
@@ -128,11 +132,11 @@ export default function OraculoJornada() {
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-500 opacity-90 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20" />
-                <div className="relative h-full p-8 flex flex-col justify-end items-start text-white">
+                <div className="relative h-full p-8 flex flex-col justify-center items-center text-center text-white pb-12">
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-80">Mensagens Celestiais</span>
                   <h3 className="text-3xl font-bold mb-2">Cartas dos Anjos</h3>
                   <p className="text-sm opacity-80 italic">Luz e proteção dos anjos guardiões</p>
-                  <div className="absolute top-1/2 right-8 -translate-y-1/2 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md group-hover:bg-white/30 transition-all">
+                  <div className="absolute top-1/2 right-8 -translate-y-1/2 w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md group-hover:bg-white/30 transition-all hidden md:flex">
                     <ChevronLeft className="rotate-180" size={20} />
                   </div>
                 </div>
