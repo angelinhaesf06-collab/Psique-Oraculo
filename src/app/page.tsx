@@ -23,8 +23,25 @@ export default function AdminPage() {
           <Link href="/admin" className="flex items-center gap-4 px-4 py-3 bg-gold/5 text-gold rounded-2xl text-[10px] font-black uppercase tracking-widest border border-gold/10 transition-all">
             <LayoutDashboard size={16} /> Dashboard
           </Link>
+          
+          <div className="pt-4 pb-2 px-4 text-[8px] font-black text-foreground/30 uppercase tracking-[0.3em]">Oráculos</div>
+          
+          <Link href="/admin/taro" className="flex items-center gap-4 px-4 py-3 text-foreground/60 hover:bg-gold/5 hover:text-gold rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all group">
+            <Sparkles size={16} className="group-hover:rotate-12 transition-transform" /> Tarô
+          </Link>
+          
+          <Link href="/admin/cigano" className="flex items-center gap-4 px-4 py-3 text-foreground/60 hover:bg-gold/5 hover:text-gold rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all group">
+            <Sparkles size={16} className="group-hover:rotate-12 transition-transform text-ruby/60 group-hover:text-ruby" /> Baralho Cigano
+          </Link>
+          
+          <Link href="/admin/anjos" className="flex items-center gap-4 px-4 py-3 text-foreground/60 hover:bg-gold/5 hover:text-gold rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all group">
+            <Sparkles size={16} className="group-hover:rotate-12 transition-transform text-blue-400/60 group-hover:text-blue-400" /> Tarô dos Anjos
+          </Link>
+
+          <div className="pt-4 pb-2 px-4 text-[8px] font-black text-foreground/30 uppercase tracking-[0.3em]">Gestão</div>
+
           <Link href="/admin/leituras" className="flex items-center gap-4 px-4 py-3 text-foreground/60 hover:bg-gold/5 hover:text-gold rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
-            <History size={16} /> Histórico
+            <History size={16} /> Histórico Geral
           </Link>
           <Link href="/admin/usuarios" className="flex items-center gap-4 px-4 py-3 text-foreground/60 hover:bg-gold/5 hover:text-gold rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
             <User size={16} /> Usuários
