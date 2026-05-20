@@ -51,10 +51,14 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-12 text-center z-10">
         
         {/* Ícone Central */}
-        <div className="relative mx-auto w-48 h-48">
-          <div className="absolute inset-0 bg-gold/5 rounded-full blur-3xl" />
-          <div className="relative w-full h-full rounded-full border-2 border-gold/10 overflow-hidden shadow-xl bg-white">
-            <img src="/assets/brand/icon-512.png" alt="Psiquê Oráculo Logo" className="w-full h-full object-cover p-4" />
+        <div className="relative mx-auto w-44 h-44 flex items-center justify-center">
+          <div className="absolute inset-0 bg-gold/5 rounded-full blur-3xl animate-pulse" />
+          <div className="relative w-full h-full rounded-full border-2 border-gold/20 overflow-hidden shadow-2xl bg-white flex items-center justify-center">
+            <img 
+              src="/assets/brand/icon-512.png" 
+              alt="Psiquê Oráculo Logo" 
+              className="w-[85%] h-[85%] object-contain" 
+            />
           </div>
         </div>
 
@@ -107,8 +111,11 @@ export default function LoginPage() {
 
           <div className="pt-6">
             <button
-              onClick={() => window.location.href = '/'}
-              className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/20 hover:text-gold/40 transition-all"
+              onClick={() => {
+                localStorage.setItem('psique_demo_mode', 'true');
+                window.location.href = '/';
+              }}
+              className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/30 hover:text-gold transition-all"
             >
               Acesso Rápido
             </button>

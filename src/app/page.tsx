@@ -40,10 +40,12 @@ export default function OraculoJornada() {
 
   useEffect(() => {
     const checkUser = async () => {
+      const isDemo = localStorage.getItem('psique_demo_mode') === 'true';
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      
+      if (!session && !isDemo) {
         router.push('/login');
-      } else {
+      } else if (session) {
         setUser(session.user);
       }
     };
@@ -51,6 +53,7 @@ export default function OraculoJornada() {
   }, [router]);
 
   const handleLogout = async () => {
+    localStorage.removeItem('psique_demo_mode');
     await supabase.auth.signOut();
     router.push('/login');
   };
