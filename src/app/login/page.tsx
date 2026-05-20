@@ -46,15 +46,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-6 relative overflow-hidden">
       
       <div className="w-full max-w-md space-y-12 text-center z-10">
         
         {/* Ícone Central */}
         <div className="relative mx-auto w-48 h-48">
-          <div className="absolute inset-0 bg-gold/10 rounded-full blur-3xl animate-pulse" />
-          <div className="relative w-full h-full rounded-full border-2 border-gold/20 overflow-hidden shadow-2xl">
-            <img src="/assets/brand/icon-512.png" alt="Psiquê Oráculo Logo" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gold/5 rounded-full blur-3xl" />
+          <div className="relative w-full h-full rounded-full border-2 border-gold/10 overflow-hidden shadow-xl bg-white">
+            <img src="/assets/brand/icon-512.png" alt="Psiquê Oráculo Logo" className="w-full h-full object-cover p-4" />
           </div>
         </div>
 
@@ -79,43 +79,43 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-12 pr-6 py-4 rounded-2xl bg-white/80 border border-gold/10 focus:border-gold/30 outline-none transition-all text-foreground"
+                className="w-full pl-12 pr-6 py-4 rounded-2xl bg-white/50 border border-gold/10 focus:border-gold/30 outline-none transition-all text-foreground placeholder:text-foreground/20"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.2em] shadow-lg shadow-gold/20 hover:scale-[1.02] transition-all disabled:opacity-50"
+              className="w-full py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.2em] shadow-lg shadow-gold/10 hover:scale-[1.01] transition-all disabled:opacity-50"
             >
               {loading ? 'Enviando...' : 'Entrar com E-mail'}
             </button>
           </form>
 
           <div className="flex items-center gap-4 py-2">
-            <div className="h-px flex-1 bg-gold/10" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-gold/40">Ou</span>
-            <div className="h-px flex-1 bg-gold/10" />
+            <div className="h-px flex-1 bg-gold/5" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-gold/30">Ou</span>
+            <div className="h-px flex-1 bg-gold/5" />
           </div>
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full py-4 bg-white/80 border border-gold/10 text-foreground rounded-2xl font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-gold/5 transition-all"
+            className="w-full py-4 bg-white/40 border border-gold/10 text-foreground/60 rounded-2xl font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/60 transition-all"
           >
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 opacity-70" />
+            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 opacity-50 grayscale" />
             Continuar com Google
           </button>
 
           <div className="pt-6">
             <button
               onClick={() => window.location.href = '/'}
-              className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/30 hover:text-gold transition-all"
+              className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/20 hover:text-gold/40 transition-all"
             >
-              Acesso Rápido (Modo Demonstração)
+              Acesso Rápido
             </button>
           </div>
         </div>
 
-        <p className="pt-12 text-[10px] font-medium uppercase tracking-[0.3em] text-gold/30">
+        <p className="pt-12 text-[10px] font-medium uppercase tracking-[0.3em] text-gold/20">
           Autoconhecimento & Terapia <Sparkles size={10} className="inline ml-1" />
         </p>
       </div>

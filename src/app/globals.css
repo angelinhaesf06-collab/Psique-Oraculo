@@ -33,7 +33,7 @@ body {
   overflow-x: hidden;
 }
 
-body::before {
+.bg-oracle-image::before {
   content: "";
   position: fixed;
   top: 0;

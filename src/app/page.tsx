@@ -92,7 +92,7 @@ export default function OraculoJornada() {
   // if (!user) return null; 
 
   return (
-    <div className="min-h-screen text-foreground font-sans p-6 md:p-12 flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-oracle-image text-foreground font-sans p-6 md:p-12 flex flex-col items-center justify-center">
       
       {/* Header Fixo */}
       <div className="fixed top-8 left-8 right-8 flex justify-between items-center z-50">
