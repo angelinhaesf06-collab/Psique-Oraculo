@@ -95,13 +95,18 @@ export default function OraculoJornada() {
   // if (!user) return null; 
 
   return (
-    <div className="min-h-screen bg-oracle-image text-foreground font-sans p-6 md:p-12 flex flex-col items-center justify-center">
+    <div className="min-h-screen text-foreground font-sans p-6 md:p-12 flex flex-col items-center justify-center relative overflow-hidden">
+      
+      {/* Background Decorativo - Mandala Centralizada (Simulada via CSS e Overlay) */}
+      <div className="fixed inset-0 flex items-center justify-center opacity-20 pointer-events-none z-0">
+         <div className="w-[800px] h-[800px] bg-[url('/assets/brand/mandala-bg.png')] bg-contain bg-no-repeat bg-center animate-spin-slow"></div>
+      </div>
       
       {/* Header Fixo */}
       <div className="fixed top-8 left-8 right-8 flex justify-between items-center z-50">
         <div className="flex items-center gap-4">
           {passo > 0 && (
-            <button onClick={prevPasso} className="text-gold flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+            <button onClick={prevPasso} className="text-gold flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gold/10">
               <ChevronLeft size={16} /> Voltar
             </button>
           )}
@@ -110,12 +115,12 @@ export default function OraculoJornada() {
         <div className="flex items-center gap-4 ml-auto">
           <button 
             onClick={handleLogout}
-            className="text-gold/40 hover:text-gold transition-colors p-2"
+            className="text-gold/40 hover:text-gold transition-colors p-2 bg-white/50 backdrop-blur-sm rounded-full"
             title="Sair"
           >
             <LogOut size={20} />
           </button>
-          <div className="w-12 h-12 bg-gold rounded-full flex items-center justify-center text-white shadow-lg overflow-hidden border-2 border-gold/50">
+          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-gold/30">
             <img 
               src="/assets/brand/icon-512.png" 
               alt="Psiquê Ícone" 
@@ -125,44 +130,69 @@ export default function OraculoJornada() {
         </div>
       </div>
 
-      <div className="max-w-2xl w-full space-y-12">
+      <div className="relative z-10 max-w-5xl w-full">
         
-        {/* PASSO 0: ESCOLHA SEU ORÁCULO */}
+        {/* PASSO 0: ESCOLHA SEU ORÁCULO (Réplica da Imagem) */}
         {passo === 0 && (
-          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-             <div className="text-center space-y-2">
-              <p className="text-3xl font-script text-gold/80 leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>
-                {getSaudacao()}
-              </p>
-              <h2 className="text-3xl font-medium text-foreground/80 tracking-tight">
-                Escolha seu Oráculo
-              </h2>
-            </div>
-
-            <div className="space-y-6">
+          <div className="space-y-16 animate-in fade-in zoom-in-95 duration-1000">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 px-4 md:px-10">
               {[
-                { id: 'Tarô', tag: '78 ARCANOS', title: 'Tarô', desc: 'Revelações profundas', pattern: 'opacity-10' },
-                { id: 'Baralho Cigano', tag: 'LENORMAND', title: 'Baralho Cigano', desc: 'Orientações práticas', pattern: 'opacity-20' },
-                { id: 'Tarô dos Anjos', tag: 'CELESTIAIS', title: 'Cartas dos Anjos', desc: 'Luz e proteção', pattern: 'opacity-10' }
+                { 
+                  id: 'Tarô', 
+                  title: 'TARO', 
+                  desc: 'CONSELHOS DOS ARCANOS', 
+                  img: '/assets/decks/covers/taro.jpg',
+                  borderColor: 'border-[#E5D9C3]'
+                },
+                { 
+                  id: 'Baralho Cigano', 
+                  title: 'BARALHO CIGANO', 
+                  desc: 'LENORMAN', 
+                  img: '/assets/decks/covers/cigano.jpg',
+                  borderColor: 'border-[#D4B982]'
+                },
+                { 
+                  id: 'Tarô dos Anjos', 
+                  title: 'TARO DOS ANJOS', 
+                  desc: 'E AINGRESIS', 
+                  img: '/assets/decks/covers/anjos.jpg',
+                  borderColor: 'border-[#E5D9C3]'
+                }
               ].map((oracle) => (
                 <button 
                   key={oracle.id}
-                  onClick={() => { setTipoOraculo(oracle.id); nextPasso(); }}
-                  className="w-full relative overflow-hidden bg-[#F5F2EA] rounded-[32px] border border-gold/10 p-8 text-left group transition-all hover:scale-[1.02] shadow-sm hover:shadow-md"
+                  onClick={() => setTipoOraculo(oracle.id)}
+                  className={`group relative flex flex-col items-center bg-[#FDFBF7] rounded-[50px] border-[12px] ${oracle.borderColor} p-6 shadow-2xl transition-all hover:scale-105 ${tipoOraculo === oracle.id ? 'ring-4 ring-teal-500/30 border-teal-600/20' : ''}`}
                 >
-                  <div className={`absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] ${oracle.pattern} pointer-events-none`} />
-                  <div className="relative flex justify-between items-center">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/40">{oracle.tag}</span>
-                      <h3 className="text-3xl font-bold text-foreground/80">{oracle.title}</h3>
-                      <p className="text-sm text-foreground/50">{oracle.desc}</p>
-                    </div>
-                    <div className="w-12 h-12 rounded-full border border-gold/30 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-all shadow-sm">
-                      <ChevronLeft className="rotate-180" size={20} />
-                    </div>
+                  <h3 className="text-2xl font-bold text-foreground/70 tracking-[0.1em] mt-2 mb-6">{oracle.title}</h3>
+                  
+                  <div className="w-full aspect-[3/4] rounded-[30px] overflow-hidden border border-gold/10 shadow-inner bg-[#F5F2EA]">
+                    <img 
+                      src={oracle.img} 
+                      alt={oracle.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x400/F5F2EA/C5A059?text=' + oracle.title;
+                      }}
+                    />
                   </div>
+
+                  <p className="text-[11px] font-bold text-foreground/40 tracking-[0.25em] mt-8 mb-4 text-center px-4 leading-relaxed">
+                    {oracle.desc}
+                  </p>
                 </button>
               ))}
+            </div>
+
+            <div className="flex justify-center pt-4">
+               <button 
+                 onClick={() => tipoOraculo && nextPasso()}
+                 disabled={!tipoOraculo}
+                 className={`group relative overflow-hidden bg-gradient-to-r from-[#008B8B] to-[#006666] text-white px-20 py-5 rounded-full text-[13px] font-bold uppercase tracking-[0.4em] shadow-[0_10px_30px_rgba(0,102,102,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(0,102,102,0.4)] hover:-translate-y-1 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:hover:translate-y-0`}
+               >
+                  <span className="relative z-10">Selecionar Leitura</span>
+                  <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+               </button>
             </div>
           </div>
         )}
@@ -292,9 +322,24 @@ export default function OraculoJornada() {
             {resultado.situacao_atual ? (
               <div className="space-y-16">
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <CardResult title="O Presente" data={resultado.situacao_atual} index={1} />
-                    <CardResult title="O Caminho" data={resultado.caminho_acao} index={2} />
-                    <CardResult title="A Síntese" data={resultado.resultado_conselho} index={3} />
+                    <CardResult 
+                      title="O Presente" 
+                      data={resultado.situacao_atual} 
+                      index={1} 
+                      tipoOraculo={tipoOraculo}
+                    />
+                    <CardResult 
+                      title="O Caminho" 
+                      data={resultado.caminho_acao} 
+                      index={2} 
+                      tipoOraculo={tipoOraculo}
+                    />
+                    <CardResult 
+                      title="A Síntese" 
+                      data={resultado.resultado_conselho} 
+                      index={3} 
+                      tipoOraculo={tipoOraculo}
+                    />
                  </div>
                  <div className="relative p-10 rounded-[56px] bg-white border border-gold/10 shadow-2xl">
                     <p className="text-2xl md:text-3xl leading-relaxed text-foreground/80 font-light italic">
@@ -338,14 +383,37 @@ export default function OraculoJornada() {
   );
 }
 
-function CardResult({ title, data, index }: { title: string, data: any, index: number }) {
+function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
+  const [imageError, setImageError] = useState(false);
+  
+  // Mapeia o nome do oráculo para a pasta correta
+  const folderMap: Record<string, string> = {
+    'Tarô': 'taro',
+    'Baralho Cigano': 'cigano',
+    'Tarô dos Anjos': 'anjos'
+  };
+
+  const folder = folderMap[tipoOraculo] || 'taro';
+  const imagePath = `/assets/decks/${folder}/${data.card_slug}.jpg`;
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-backwards" style={{ animationDelay: `${index * 200}ms` }}>
       <h5 className="text-[9px] font-black uppercase tracking-[0.3em] text-foreground/30 text-center">{title}</h5>
       <div className="relative h-full bg-[#FDFBF7] rounded-[24px] border-2 border-gold/20 p-2 shadow-xl hover:scale-[1.02] transition-all duration-700">
         <div className="h-full border border-gold/10 rounded-[18px] flex flex-col overflow-hidden">
-          <div className="h-2/3 bg-gradient-to-b from-[#F5F2EA] to-white flex flex-col items-center justify-center p-6 text-center">
-             <span className="text-gold font-bold text-xl uppercase tracking-tighter drop-shadow-sm">{data.carta}</span>
+          <div className="h-2/3 bg-gradient-to-b from-[#F5F2EA] to-white flex flex-col items-center justify-center relative overflow-hidden">
+             {!imageError ? (
+               <img 
+                 src={imagePath} 
+                 alt={data.carta}
+                 className="w-full h-full object-cover"
+                 onError={() => setImageError(true)}
+               />
+             ) : (
+               <div className="p-6 text-center">
+                 <span className="text-gold font-bold text-xl uppercase tracking-tighter drop-shadow-sm">{data.carta}</span>
+               </div>
+             )}
           </div>
           <div className="h-1/3 bg-white p-5 flex items-center justify-center text-center">
              <p className="text-[11px] leading-relaxed text-foreground/60 italic font-medium">{data.interpretacao}</p>

@@ -39,13 +39,33 @@ export async function POST(req: Request) {
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "Nome", "interpretacao": "O que esta energia revela sobre o agora (Jungian-style).", "regra_aplicada": 1|2 },
-        "caminho_acao": { "carta": "Nome", "interpretacao": "A sugestão do inconsciente para o movimento.", "regra_aplicada": 1|2 },
-        "resultado_conselho": { "carta": "Nome", "interpretacao": "A síntese arquetípica do possível desfecho.", "regra_aplicada": 1|2 },
+        "situacao_atual": { 
+          "carta": "Nome", 
+          "card_slug": "nome-da-carta-slug",
+          "interpretacao": "O que esta energia revela sobre o agora (Jungian-style).", 
+          "regra_aplicada": 1|2 
+        },
+        "caminho_acao": { 
+          "carta": "Nome", 
+          "card_slug": "nome-da-carta-slug",
+          "interpretacao": "A sugestão do inconsciente para o movimento.", 
+          "regra_aplicada": 1|2 
+        },
+        "resultado_conselho": { 
+          "carta": "Nome", 
+          "card_slug": "nome-da-carta-slug",
+          "interpretacao": "A síntese arquetípica do possível desfecho.", 
+          "regra_aplicada": 1|2 
+        },
         "conselho_final": "Uma narrativa fluida, conectando o desabafo pessoal do usuário aos arquétipos revelados. Use o nome do usuário se fornecido no contexto.",
         "complemento_terapeutico": "Uma frase curta, como um mantra ou insight para meditação.",
         "salmo_recomendado": "Opcional (Obrigatório se Tarô dos Anjos)"
       }
+
+      REGRAS PARA card_slug:
+      - Use apenas letras minúsculas, números e hífens.
+      - Remova acentos.
+      - Exemplo: "O Mago" vira "o-mago", "Ás de Copas" vira "as-de-copas".
     `;
 
     let userContext = "Tema Selecionado: " + tema + "\nPergunta/Desabafo: " + (pergunta || "O usuário busca orientação geral.");

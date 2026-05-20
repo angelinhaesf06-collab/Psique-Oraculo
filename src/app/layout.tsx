@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat, Great_Vibes } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
+import DecorationOverlay from "./DecorationOverlay";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -26,10 +27,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${montserrat.variable} ${greatVibes.variable} antialiased font-sans text-foreground`}>
+      <body className={`${montserrat.variable} ${greatVibes.variable} antialiased font-sans text-foreground relative min-h-screen`}>
+        <DecorationOverlay />
         <Toaster position="top-center" richColors />
-        {children}
+        <div className="relative z-10">
+          {children}
+        </div>
       </body>
     </html>
   );
 }
+
