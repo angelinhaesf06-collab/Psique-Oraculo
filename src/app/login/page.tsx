@@ -3,136 +3,164 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Mail, Sparkles, Moon, Sun } from 'lucide-react';
-import Image from 'next/image';
+import { Eye, Mail, Sparkles, Moon, Sun, Key } from 'lucide-react';
 
-const ButterflyIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M12,16c0,0-1,2-3,2s-3-2-3-2s-1-4,3-4s3,4,3,4M12,16c0,0,1,2,3,2s3-2,3-2s1-4-3-4s-3,4-3,4 M12,8c0,0-1-2-3-2S6,8,6,8s-1,4,3,4s3-4,3-4M12,8c0,0,1-2,3-2s3,2,3,2s1,4-3,4s-3-4-3-4" />
+const FeatherIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76z" />
+    <line x1="16" y1="8" x2="2" y2="22" />
+    <line x1="17.5" y1="15" x2="9" y2="15" />
   </svg>
 );
 
-const MandalaIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" className={className}>
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="12" r="6" />
-    <path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19" />
-    <circle cx="12" cy="12" r="3" fill="currentColor" fillOpacity="0.1" />
+const KeyIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.778-7.778zM12 7l.343-.343a4 4 0 1 1 5.657 5.657L17 13.343M11 10.343l2 2m-3-1l2 2" />
   </svg>
 );
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      password,
     });
     if (error) toast.error(error.message);
-    else toast.success('Link de login enviado!');
+    else window.location.href = '/';
     setLoading(false);
   };
 
-  const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin },
-    });
-    if (error) toast.error(error.message);
+  const handleDemoAccess = () => {
+    localStorage.setItem('psique_demo_mode', 'true');
+    window.location.href = '/';
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#F5F2EA] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
       
-      <div className="w-full max-w-md space-y-12 text-center z-10">
+      {/* Background Mandala - Réplica do Design */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none z-0">
+         <div className="w-[1200px] h-[1200px] bg-[url('https://i.ibb.co/v4v8fL1/mandala-login.png')] bg-contain bg-no-repeat bg-center mix-blend-multiply">
+            {/* Fallback caso a imagem não carregue, simulando a mandala com gradientes e formas */}
+            <div className="w-full h-full bg-radial-gradient from-transparent via-transparent to-transparent flex items-center justify-center">
+                <div className="w-[600px] h-[600px] border-[40px] border-gold/5 rounded-full blur-xl" />
+            </div>
+         </div>
+      </div>
+
+      <div className="w-full max-w-[440px] space-y-8 text-center z-10">
         
-        {/* Ícone Central */}
-        <div className="relative mx-auto w-44 h-44 flex items-center justify-center">
-          <div className="absolute inset-0 bg-gold/5 rounded-full blur-3xl animate-pulse" />
-          <div className="relative w-full h-full rounded-full border-2 border-gold/20 overflow-hidden shadow-2xl bg-white flex items-center justify-center">
-            <img 
-              src="/assets/brand/icon-512.png" 
-              alt="Psiquê Oráculo Logo" 
-              className="w-[85%] h-[85%] object-contain" 
-            />
-          </div>
+        {/* Espaço para a Mandala Superior do Design */}
+        <div className="relative h-48 w-full flex items-center justify-center">
+            <div className="absolute top-0 w-[140%] h-[180%] bg-[url('https://i.ibb.co/v4v8fL1/mandala-login.png')] bg-contain bg-no-repeat bg-center opacity-90 scale-125" />
         </div>
 
-        {/* Título e Subtítulo */}
-        <div className="space-y-4">
-          <h1 className="text-7xl md:text-8xl font-serif text-gold tracking-tighter leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>
-            Psique
-          </h1>
-          <p className="text-xl md:text-2xl text-foreground/40 font-light tracking-[0.1em]">
-            Seu oráculo de bolso.
-          </p>
-        </div>
-
-        {/* Formulário de Login */}
-        <div className="space-y-6 pt-8">
+        {/* Inputs Ornamentados */}
+        <div className="space-y-4 pt-4">
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40 group-focus-within:text-gold transition-colors" size={20} />
+            
+            {/* Campo E-mail */}
+            <div className="relative">
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#2C2420] opacity-80">
+                <FeatherIcon className="w-6 h-6" />
+              </div>
               <input
                 type="email"
-                placeholder="Seu melhor e-mail"
+                placeholder="SEU E-MAIL"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-12 pr-6 py-4 rounded-2xl bg-white/50 border border-gold/10 focus:border-gold/30 outline-none transition-all text-foreground placeholder:text-foreground/20"
+                className="w-full pl-16 pr-6 py-5 rounded-2xl bg-white border-2 border-[#D4B982]/40 focus:border-[#D4B982] outline-none transition-all text-[#2C2420] text-lg font-medium tracking-widest placeholder:text-[#2C2420]/30 shadow-sm"
               />
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.2em] shadow-lg shadow-gold/10 hover:scale-[1.01] transition-all disabled:opacity-50"
-            >
-              {loading ? 'Enviando...' : 'Entrar com E-mail'}
-            </button>
+
+            {/* Campo Senha */}
+            <div className="relative">
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#2C2420] opacity-80">
+                <KeyIcon className="w-6 h-6" />
+              </div>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="SUA SENHA"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full pl-16 pr-14 py-5 rounded-2xl bg-white border-2 border-[#D4B982]/40 focus:border-[#D4B982] outline-none transition-all text-[#2C2420] text-lg font-medium tracking-widest placeholder:text-[#2C2420]/30 shadow-sm"
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-6 top-1/2 -translate-y-1/2 text-[#2C2420]/40 hover:text-[#2C2420] transition-colors"
+              >
+                <Eye size={20} />
+              </button>
+            </div>
+
+            {/* Link Esqueceu Senha */}
+            <div className="flex justify-end pr-2">
+               <button type="button" className="text-[#A08149] text-sm font-medium underline underline-offset-4 decoration-[#A08149]/30 hover:decoration-[#A08149]">
+                  Esqueceu sua senha?
+               </button>
+            </div>
+
+            {/* Botão Entrar */}
+            <div className="pt-6">
+                <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-5 bg-gradient-to-r from-[#008B8B] to-[#006666] text-white rounded-[32px] font-bold text-lg uppercase tracking-[0.3em] shadow-[0_10px_25px_rgba(0,102,102,0.3)] hover:scale-[1.02] active:scale-98 transition-all disabled:opacity-50"
+                >
+                {loading ? 'Entrando...' : 'ENTRAR NO ORÁCULO'}
+                </button>
+            </div>
           </form>
 
-          <div className="flex items-center gap-4 py-2">
-            <div className="h-px flex-1 bg-gold/5" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-gold/30">Ou</span>
-            <div className="h-px flex-1 bg-gold/5" />
-          </div>
+          {/* Social Login Section */}
+          <div className="pt-10 space-y-6">
+            <div className="flex items-center gap-4 justify-center">
+              <div className="h-[1px] w-12 bg-[#A08149]/20" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.4em] text-[#A08149]/60">ou conecte-se com</span>
+              <div className="h-[1px] w-12 bg-[#A08149]/20" />
+            </div>
 
-          <button
-            onClick={handleGoogleLogin}
-            className="w-full py-4 bg-white/40 border border-gold/10 text-foreground/60 rounded-2xl font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/60 transition-all"
-          >
-            <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5 opacity-50 grayscale" />
-            Continuar com Google
-          </button>
-
-          <div className="pt-6">
-            <button
-              onClick={() => {
-                localStorage.setItem('psique_demo_mode', 'true');
-                window.location.href = '/';
-              }}
-              className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/30 hover:text-gold transition-all"
-            >
-              Acesso Rápido
-            </button>
+            <div className="flex items-center justify-center gap-10">
+                <button className="text-[#A08149]/60 hover:text-[#A08149] transition-all">
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.908 3.152-1.928 4.176-1.224 1.224-3.136 2.52-6.528 2.52-5.32 0-9.624-4.304-9.624-9.624s4.304-9.624 9.624-9.624c2.88 0 5.032 1.136 6.592 2.616l2.32-2.32C18.664 1.256 15.8 0 12.48 0 6.312 0 1.296 5.016 1.296 11.184s5.016 11.184 11.184 11.184c3.392 0 5.968-1.12 7.968-3.2 2.072-2.072 2.728-4.968 2.728-7.312 0-.704-.064-1.376-.184-1.936l-10.512.016z"/></svg>
+                </button>
+                <button className="text-[#A08149]/60 hover:text-[#A08149] transition-all">
+                    <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-2.415-2.828 0-1.927 1.572-3.123 3.018-3.123 1.056 0 2.214.654 2.214 1.884 0 1.23-.96 2.153-2.14 2.153-.346 0-.67-.09-.96-.237l-.022.016c.365.807 1.096 1.488 2.305 1.488 1.99 0 3.255-1.63 3.255-3.64 0-2.03-1.64-3.522-3.87-3.522-2.525 0-4.437 1.846-4.437 4.295 0 2.235 1.594 4.17 3.524 4.17.653 0 1.24-.19 1.7-.514l-.004-.002a4.4 4.4 0 0 1-2.168.652z"/></svg>
+                </button>
+                <button className="text-[#A08149]/60 hover:text-[#A08149] transition-all">
+                    <Sun size={32} strokeWidth={1.5} />
+                </button>
+            </div>
           </div>
         </div>
 
-        <p className="pt-12 text-[10px] font-medium uppercase tracking-[0.3em] text-gold/20">
-          Autoconhecimento & Terapia <Sparkles size={10} className="inline ml-1" />
-        </p>
-      </div>
+        {/* Logo Rodapé */}
+        <div className="pt-16 pb-8">
+            <h2 className="text-3xl font-serif text-[#A08149] tracking-[0.4em] opacity-80" style={{ fontFamily: 'serif' }}>
+              PSIQUEORÁCULO
+            </h2>
+        </div>
 
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-        .font-script {
-          font-family: 'Great Vibes', cursive;
-        }
-      `}</style>
+        {/* Botão de Demo (Apenas para desenvolvimento/teste) */}
+        <div className="pt-4">
+            <button 
+                onClick={handleDemoAccess}
+                className="text-[9px] font-black uppercase tracking-[0.5em] text-[#A08149]/20 hover:text-[#A08149]/40 transition-all"
+            >
+                Acesso de Visitante
+            </button>
+        </div>
+      </div>
     </div>
   );
 }
