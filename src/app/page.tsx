@@ -110,13 +110,46 @@ export default function OraculoJornada() {
   return (
     <div className="min-h-screen text-foreground font-sans p-6 md:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-[#F5F2EA]">
       
-      {/* Background Mandala removido para design limpo */}
-      
+      {/* Elementos Decorativos Passo 0 */}
+      {passo === 0 && (
+        <>
+          {/* Mandala Central Suave ao Fundo */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] md:w-[900px] md:h-[900px] opacity-[0.07] pointer-events-none z-0">
+             <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
+          </div>
+
+          {/* Ornamentos de Canto (SVG simulando a imagem) */}
+          <div className="absolute top-4 left-4 md:top-8 md:left-8 w-24 h-24 md:w-48 md:h-48 opacity-20 pointer-events-none z-0">
+             <svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current">
+                <path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" />
+                <circle cx="20" cy="20" r="3" />
+                <circle cx="40" cy="20" r="2" />
+                <circle cx="20" cy="40" r="2" />
+             </svg>
+          </div>
+          <div className="absolute top-4 right-4 md:top-8 md:right-8 w-24 h-24 md:w-48 md:h-48 opacity-20 pointer-events-none z-0 rotate-90">
+             <svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current">
+                <path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" />
+             </svg>
+          </div>
+          <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 w-24 h-24 md:w-48 md:h-48 opacity-20 pointer-events-none z-0 -rotate-90">
+             <svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current">
+                <path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" />
+             </svg>
+          </div>
+          <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 w-24 h-24 md:w-48 md:h-48 opacity-20 pointer-events-none z-0 rotate-180">
+             <svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current">
+                <path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" />
+             </svg>
+          </div>
+        </>
+      )}
+
       {/* Header Fixo */}
       <div className="fixed top-4 left-4 right-4 md:top-8 md:left-8 md:right-8 flex justify-between items-center z-50">
         <div className="flex items-center gap-4">
           {passo > 0 && (
-            <button onClick={prevPasso} className="text-gold flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gold/10">
+            <button onClick={prevPasso} className="text-gold flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gold/10 shadow-sm">
               <ChevronLeft size={16} /> Voltar
             </button>
           )}
@@ -140,69 +173,81 @@ export default function OraculoJornada() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-5xl w-full">
+      <div className="relative z-10 max-w-6xl w-full">
         
         {/* PASSO 0: ESCOLHA SEU ORÁCULO (Réplica da Imagem) */}
         {passo === 0 && (
-          <div className="space-y-12 md:space-y-16 animate-in fade-in zoom-in-95 duration-1000">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 px-2 md:px-10">
+          <div className="flex flex-col items-center space-y-12 md:space-y-16 animate-in fade-in zoom-in-95 duration-1000">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 px-4 md:px-10 w-full">
               {[
                 { 
                   id: 'Tarô', 
                   title: 'TARO', 
-                  desc: 'CONSELHOS DOS ARCANOS', 
+                  desc: 'TARO: CONSELHOS DOS ARCANOS', 
                   img: '/assets/decks/covers/taro.jpg',
                   borderColor: 'border-[#E5D9C3]'
                 },
                 { 
                   id: 'Baralho Cigano', 
                   title: 'BARALHO CIGANO', 
-                  desc: 'LENORMAN', 
+                  desc: 'BARALHO CIGANO LENORMAN', 
                   img: '/assets/decks/covers/cigano.jpg',
                   borderColor: 'border-[#D4B982]'
                 },
                 { 
                   id: 'Tarô dos Anjos', 
                   title: 'TARO DOS ANJOS', 
-                  desc: 'E AINGRESIS', 
+                  desc: 'TARO DOS ANJOS E AINGRESIS', 
                   img: '/assets/decks/covers/anjos.jpg',
                   borderColor: 'border-[#E5D9C3]'
                 }
               ].map((oracle) => (
-                <button 
-                  key={oracle.id}
-                  onClick={() => setTipoOraculo(oracle.id)}
-                  className={`group relative flex flex-col items-center bg-[#FDFBF7] rounded-[32px] md:rounded-[50px] border-4 md:border-[12px] ${oracle.borderColor} p-4 md:p-6 shadow-2xl transition-all hover:scale-105 ${tipoOraculo === oracle.id ? 'ring-4 ring-teal-500/30 border-teal-600/20' : ''}`}
-                >
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground/70 tracking-[0.1em] mt-2 mb-4 md:mb-6">{oracle.title}</h3>
-                  
-                  <div className="w-full aspect-[3/4] rounded-[20px] md:rounded-[30px] overflow-hidden border border-gold/10 shadow-inner bg-[#F5F2EA]">
-                    <img 
-                      src={oracle.img} 
-                      alt={oracle.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x400/F5F2EA/C5A059?text=' + oracle.title;
-                      }}
-                    />
-                  </div>
-
-                  <p className="text-[10px] md:text-[11px] font-bold text-foreground/40 tracking-[0.25em] mt-6 md:mt-8 mb-4 text-center px-4 leading-relaxed">
+                <div key={oracle.id} className="flex flex-col items-center group">
+                  <button 
+                    onClick={() => setTipoOraculo(oracle.id)}
+                    className={`relative flex flex-col items-center bg-[#FDFBF7] rounded-[40px] md:rounded-[56px] border-4 md:border-[10px] ${oracle.borderColor} p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all hover:scale-105 ${tipoOraculo === oracle.id ? 'ring-4 ring-[#008B8B]/40 border-[#008B8B]/20' : ''}`}
+                  >
+                    <h3 className="text-xl md:text-2xl font-serif text-foreground/80 tracking-[0.2em] mb-6 md:mb-8">{oracle.title}</h3>
+                    
+                    <div className="w-full aspect-[3/4.2] rounded-[16px] md:rounded-[24px] overflow-hidden border border-gold/10 shadow-inner bg-[#F5F2EA]">
+                      <img 
+                        src={oracle.img} 
+                        alt={oracle.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x400/F5F2EA/C5A059?text=' + oracle.title;
+                        }}
+                      />
+                    </div>
+                  </button>
+                  <p className="text-[10px] md:text-[12px] font-bold text-foreground/50 tracking-[0.2em] mt-6 md:mt-8 text-center px-4 leading-relaxed uppercase">
                     {oracle.desc}
                   </p>
-                </button>
+                </div>
               ))}
             </div>
 
-            <div className="flex justify-center pt-4">
+            <div className="flex flex-col items-center gap-12 w-full">
                <button 
                  onClick={() => tipoOraculo && nextPasso()}
                  disabled={!tipoOraculo}
-                 className={`group relative overflow-hidden bg-gradient-to-r from-[#008B8B] to-[#006666] text-white px-12 md:px-20 py-4 md:py-5 rounded-full text-[12px] md:text-[13px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] shadow-[0_10px_30px_rgba(0,102,102,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(0,102,102,0.4)] hover:-translate-y-1 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:hover:translate-y-0`}
+                 className={`group relative overflow-hidden bg-gradient-to-r from-[#008B8B] to-[#006666] text-white px-16 md:px-24 py-4 md:py-5 rounded-full text-[12px] md:text-[14px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] shadow-[0_15px_40px_rgba(0,102,102,0.3)] transition-all hover:shadow-[0_20px_50px_rgba(0,102,102,0.4)] hover:-translate-y-1 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:hover:translate-y-0`}
                >
                   <span className="relative z-10">Selecionar Leitura</span>
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                </button>
+
+               {/* Logo e Ícones Inferiores (Réplica da Imagem) */}
+               <div className="flex flex-col items-center gap-6 pb-8 md:pb-0">
+                  <div className="flex items-center gap-8 text-gold/30">
+                     <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.908 3.152-1.928 4.176-1.224 1.224-3.136 2.52-6.528 2.52-5.32 0-9.624-4.304-9.624-9.624s4.304-9.624 9.624-9.624c2.88 0 5.032 1.136 6.592 2.616l2.32-2.32C18.664 1.256 15.8 0 12.48 0 6.312 0 1.296 5.016 1.296 11.184s5.016 11.184 11.184 11.184c3.392 0 5.968-1.12 7.968-3.2 2.072-2.072 2.728-4.968 2.728-7.312 0-.704-.064-1.376-.184-1.936l-10.512.016z"/></svg>
+                     <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-2.415-2.828 0-1.927 1.572-3.123 3.018-3.123 1.056 0 2.214.654 2.214 1.884 0 1.23-.96 2.153-2.14 2.153-.346 0-.67-.09-.96-.237l-.022.016c.365.807 1.096 1.488 2.305 1.488 1.99 0 3.255-1.63 3.255-3.64 0-2.03-1.64-3.522-3.87-3.522-2.525 0-4.437 1.846-4.437 4.295 0 2.235 1.594 4.17 3.524 4.17.653 0 1.24-.19 1.7-.514l-.004-.002a4.4 4.4 0 0 1-2.168.652z"/></svg>
+                     <Sun className="w-8 h-8" strokeWidth={1} />
+                  </div>
+                  <h2 className="text-3xl md:text-5xl font-serif text-[#A08149]/40 tracking-[0.3em] md:tracking-[0.5em] font-light">
+                    PSIQUEORÁCULO
+                  </h2>
+               </div>
             </div>
           </div>
         )}
