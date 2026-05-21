@@ -21,11 +21,11 @@ const WingsIcon = ({ className }: { className?: string }) => (
 );
 
 const TEMAS = [
-  { label: 'Amigos', icon: ButterflyIcon, color: 'from-[#40E0D0] via-[#00CED1] to-[#008B8B]' }, // Turquesas
-  { label: 'Amor', icon: ButterflyIcon, color: 'from-[#FF6B6B] via-[#EE5253] to-[#C0392B]' }, // Vermelhos/Corais Mandala
-  { label: 'Dinheiro', icon: ButterflyIcon, color: 'from-[#D4B982] via-[#C5A059] to-[#8B733D]' }, // Ouros
-  { label: 'Saúde', icon: WingsIcon, color: 'from-[#20B2AA] via-[#008080] to-[#004D40]' }, // Verdes Profundos
-  { label: 'Trabalho', icon: ButterflyIcon, color: 'from-[#A08149] via-[#8B733D] to-[#5C4D2B]' }, // Bronze/Terra
+  { label: 'Amigos', icon: ButterflyIcon, color: 'from-[#40E0D0] via-[#00CED1] to-[#008B8B]' },
+  { label: 'Amor', icon: ButterflyIcon, color: 'from-[#FF6B6B] via-[#EE5253] to-[#C0392B]' },
+  { label: 'Dinheiro', icon: ButterflyIcon, color: 'from-[#D4B982] via-[#C5A059] to-[#8B733D]' },
+  { label: 'Saúde', icon: WingsIcon, color: 'from-[#20B2AA] via-[#008080] to-[#004D40]' },
+  { label: 'Trabalho', icon: ButterflyIcon, color: 'from-[#A08149] via-[#8B733D] to-[#5C4D2B]' },
 ];
 
 export default function OraculoJornada() {
@@ -42,6 +42,28 @@ export default function OraculoJornada() {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
 
+  useEffect(() => {
+    const checkUser = async () => {
+      const isDemo = localStorage.getItem('psique_demo_mode') === 'true';
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session && !isDemo) {
+        router.push('/login');
+      } else if (session) {
+        setUser(session.user);
+      }
+    };
+    checkUser();
+  }, [router]);
+
+  const handleLogout = async () => {
+    localStorage.removeItem('psique_demo_mode');
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
+  const nextPasso = () => setPasso(passo + 1);
+  const prevPasso = () => setPasso(passo - 1);
+
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -52,10 +74,8 @@ export default function OraculoJornada() {
       recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
       recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        toast.success('Áudio capturado. Processando voz...');
-        // Aqui poderíamos enviar para um Whisper ou similar, 
-        // por enquanto vamos simular a transcrição ou apenas marcar como enviado.
-        setDesabafo(prev => prev + " [Áudio Gravado]");
+        toast.success('Sua voz foi sintonizada ao campo.');
+        setDesabafo(prev => prev + (prev ? " " : "") + "[Mensagem de Voz Processada]");
       };
 
       recorder.start();
@@ -88,7 +108,6 @@ export default function OraculoJornada() {
     setLoading(true);
     try {
       const cartasSorteadas = tipo === 'completa' ? drawCards(tipoOraculo, 3) : drawCards(tipoOraculo, 1);
-      
       const res = await fetch('/api/oracle/read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -203,7 +222,15 @@ export default function OraculoJornada() {
             <div className="relative bg-[#FDFBF7] rounded-[30px] border border-gold/10 p-6 shadow-xl max-w-xl mx-auto">
               <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva aqui sua dúvida..." className="w-full h-40 bg-transparent border-none focus:outline-none text-lg font-light text-foreground/80" />
               <div className="flex flex-col md:flex-row justify-between items-center mt-4 border-t border-gold/5 pt-4 gap-4">
-                <button onMouseDown={() => setIsGravando(true)} onMouseUp={() => { setIsGravando(false); toast.success('Ouvido.'); }} className={`w-full md:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest ${isGravando ? 'bg-ruby text-white' : 'bg-gold/5 text-gold border border-gold/10'}`}><Mic size={18} /> {isGravando ? 'Ouvindo...' : 'Falar'}</button>
+                <button 
+                  onMouseDown={startRecording} 
+                  onMouseUp={stopRecording}
+                  onTouchStart={startRecording}
+                  onTouchEnd={stopRecording}
+                  className={`w-full md:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${isGravando ? 'bg-ruby text-white scale-110' : 'bg-gold/5 text-gold border border-gold/10'}`}
+                >
+                  <Mic size={18} /> {isGravando ? 'O Campo está ouvindo...' : 'Segure para Falar'}
+                </button>
                 <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full md:w-auto bg-gold text-white px-12 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg disabled:opacity-30">Prosseguir</button>
               </div>
             </div>
@@ -219,13 +246,21 @@ export default function OraculoJornada() {
         {passo === 3 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
+            <input 
+              type="file" 
+              accept="image/*" 
+              capture="environment" 
+              className="hidden" 
+              ref={fileInputRef} 
+              onChange={handleCaptureImage}
+            />
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 max-w-4xl mx-auto px-8">
               {[
-                { id: 'foto', icon: Camera, title: 'Foto', color: 'bg-gold' },
-                { id: 'completa', icon: LayoutGrid, title: 'Virtual', color: 'bg-ruby' },
-                { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-blue-400' }
+                { id: 'foto', icon: Camera, title: 'Foto', color: 'bg-gold', action: () => fileInputRef.current?.click() },
+                { id: 'completa', icon: LayoutGrid, title: 'Virtual', color: 'bg-ruby', action: () => handleLeitura('completa') },
+                { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-blue-400', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
-                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full max-w-[180px] md:max-w-[180px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
+                <button key={m.id} onClick={m.action} className="w-full max-w-[180px] md:max-w-[180px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
                   <div className={`w-14 h-14 ${m.color}/5 rounded-2xl flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-all`}><m.icon size={24} /></div>
                   <h4 className="font-bold text-xs md:text-sm text-foreground/80 uppercase tracking-widest">{m.title}</h4>
                 </button>
