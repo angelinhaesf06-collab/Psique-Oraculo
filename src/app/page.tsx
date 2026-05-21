@@ -88,10 +88,17 @@ export default function OraculoJornada() {
         })
       });
       const data = await res.json();
+      
+      if (data.error) {
+        toast.error(`O oráculo falhou: ${data.details || 'Tente novamente.'}`);
+        setLoading(false);
+        return;
+      }
+
       setResultado(data);
       setPasso(4); 
     } catch (error) {
-      toast.error('Erro ao conectar com o oráculo');
+      toast.error('Erro ao conectar com o oráculo. Verifique sua conexão.');
     } finally {
       setLoading(false);
     }

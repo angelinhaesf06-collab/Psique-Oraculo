@@ -117,20 +117,25 @@ export async function POST(req: Request) {
     console.log("JSON processado com sucesso");
 
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        const supabaseAdmin = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY
-        );
+        try {
+            const supabaseAdmin = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY
+            );
 
-        await supabaseAdmin.from("historico_leituras").insert({
-            user_id: userId || null,
-            tipo_oraculo: tipoOraculo,
-            tipo_leitura: tipoLeitura,
-            pergunta_tema: tema + ": " + (pergunta || "Consulta via Contexto Híbrido"),
-            cartas_sorteadas: cartas || null,
-            resposta_ia: jsonResponse,
-            image_url: imagem ? "processada" : null
-        });
+            await supabaseAdmin.from("historico_leituras").insert({
+                user_id: userId || null,
+                tipo_oraculo: tipoOraculo,
+                tipo_leitura: tipoLeitura,
+                pergunta_tema: tema + ": " + (pergunta || "Consulta via Contexto Híbrido"),
+                cartas_sorteadas: cartas || null,
+                resposta_ia: jsonResponse,
+                image_url: imagem ? "processada" : null
+            });
+            console.log("Histórico salvo no Supabase");
+        } catch (dbError) {
+            console.error("Erro ao salvar no banco (mas a leitura continua):", dbError);
+        }
     }
 
     return NextResponse.json(jsonResponse);
