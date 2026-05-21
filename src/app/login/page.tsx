@@ -50,12 +50,11 @@ export default function LoginPage() {
         {/* Mandala como Ícone Superior - Cores Vivas e Vibrantes */}
         <div className="relative mx-auto w-32 h-32 md:w-56 md:h-56 mb-2 md:mb-4 animate-in fade-in zoom-in duration-1000">
             <div className="w-full h-full rounded-full overflow-hidden border-2 md:border-4 border-[#D4B982]/40 shadow-[0_20px_50px_rgba(212,185,130,0.3)] bg-white flex items-center justify-center">
-                <img 
-                    src="/assets/brand/mandala-login.jpg" 
-                    alt="Psiquê Mandala" 
+                <img
+                    src="/assets/brand/mandala-login.png"
+                    alt="Psiquê Mandala"
                     className="w-full h-full object-cover"
-                />
-            </div>
+                />            </div>
         </div>
 
         {/* Link Rápido de Teste */}
