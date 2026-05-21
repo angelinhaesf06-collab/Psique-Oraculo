@@ -47,7 +47,7 @@ export default function LoginPage() {
       
       {/* Background Mandala - Réplica do Design */}
       <div className="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none z-0">
-         <div className="w-[1200px] h-[1200px] bg-[url('https://i.ibb.co/v4v8fL1/mandala-login.png')] bg-contain bg-no-repeat bg-center mix-blend-multiply">
+         <div className="w-[1200px] h-[1200px] bg-[url('/assets/brand/mandala-login.jpg')] bg-contain bg-no-repeat bg-center mix-blend-multiply">
             {/* Fallback caso a imagem não carregue, simulando a mandala com gradientes e formas */}
             <div className="w-full h-full bg-radial-gradient from-transparent via-transparent to-transparent flex items-center justify-center">
                 <div className="w-[600px] h-[600px] border-[40px] border-gold/5 rounded-full blur-xl" />
@@ -59,7 +59,7 @@ export default function LoginPage() {
         
         {/* Espaço para a Mandala Superior do Design */}
         <div className="relative h-48 w-full flex items-center justify-center">
-            <div className="absolute top-0 w-[140%] h-[180%] bg-[url('https://i.ibb.co/v4v8fL1/mandala-login.png')] bg-contain bg-no-repeat bg-center opacity-90 scale-125" />
+            <div className="absolute top-0 w-[140%] h-[180%] bg-[url('/assets/brand/mandala-login.jpg')] bg-contain bg-no-repeat bg-center opacity-90 scale-125" />
         </div>
 
         {/* Inputs Ornamentados */}

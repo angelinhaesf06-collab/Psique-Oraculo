@@ -99,7 +99,7 @@ export default function OraculoJornada() {
       
       {/* Background Decorativo - Mandala Centralizada (Simulada via CSS e Overlay) */}
       <div className="fixed inset-0 flex items-center justify-center opacity-20 pointer-events-none z-0">
-         <div className="w-[800px] h-[800px] bg-[url('/assets/brand/mandala-bg.png')] bg-contain bg-no-repeat bg-center animate-spin-slow"></div>
+         <div className="w-[800px] h-[800px] bg-[url('/assets/brand/mandala-login.jpg')] bg-contain bg-no-repeat bg-center animate-spin-slow"></div>
       </div>
       
       {/* Header Fixo */}
