@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { drawCards } from '@/lib/cards';
 
 const ButterflyIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
@@ -72,6 +73,9 @@ export default function OraculoJornada() {
   const handleLeitura = async (tipo: string) => {
     setLoading(true);
     try {
+      // Sorteia as cartas ANTES de chamar a IA para garantir realismo
+      const cartasSorteadas = tipo === 'completa' ? drawCards(tipoOraculo, 3) : drawCards(tipoOraculo, 1);
+      
       const res = await fetch('/api/oracle/read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -80,6 +84,7 @@ export default function OraculoJornada() {
           tipoLeitura: tipo,
           tema,
           pergunta: desabafo,
+          cartas: cartasSorteadas, // Envia as cartas reais sorteadas pelo sistema
         })
       });
       const data = await res.json();
@@ -383,7 +388,6 @@ export default function OraculoJornada() {
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
   const [imageError, setImageError] = useState(false);
   
-  // Mapeia o nome do oráculo para a pasta correta
   const folderMap: Record<string, string> = {
     'Tarô': 'taro',
     'Baralho Cigano': 'cigano',
@@ -393,12 +397,22 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const folder = folderMap[tipoOraculo] || 'taro';
   const imagePath = `/assets/decks/${folder}/${data.card_slug}.jpg`;
 
+  // Define a cor de destaque (glow) baseada no oráculo ou na carta
+  const glowColor = tipoOraculo === 'Baralho Cigano' 
+    ? (index % 2 === 0 ? 'shadow-teal-500/20' : 'shadow-ruby/20')
+    : 'shadow-gold/20';
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-backwards" style={{ animationDelay: `${index * 200}ms` }}>
-      <h5 className="text-[9px] font-black uppercase tracking-[0.3em] text-foreground/30 text-center">{title}</h5>
-      <div className="relative h-full bg-[#FDFBF7] rounded-[24px] border-2 border-gold/20 p-2 shadow-xl hover:scale-[1.02] transition-all duration-700">
-        <div className="h-full border border-gold/10 rounded-[18px] flex flex-col overflow-hidden">
-          <div className="h-2/3 bg-gradient-to-b from-[#F5F2EA] to-white flex flex-col items-center justify-center relative overflow-hidden">
+      <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-foreground/30 text-center">{title}</h5>
+      
+      {/* Moldura Estilo Joalheria Mística */}
+      <div className={`relative h-full bg-[#FDFBF7] rounded-[32px] border-[3px] border-[#D4B982]/30 p-3 shadow-2xl transition-all duration-700 hover:scale-[1.05] hover:border-[#D4B982] ${glowColor}`}>
+        
+        {/* Borda Interna Fina (Efeito Duplo) */}
+        <div className="h-full border border-[#D4B982]/10 rounded-[22px] flex flex-col overflow-hidden bg-white">
+          
+          <div className="h-2/3 relative overflow-hidden bg-[#F5F2EA]">
              {!imageError ? (
                <img 
                  src={imagePath} 
@@ -407,13 +421,27 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
                  onError={() => setImageError(true)}
                />
              ) : (
-               <div className="p-6 text-center">
-                 <span className="text-gold font-bold text-xl uppercase tracking-tighter drop-shadow-sm">{data.carta}</span>
+               <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-[#FDFBF7] to-[#F5F2EA]">
+                 <div className="w-16 h-16 mb-4 rounded-full border-2 border-gold/20 flex items-center justify-center text-gold/40">
+                   <Sparkles size={24} />
+                 </div>
+                 <span className="text-gold font-bold text-lg uppercase tracking-widest leading-tight">{data.carta}</span>
                </div>
              )}
+             
+             {/* Overlay de Brilho nos Cantos */}
+             <div className="absolute top-2 left-2 w-4 h-4 border-t border-l border-gold/30" />
+             <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-gold/30" />
+             <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-gold/30" />
+             <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-gold/30" />
           </div>
-          <div className="h-1/3 bg-white p-5 flex items-center justify-center text-center">
-             <p className="text-[11px] leading-relaxed text-foreground/60 italic font-medium">{data.interpretacao}</p>
+
+          {/* Área de Interpretação Luxuosa */}
+          <div className="h-1/3 bg-white p-6 flex flex-col items-center justify-center text-center border-t border-[#D4B982]/10">
+             <div className="w-8 h-[1px] bg-gold/20 mb-3" />
+             <p className="text-[12px] leading-relaxed text-foreground/70 italic font-medium">
+               {data.interpretacao}
+             </p>
           </div>
         </div>
       </div>
