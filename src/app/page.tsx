@@ -133,8 +133,12 @@ export default function OraculoJornada() {
                   className={`flex-1 min-w-[120px] max-w-[240px] flex flex-col items-center bg-[#FDFBF7] rounded-[24px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-3 md:p-5 shadow-xl transition-all hover:scale-105 active:scale-95`}
                 >
                   <h3 className="text-xs md:text-base font-bold text-foreground/80 tracking-widest mb-3 md:mb-5 font-sans">{o.title}</h3>
-                  <div className="w-full aspect-[3/4.2] rounded-[12px] md:rounded-[16px] overflow-hidden border border-gold/10 bg-[#F5F2EA] flex items-center justify-center">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover" />
+                  <div className="w-full aspect-[3/4.2] rounded-[12px] md:rounded-[16px] overflow-hidden border border-gold/5 bg-white/50 flex items-center justify-center p-1">
+                    <img 
+                      src={o.img} 
+                      alt={o.title} 
+                      className="w-full h-full object-contain" 
+                    />
                   </div>
                 </button>
               ))}
