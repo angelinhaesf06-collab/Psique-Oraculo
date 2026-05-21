@@ -419,7 +419,7 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
         {/* Borda Interna Fina (Efeito Duplo) */}
         <div className="h-full border border-[#D4B982]/10 rounded-[22px] flex flex-col overflow-hidden bg-white">
           
-          <div className="h-2/3 relative overflow-hidden bg-[#F5F2EA]">
+          <div className="h-full relative overflow-hidden bg-[#F5F2EA]">
              {!imageError ? (
                <img 
                  src={imagePath} 
@@ -441,14 +441,6 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
              <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-gold/30" />
              <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-gold/30" />
              <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-gold/30" />
-          </div>
-
-          {/* Área de Interpretação Luxuosa */}
-          <div className="h-1/3 bg-white p-6 flex flex-col items-center justify-center text-center border-t border-[#D4B982]/10">
-             <div className="w-8 h-[1px] bg-gold/20 mb-3" />
-             <p className="text-[12px] leading-relaxed text-foreground/70 italic font-medium">
-               {data.interpretacao}
-             </p>
           </div>
         </div>
       </div>
