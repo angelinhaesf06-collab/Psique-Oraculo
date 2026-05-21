@@ -34,32 +34,40 @@ export async function POST(req: Request) {
       2. Abordagem Terapêutica: Se a carta for negativa (ex: A Torre, 3 de Espadas), não cause medo. Trate como um "colapso necessário para a reconstrução" ou uma "limpeza emocional".
       3. Empowerment: Sempre termine com um direcionamento que devolva o poder de escolha ao usuário.
 
-      ESTRUTURA DE RETORNO (JSON):
-      Se tipoLeitura for "completa":
+      ESTRUTURA DE RETORNO (JSON) - OBRIGATÓRIO:
+
+      Se tipoLeitura for "completa" ou envolver 3 cartas:
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
         "situacao_atual": { 
-          "carta": "Nome", 
+          "carta": "Nome da Carta", 
           "card_slug": "nome-da-carta-slug",
-          "interpretacao": "O que esta energia revela sobre o agora (Jungian-style).", 
-          "regra_aplicada": 1|2 
+          "interpretacao": "O que esta energia revela sobre o agora (estilo Junguiano)."
         },
         "caminho_acao": { 
-          "carta": "Nome", 
+          "carta": "Nome da Carta", 
           "card_slug": "nome-da-carta-slug",
-          "interpretacao": "A sugestão do inconsciente para o movimento.", 
-          "regra_aplicada": 1|2 
+          "interpretacao": "A sugestão do inconsciente para o movimento."
         },
         "resultado_conselho": { 
-          "carta": "Nome", 
+          "carta": "Nome da Carta", 
           "card_slug": "nome-da-carta-slug",
-          "interpretacao": "A síntese arquetípica do possível desfecho.", 
-          "regra_aplicada": 1|2 
+          "interpretacao": "A síntese arquetípica do possível desfecho."
         },
-        "conselho_final": "Uma narrativa fluida, conectando o desabafo pessoal do usuário aos arquétipos revelados. Use o nome do usuário se fornecido no contexto.",
-        "complemento_terapeutico": "Uma frase curta, como um mantra ou insight para meditação.",
-        "salmo_recomendado": "Opcional (Obrigatório se Tarô dos Anjos)"
+        "conselho_final": "Uma narrativa fluida e profunda conectando as cartas ao desabafo do usuário.",
+        "complemento_terapeutico": "Um mantra ou insight curto.",
+        "salmo_recomendado": "Salmo X (Obrigatório se Tarô dos Anjos)"
+      }
+
+      Se tipoLeitura for "sim_nao", "foto" ou 1 carta:
+      {
+        "oraculo_utilizado": "${tipoOraculo}",
+        "tema": "${tema}",
+        "veredito": "SIM / NÃO / TALVEZ",
+        "previsao": "Uma explicação breve baseada nos arquétipos.",
+        "conselho": "O conselho final da alma para o usuário.",
+        "complemento_terapeutico": "Um mantra ou insight curto."
       }
 
       REGRAS PARA card_slug:
