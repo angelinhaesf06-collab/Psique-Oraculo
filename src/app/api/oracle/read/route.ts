@@ -67,7 +67,11 @@ export async function POST(req: Request) {
         "veredito": "SIM / NÃO / TALVEZ",
         "previsao": "Uma explicação breve baseada nos arquétipos.",
         "conselho": "O conselho final da alma para o usuário.",
-        "complemento_terapeutico": "Um mantra ou insight curto."
+        "complemento_terapeutico": "Um mantra ou insight curto.",
+        "carta_sorteada": {
+          "carta": "Nome da Carta",
+          "card_slug": "nome-da-carta-slug"
+        }
       }
 
       REGRAS PARA card_slug:

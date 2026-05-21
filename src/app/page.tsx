@@ -19,16 +19,17 @@ const WingsIcon = ({ className }: { className?: string }) => (
     <path d="M11,6c0,0-4-1-7,3s0,9,0,9s5,0,7-5s0-7,0-7 M13,6c0,0,4-1,7,3s0,9,0,9s-5,0-7-5s0-7,0-7" />
   </svg>
 );
-
 const TEMAS = [
-  { label: 'Amigos', icon: ButterflyIcon, color: 'from-[#4A2D1A] via-[#7B4B2A] to-[#A06E45]' },
-  { label: 'Amor', icon: ButterflyIcon, color: 'from-[#8B5E5E] via-[#B17D7D] to-[#D4A5A5]' },
-  { label: 'Dinheiro', icon: ButterflyIcon, color: 'from-[#8C6D2E] via-[#B8860B] to-[#DAA520]' },
-  { label: 'Saúde', icon: WingsIcon, color: 'from-[#5D2E17] via-[#8B4513] to-[#CD853F]' },
-  { label: 'Trabalho', icon: ButterflyIcon, color: 'from-[#8B733D] via-[#C5A059] to-[#E5C78B]' },
+  { label: 'Amigos', icon: ButterflyIcon, color: 'from-[#40E0D0] via-[#00CED1] to-[#008B8B]' }, // Turquesas
+  { label: 'Amor', icon: ButterflyIcon, color: 'from-[#FF6B6B] via-[#EE5253] to-[#C0392B]' }, // Vermelhos/Corais Mandala
+  { label: 'Dinheiro', icon: ButterflyIcon, color: 'from-[#D4B982] via-[#C5A059] to-[#8B733D]' }, // Ouros
+  { label: 'Saúde', icon: WingsIcon, color: 'from-[#20B2AA] via-[#008080] to-[#004D40]' }, // Verdes Profundos
+  { label: 'Trabalho', icon: ButterflyIcon, color: 'from-[#A08149] via-[#8B733D] to-[#5C4D2B]' }, // Bronze/Terra
 ];
 
 export default function OraculoJornada() {
+  // ... rest of state ...
+
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
   const [passo, setPasso] = useState(0); // Começa na seleção de oráculo
@@ -358,16 +359,28 @@ export default function OraculoJornada() {
                  </div>
               </div>
             ) : (
-              <div className="bg-white rounded-[32px] md:rounded-[56px] border border-gold/10 p-6 md:p-12 shadow-2xl">
-                <h3 className="text-2xl md:text-4xl font-bold text-gold mb-4">{resultado.veredito}</h3>
-                <p className="text-lg md:text-xl leading-relaxed text-foreground/70 font-light mb-6">{resultado.previsao}</p>
-                <div className="bg-gold/5 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gold/10 italic text-base md:text-lg">"{resultado.conselho}"</div>
+              <div className="space-y-10">
+                <div className="max-w-xs mx-auto">
+                  {resultado.carta_sorteada && (
+                    <CardResult 
+                      title="A Resposta do Campo" 
+                      data={resultado.carta_sorteada} 
+                      index={0} 
+                      tipoOraculo={tipoOraculo}
+                    />
+                  )}
+                </div>
+                <div className="bg-white rounded-[32px] md:rounded-[56px] border border-gold/10 p-6 md:p-12 shadow-2xl">
+                  <h3 className="text-2xl md:text-4xl font-bold text-gold mb-4">{resultado.veredito}</h3>
+                  <p className="text-lg md:text-xl leading-relaxed text-foreground/70 font-light mb-6">{resultado.previsao}</p>
+                  <div className="bg-gold/5 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gold/10 italic text-base md:text-lg">"{resultado.conselho}"</div>
+                </div>
               </div>
             )}
 
             <div className="space-y-8">
               {resultado.complemento_terapeutico && (
-                <p className="text-sm font-black uppercase tracking-[0.4em] text-gold/30 max-w-md mx-auto animate-pulse">
+                <p className="text-sm font-black uppercase tracking-[0.4em] text-[#40E0D0] max-w-md mx-auto animate-pulse">
                   {resultado.complemento_terapeutico}
                 </p>
               )}
