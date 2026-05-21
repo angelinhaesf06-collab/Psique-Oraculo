@@ -36,35 +36,59 @@ export default function OraculoJornada() {
   const [tema, setTema] = useState('');
   const [desabafo, setDesabafo] = useState('');
   const [isGravando, setIsGravando] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const isDemo = localStorage.getItem('psique_demo_mode') === 'true';
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session && !isDemo) {
-        router.push('/login');
-      } else if (session) {
-        setUser(session.user);
-      }
-    };
-    checkUser();
-  }, [router]);
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = recorder;
+      audioChunksRef.current = [];
 
-  const handleLogout = async () => {
-    localStorage.removeItem('psique_demo_mode');
-    await supabase.auth.signOut();
-    router.push('/login');
+      recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        toast.success('Áudio capturado. Processando voz...');
+        // Aqui poderíamos enviar para um Whisper ou similar, 
+        // por enquanto vamos simular a transcrição ou apenas marcar como enviado.
+        setDesabafo(prev => prev + " [Áudio Gravado]");
+      };
+
+      recorder.start();
+      setIsGravando(true);
+    } catch (err) {
+      toast.error('Erro ao acessar microfone. Verifique as permissões.');
+    }
   };
 
-  const nextPasso = () => setPasso(passo + 1);
-  const prevPasso = () => setPasso(passo - 1);
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isGravando) {
+      mediaRecorderRef.current.stop();
+      setIsGravando(false);
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+  };
 
-  const handleLeitura = async (tipo: string) => {
+  const handleCaptureImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        handleLeitura('foto', reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLeitura = async (tipo: string, imageData?: string) => {
     setLoading(true);
     try {
       const cartasSorteadas = tipo === 'completa' ? drawCards(tipoOraculo, 3) : drawCards(tipoOraculo, 1);
+      
       const res = await fetch('/api/oracle/read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -73,7 +97,8 @@ export default function OraculoJornada() {
           tipoLeitura: tipo,
           tema,
           pergunta: desabafo,
-          cartas: cartasSorteadas,
+          cartas: tipo === 'foto' ? null : cartasSorteadas,
+          imagem: imageData || null
         })
       });
       const data = await res.json();
@@ -94,20 +119,18 @@ export default function OraculoJornada() {
   return (
     <div className="min-h-screen text-foreground font-sans p-4 md:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-[#F5F2EA]">
       
-      {/* Background Mandala Passo 0 */}
-      {passo === 0 && (
-        <>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[900px] md:h-[900px] opacity-[0.05] pointer-events-none z-0">
-             <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
-          </div>
-          <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
-             <div className="absolute top-4 left-4 md:top-8 md:left-8 w-24 h-24 md:w-48 md:h-48 opacity-20"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /><circle cx="20" cy="20" r="3" /></svg></div>
-             <div className="absolute top-4 right-4 md:top-8 md:right-8 w-24 h-24 md:w-48 md:h-48 opacity-20 rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
-             <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 w-24 h-24 md:w-48 md:h-48 opacity-20 -rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
-             <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 w-24 h-24 md:w-48 md:h-48 opacity-20 rotate-180"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
-          </div>
-        </>
-      )}
+      {/* Background Mandala Estática e Fixa */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[900px] md:h-[900px] opacity-[0.05] pointer-events-none z-0">
+         <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
+      </div>
+
+      {/* Ornamentos de Canto */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+         <div className="absolute top-4 left-4 md:top-8 md:left-8 w-24 h-24 md:w-48 md:h-48 opacity-20"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /><circle cx="20" cy="20" r="3" /></svg></div>
+         <div className="absolute top-4 right-4 md:top-8 md:right-8 w-24 h-24 md:w-48 md:h-48 opacity-20 rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
+         <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 w-24 h-24 md:w-48 md:h-48 opacity-20 -rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
+         <div className="absolute bottom-4 right-4 md:bottom-8 md:right-8 w-24 h-24 md:w-48 md:h-48 opacity-20 rotate-180"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
+      </div>
 
       {/* Header com Ícone Centralizado e Maior */}
       <div className="fixed top-6 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
@@ -121,7 +144,7 @@ export default function OraculoJornada() {
         {/* PASSO 0: ESCOLHA SEU ORÁCULO */}
         {passo === 0 && (
           <div className="flex flex-col items-center space-y-12 animate-in fade-in zoom-in-95 duration-1000">
-            <div className="flex flex-wrap md:flex-nowrap justify-center gap-4 md:gap-8 w-full">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full px-8">
               {[
                 { id: 'Tarô', title: 'TARÔ', img: '/assets/decks/covers/taro.jpg', borderColor: 'border-[#E5D9C3]' },
                 { id: 'Baralho Cigano', title: 'CIGANO', img: '/assets/decks/covers/cigano.jpg', borderColor: 'border-[#D4B982]' },
@@ -130,15 +153,11 @@ export default function OraculoJornada() {
                 <button 
                   key={o.id}
                   onClick={() => { setTipoOraculo(o.id); nextPasso(); }}
-                  className={`flex-1 min-w-[120px] max-w-[240px] flex flex-col items-center bg-[#FDFBF7] rounded-[24px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-3 md:p-5 shadow-xl transition-all hover:scale-105 active:scale-95`}
+                  className={`w-full max-w-[180px] md:max-w-[240px] flex flex-col items-center bg-[#FDFBF7] rounded-[24px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-3 md:p-5 shadow-xl transition-all hover:scale-105 active:scale-95`}
                 >
                   <h3 className="text-xs md:text-base font-bold text-foreground/80 tracking-widest mb-3 md:mb-5 font-sans">{o.title}</h3>
                   <div className="w-full aspect-[3/4.2] rounded-[12px] md:rounded-[16px] overflow-hidden border border-gold/5 bg-white/50 flex items-center justify-center p-1">
-                    <img 
-                      src={o.img} 
-                      alt={o.title} 
-                      className="w-full h-full object-contain" 
-                    />
+                    <img src={o.img} alt={o.title} className="w-full h-full object-contain" />
                   </div>
                 </button>
               ))}
@@ -149,7 +168,7 @@ export default function OraculoJornada() {
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-2.415-2.828 0-1.927 1.572-3.123 3.018-3.123 1.056 0 2.214.654 2.214 1.884 0 1.23-.96 2.153-2.14 2.153-.346 0-.67-.09-.96-.237l-.022.016c.365.807 1.096 1.488 2.305 1.488 1.99 0 3.255-1.63 3.255-3.64 0-2.03-1.64-3.522-3.87-3.522-2.525 0-4.437 1.846-4.437 4.295 0 2.235 1.594 4.17 3.524 4.17.653 0 1.24-.19 1.7-.514l-.004-.002a4.4 4.4 0 0 1-2.168.652z"/></svg>
                   <Sun className="w-6 h-6" strokeWidth={1.5} />
                </div>
-               <h2 className="text-xl md:text-3xl font-bold text-[#A08149]/30 tracking-[0.4em] font-sans">PSIQUEORÁCULO</h2>
+               <h2 className="text-xl md:text-3xl font-bold text-[#A08149]/30 tracking-[0.4em] font-sans text-center px-4">PSIQUEORÁCULO</h2>
                <button onClick={handleLogout} className="mt-8 text-[9px] font-black uppercase tracking-[0.5em] text-gold/20 hover:text-gold/40 transition-colors">Encerrar Conexão</button>
             </div>
           </div>
@@ -200,13 +219,13 @@ export default function OraculoJornada() {
         {passo === 3 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
-            <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 max-w-4xl mx-auto px-8">
               {[
                 { id: 'foto', icon: Camera, title: 'Foto', color: 'bg-gold' },
                 { id: 'completa', icon: LayoutGrid, title: 'Virtual', color: 'bg-ruby' },
                 { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-blue-400' }
               ].map((m) => (
-                <button key={m.id} onClick={() => handleLeitura(m.id)} className="flex-1 min-w-[120px] max-w-[180px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
+                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full max-w-[180px] md:max-w-[180px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
                   <div className={`w-14 h-14 ${m.color}/5 rounded-2xl flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-all`}><m.icon size={24} /></div>
                   <h4 className="font-bold text-xs md:text-sm text-foreground/80 uppercase tracking-widest">{m.title}</h4>
                 </button>
@@ -229,7 +248,7 @@ export default function OraculoJornada() {
             </div>
             {resultado.situacao_atual ? (
               <div className="space-y-10">
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <div className="flex flex-col md:flex-row items-center justify-center gap-6 px-8">
                     <CardResult title="Presente" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
                     <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
                     <CardResult title="Síntese" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
@@ -253,7 +272,7 @@ export default function OraculoJornada() {
             )}
             <div className="space-y-8">
               {resultado.complemento_terapeutico && <p className="text-sm font-bold uppercase tracking-[0.4em] text-[#40E0D0] animate-pulse font-sans">{resultado.complemento_terapeutico}</p>}
-              <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="px-12 py-5 rounded-full text-[11px] font-bold uppercase tracking-[0.3em] text-gold border border-gold/20 hover:bg-gold hover:text-white transition-all shadow-lg shadow-gold/10">Novo Ciclo</button>
+              <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="px-12 py-5 rounded-full text-[11px] font-bold uppercase tracking-[0.3em] text-gold border border-gold/20 hover:bg-gold hover:text-white transition-all shadow-lg shadow-gold/10">Novo Ciclo Arquetípico</button>
             </div>
           </div>
         )}
@@ -276,12 +295,12 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const imagePath = `/assets/decks/${folder}/${data.card_slug}.jpg`;
 
   return (
-    <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
+    <div className="w-full max-w-[180px] md:max-w-full flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
       <h5 className="text-[10px] font-bold uppercase tracking-[0.4em] text-foreground/30">{title}</h5>
       <div className="relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[24px] border-[2px] border-[#D4B982]/30 p-2 shadow-xl">
         <div className="h-full rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
            {!imageError ? (
-             <img src={imagePath} alt={data.carta} className="w-full h-full object-cover" onError={() => setImageError(true)} />
+             <img src={imagePath} alt={data.carta} className="w-full h-full object-contain" onError={() => setImageError(true)} />
            ) : (
              <div className="p-4 text-center">
                <Sparkles className="w-10 h-10 text-gold/30 mx-auto mb-2" />
