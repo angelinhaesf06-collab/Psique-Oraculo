@@ -45,21 +45,18 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#F5F2EA] flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
       
-      {/* Background Mandala - Réplica do Design */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none z-0">
-         <div className="w-[1200px] h-[1200px] bg-[url('/assets/brand/mandala-login.jpg')] bg-contain bg-no-repeat bg-center mix-blend-multiply">
-            {/* Fallback caso a imagem não carregue, simulando a mandala com gradientes e formas */}
-            <div className="w-full h-full bg-radial-gradient from-transparent via-transparent to-transparent flex items-center justify-center">
-                <div className="w-[600px] h-[600px] border-[40px] border-gold/5 rounded-full blur-xl" />
-            </div>
-         </div>
-      </div>
-
       <div className="w-full max-w-[440px] space-y-8 text-center z-10">
         
-        {/* Espaço para a Mandala Superior do Design */}
-        <div className="relative h-48 w-full flex items-center justify-center">
-            <div className="absolute top-0 w-[140%] h-[180%] bg-[url('/assets/brand/mandala-login.jpg')] bg-contain bg-no-repeat bg-center opacity-90 scale-125" />
+        {/* Mandala como Ícone Superior - Limpo e Centralizado */}
+        <div className="relative mx-auto w-48 h-48 mb-8">
+            <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#D4B982]/20 shadow-2xl bg-white flex items-center justify-center">
+                <img 
+                    src="/assets/brand/mandala-login.jpg" 
+                    alt="Psiquê Mandala" 
+                    className="w-[110%] h-[110%] object-cover mix-blend-multiply"
+                />
+            </div>
+            <div className="absolute -inset-4 bg-gradient-to-b from-transparent to-[#F5F2EA]/50 pointer-events-none" />
         </div>
 
         {/* Inputs Ornamentados */}

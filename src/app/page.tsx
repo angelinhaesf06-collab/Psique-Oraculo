@@ -95,12 +95,9 @@ export default function OraculoJornada() {
   // if (!user) return null; 
 
   return (
-    <div className="min-h-screen text-foreground font-sans p-6 md:p-12 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen text-foreground font-sans p-6 md:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-[#F5F2EA]">
       
-      {/* Background Decorativo - Mandala Centralizada (Simulada via CSS e Overlay) */}
-      <div className="fixed inset-0 flex items-center justify-center opacity-20 pointer-events-none z-0">
-         <div className="w-[800px] h-[800px] bg-[url('/assets/brand/mandala-login.jpg')] bg-contain bg-no-repeat bg-center animate-spin-slow"></div>
-      </div>
+      {/* Background Mandala removido para design limpo */}
       
       {/* Header Fixo */}
       <div className="fixed top-8 left-8 right-8 flex justify-between items-center z-50">
