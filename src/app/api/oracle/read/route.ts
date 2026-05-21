@@ -101,16 +101,20 @@ export async function POST(req: Request) {
         promptParts.push({ inlineData: { data: audioData, mimeType: "audio/mp3" } });
     }
 
+    console.log("Chamando Gemini 1.5 Flash...");
     const result = await model.generateContent(promptParts);
     const responseText = result.response.text();
+    console.log("Resposta bruta da IA:", responseText);
     
     // Extração robusta de JSON (procurando pelo primeiro '{' e último '}')
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      console.error("Erro: Resposta da IA não contém JSON válido");
       throw new Error("A IA não retornou um formato JSON válido.");
     }
     const cleanJson = jsonMatch[0];
     const jsonResponse = JSON.parse(cleanJson);
+    console.log("JSON processado com sucesso");
 
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
         const supabaseAdmin = createClient(
