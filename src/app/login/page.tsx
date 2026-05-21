@@ -48,7 +48,7 @@ export default function LoginPage() {
       <div className="w-full max-w-[440px] space-y-8 text-center z-10">
         
         {/* Mandala como Ícone Superior - Cores Vivas e Vibrantes */}
-        <div className="relative mx-auto w-56 h-56 mb-4 animate-in fade-in zoom-in duration-1000">
+        <div className="relative mx-auto w-48 h-48 md:w-56 md:h-56 mb-4 animate-in fade-in zoom-in duration-1000">
             <div className="w-full h-full rounded-full overflow-hidden border-4 border-[#D4B982]/40 shadow-[0_20px_50px_rgba(212,185,130,0.3)] bg-white flex items-center justify-center">
                 <img 
                     src="/assets/brand/mandala-login.jpg" 
@@ -62,9 +62,9 @@ export default function LoginPage() {
         <div className="pb-4">
             <button 
                 onClick={handleDemoAccess}
-                className="px-6 py-2 rounded-full bg-gold/10 border border-gold/20 text-gold text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-gold hover:text-white transition-all shadow-sm"
+                className="px-6 py-2 rounded-full bg-gold/10 border border-gold/20 text-gold text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] hover:bg-gold hover:text-white transition-all shadow-sm"
             >
-                Link Rápido de Teste (Entrar agora)
+                Link Rápido (Entrar agora)
             </button>
         </div>
 
