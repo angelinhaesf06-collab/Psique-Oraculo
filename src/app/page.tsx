@@ -105,7 +105,7 @@ export default function OraculoJornada() {
       {/* Background Mandala removido para design limpo */}
       
       {/* Header Fixo */}
-      <div className="fixed top-8 left-8 right-8 flex justify-between items-center z-50">
+      <div className="fixed top-4 left-4 right-4 md:top-8 md:left-8 md:right-8 flex justify-between items-center z-50">
         <div className="flex items-center gap-4">
           {passo > 0 && (
             <button onClick={prevPasso} className="text-gold flex items-center gap-2 text-[10px] font-black uppercase tracking-widest bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gold/10">
@@ -122,7 +122,7 @@ export default function OraculoJornada() {
           >
             <LogOut size={20} />
           </button>
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-gold/30">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-gold/30">
             <img 
               src="/assets/brand/icon-512.png" 
               alt="Psiquê Ícone" 
@@ -136,8 +136,8 @@ export default function OraculoJornada() {
         
         {/* PASSO 0: ESCOLHA SEU ORÁCULO (Réplica da Imagem) */}
         {passo === 0 && (
-          <div className="space-y-16 animate-in fade-in zoom-in-95 duration-1000">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 px-4 md:px-10">
+          <div className="space-y-12 md:space-y-16 animate-in fade-in zoom-in-95 duration-1000">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 px-2 md:px-10">
               {[
                 { 
                   id: 'Tarô', 
@@ -164,11 +164,11 @@ export default function OraculoJornada() {
                 <button 
                   key={oracle.id}
                   onClick={() => setTipoOraculo(oracle.id)}
-                  className={`group relative flex flex-col items-center bg-[#FDFBF7] rounded-[50px] border-[12px] ${oracle.borderColor} p-6 shadow-2xl transition-all hover:scale-105 ${tipoOraculo === oracle.id ? 'ring-4 ring-teal-500/30 border-teal-600/20' : ''}`}
+                  className={`group relative flex flex-col items-center bg-[#FDFBF7] rounded-[32px] md:rounded-[50px] border-4 md:border-[12px] ${oracle.borderColor} p-4 md:p-6 shadow-2xl transition-all hover:scale-105 ${tipoOraculo === oracle.id ? 'ring-4 ring-teal-500/30 border-teal-600/20' : ''}`}
                 >
-                  <h3 className="text-2xl font-bold text-foreground/70 tracking-[0.1em] mt-2 mb-6">{oracle.title}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-foreground/70 tracking-[0.1em] mt-2 mb-4 md:mb-6">{oracle.title}</h3>
                   
-                  <div className="w-full aspect-[3/4] rounded-[30px] overflow-hidden border border-gold/10 shadow-inner bg-[#F5F2EA]">
+                  <div className="w-full aspect-[3/4] rounded-[20px] md:rounded-[30px] overflow-hidden border border-gold/10 shadow-inner bg-[#F5F2EA]">
                     <img 
                       src={oracle.img} 
                       alt={oracle.title}
@@ -179,7 +179,7 @@ export default function OraculoJornada() {
                     />
                   </div>
 
-                  <p className="text-[11px] font-bold text-foreground/40 tracking-[0.25em] mt-8 mb-4 text-center px-4 leading-relaxed">
+                  <p className="text-[10px] md:text-[11px] font-bold text-foreground/40 tracking-[0.25em] mt-6 md:mt-8 mb-4 text-center px-4 leading-relaxed">
                     {oracle.desc}
                   </p>
                 </button>
@@ -190,7 +190,7 @@ export default function OraculoJornada() {
                <button 
                  onClick={() => tipoOraculo && nextPasso()}
                  disabled={!tipoOraculo}
-                 className={`group relative overflow-hidden bg-gradient-to-r from-[#008B8B] to-[#006666] text-white px-20 py-5 rounded-full text-[13px] font-bold uppercase tracking-[0.4em] shadow-[0_10px_30px_rgba(0,102,102,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(0,102,102,0.4)] hover:-translate-y-1 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:hover:translate-y-0`}
+                 className={`group relative overflow-hidden bg-gradient-to-r from-[#008B8B] to-[#006666] text-white px-12 md:px-20 py-4 md:py-5 rounded-full text-[12px] md:text-[13px] font-bold uppercase tracking-[0.3em] md:tracking-[0.4em] shadow-[0_10px_30px_rgba(0,102,102,0.3)] transition-all hover:shadow-[0_15px_40px_rgba(0,102,102,0.4)] hover:-translate-y-1 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:hover:translate-y-0`}
                >
                   <span className="relative z-10">Selecionar Leitura</span>
                   <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
@@ -201,33 +201,33 @@ export default function OraculoJornada() {
 
         {/* PASSO 1: SELEÇÃO DE TEMA */}
         {passo === 1 && (
-          <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-700 relative">
-            <div className="absolute -top-24 -right-10 opacity-30 animate-pulse transition-all">
+          <div className="space-y-10 md:space-y-12 animate-in fade-in slide-in-from-right-4 duration-700 relative">
+            <div className="absolute -top-16 md:-top-24 -right-4 md:-right-10 opacity-30 animate-pulse transition-all">
                <div className="relative">
-                  <Sparkles className="text-gold w-16 h-16" />
-                  <div className="absolute -top-2 -right-2 text-[24px]">🧚</div>
+                  <Sparkles className="text-gold w-12 h-12 md:w-16 md:h-16" />
+                  <div className="absolute -top-2 -right-2 text-[20px] md:text-[24px]">🧚</div>
                </div>
             </div>
 
             <div className="text-center space-y-4">
-              <h2 className="text-4xl md:text-5xl font-medium text-foreground leading-tight tracking-tight px-4">
-                O que o seu coração <br />
+              <h2 className="text-3xl md:text-5xl font-medium text-foreground leading-tight tracking-tight px-4">
+                O que o seu coração <br className="hidden md:block" />
                 precisa entender hoje?
               </h2>
-              <p className="text-lg text-foreground/60 font-medium">Escolha uma área para focar:</p>
+              <p className="text-base md:text-lg text-foreground/60 font-medium">Escolha uma área para focar:</p>
             </div>
             
-            <div className="flex flex-col gap-5 w-full max-w-md mx-auto">
+            <div className="flex flex-col gap-4 md:gap-5 w-full max-w-md mx-auto px-4 md:px-0">
               {TEMAS.map((t) => (
                 <button
                   key={t.label}
                   onClick={() => { setTema(t.label); nextPasso(); }}
-                  className={`w-full h-20 rounded-2xl bg-gradient-to-r ${t.color} p-[1px] shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden`}
+                  className={`w-full h-16 md:h-20 rounded-2xl bg-gradient-to-r ${t.color} p-[1px] shadow-lg shadow-black/10 hover:scale-[1.02] active:scale-95 transition-all group overflow-hidden`}
                 >
                   <div className="w-full h-full bg-black/5 group-hover:bg-transparent transition-colors flex items-center justify-center relative">
-                    <div className="flex items-center gap-6">
-                      <t.icon className="w-12 h-12 text-white drop-shadow-2xl" />
-                      <span className="text-4xl font-bold text-white drop-shadow-2xl tracking-tighter">{t.label}</span>
+                    <div className="flex items-center gap-4 md:gap-6">
+                      <t.icon className="w-8 h-8 md:w-12 md:h-12 text-white drop-shadow-2xl" />
+                      <span className="text-2xl md:text-4xl font-bold text-white drop-shadow-2xl tracking-tighter">{t.label}</span>
                     </div>
                   </div>
                 </button>
@@ -238,36 +238,36 @@ export default function OraculoJornada() {
 
         {/* PASSO 2: DESABAFO */}
         {passo === 2 && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 relative">
+          <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 relative px-4 md:px-0">
             <button onClick={prevPasso} className="text-gold/60 hover:text-gold flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
               <ChevronLeft size={14} /> Mudar Tema ({tema})
             </button>
             <div className="space-y-2 text-center">
-              <h2 className="text-4xl font-serif text-gold tracking-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+              <h2 className="text-3xl md:text-4xl font-serif text-gold tracking-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>
                 Abra o seu coração
               </h2>
-              <p className="text-foreground/50 italic text-sm">O inconsciente se revela através das palavras.</p>
+              <p className="text-foreground/50 italic text-xs md:text-sm">O inconsciente se revela através das palavras.</p>
             </div>
             <div className="relative group mx-auto max-w-xl">
-              <div className="relative bg-[#FDFBF7] rounded-[40px] border border-gold/10 p-8 shadow-xl overflow-hidden">
+              <div className="relative bg-[#FDFBF7] rounded-[30px] md:rounded-[40px] border border-gold/10 p-6 md:p-8 shadow-xl overflow-hidden">
                 <textarea
                   value={desabafo}
                   onChange={(e) => setDesabafo(e.target.value)}
                   placeholder="Escreva aqui sua dúvida mais profunda..."
-                  className="relative w-full h-48 bg-transparent border-none focus:outline-none resize-none text-xl font-light text-foreground/80 leading-relaxed z-10"
+                  className="relative w-full h-40 md:h-48 bg-transparent border-none focus:outline-none resize-none text-lg md:text-xl font-light text-foreground/80 leading-relaxed z-10"
                 />
-                <div className="flex flex-col md:flex-row justify-between items-center mt-6 pt-6 border-t border-gold/5 gap-4 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-center mt-4 md:mt-6 pt-4 md:pt-6 border-t border-gold/5 gap-4 relative z-10">
                   <button 
                     onMouseDown={() => setIsGravando(true)}
                     onMouseUp={() => { setIsGravando(false); toast.success('Sua voz foi ouvida.'); }}
-                    className={`flex items-center gap-3 px-8 py-4 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] transition-all ${isGravando ? 'bg-ruby text-white scale-95' : 'bg-gold/5 text-gold hover:bg-gold/10 border border-gold/10'}`}
+                    className={`w-full md:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] transition-all ${isGravando ? 'bg-ruby text-white scale-95' : 'bg-gold/5 text-gold hover:bg-gold/10 border border-gold/10'}`}
                   >
                     <Mic size={18} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
                   </button>
                   <button 
                     onClick={nextPasso}
                     disabled={!desabafo && !isGravando}
-                    className="w-full md:w-auto bg-gold text-white px-12 py-4 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] shadow-lg hover:scale-[1.05] transition-all disabled:opacity-30"
+                    className="w-full md:w-auto bg-gold text-white px-12 py-4 rounded-full text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] shadow-lg hover:scale-[1.05] transition-all disabled:opacity-30"
                   >
                     Prosseguir
                   </button>
@@ -279,13 +279,13 @@ export default function OraculoJornada() {
 
         {/* PASSO 3: MÉTODO */}
         {passo === 3 && (
-          <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="space-y-8 md:space-y-10 animate-in fade-in slide-in-from-right-4 duration-500 px-4 md:px-0">
             <div className="text-center space-y-2">
-              <h2 className="text-4xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+              <h2 className="text-3xl md:text-4xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>
                 Consulte o Invisível
               </h2>
             </div>
-            <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
+            <div className="grid grid-cols-1 gap-4 md:gap-6 max-w-md mx-auto">
               {[
                 { id: 'foto', icon: Camera, title: 'Tirar Foto', desc: 'Leitura física', color: 'bg-gold' },
                 { id: 'completa', icon: LayoutGrid, title: 'Tiragem Virtual', desc: 'Sincronicidade de 3 Arcanos', color: 'bg-ruby' },
@@ -294,14 +294,14 @@ export default function OraculoJornada() {
                 <button 
                   key={m.id}
                   onClick={() => handleLeitura(m.id)}
-                  className="flex items-center gap-6 bg-white border border-gold/10 p-6 rounded-[32px] hover:border-gold/40 hover:shadow-2xl transition-all group text-left"
+                  className="flex items-center gap-4 md:gap-6 bg-white border border-gold/10 p-4 md:p-6 rounded-[24px] md:rounded-[32px] hover:border-gold/40 hover:shadow-2xl transition-all group text-left"
                 >
-                  <div className={`w-16 h-16 ${m.color}/5 rounded-2xl flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-all`}>
-                    <m.icon size={28} />
+                  <div className={`w-12 h-12 md:w-16 md:h-16 ${m.color}/5 rounded-xl md:rounded-2xl flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-all`}>
+                    <m.icon className="w-6 h-6 md:w-7 md:h-7" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-xl text-foreground/80">{m.title}</h4>
-                    <p className="text-sm text-foreground/40">{m.desc}</p>
+                    <h4 className="font-bold text-lg md:text-xl text-foreground/80">{m.title}</h4>
+                    <p className="text-xs md:text-sm text-foreground/40">{m.desc}</p>
                   </div>
                 </button>
               ))}
@@ -311,19 +311,19 @@ export default function OraculoJornada() {
 
         {/* PASSO 4: RESULTADO */}
         {passo === 4 && resultado && (
-          <div className="animate-in fade-in zoom-in-95 duration-1000 space-y-12 pb-24 max-w-4xl mx-auto text-center">
-            <div className="space-y-6">
-              <div className="inline-block px-6 py-2 bg-gold/10 rounded-full text-[11px] font-black text-gold uppercase tracking-[0.3em] border border-gold/20">
+          <div className="animate-in fade-in zoom-in-95 duration-1000 space-y-8 md:space-y-12 pb-24 max-w-4xl mx-auto text-center px-4 md:px-0">
+            <div className="space-y-4 md:space-y-6">
+              <div className="inline-block px-6 py-2 bg-gold/10 rounded-full text-[10px] md:text-[11px] font-black text-gold uppercase tracking-[0.3em] border border-gold/20">
                 {resultado.oraculo_utilizado} • {resultado.tema}
               </div>
-              <h2 className="text-5xl md:text-6xl font-serif text-gold leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+              <h2 className="text-4xl md:text-6xl font-serif text-gold leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>
                 Sua Revelação
               </h2>
             </div>
 
             {resultado.situacao_atual ? (
-              <div className="space-y-16">
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="space-y-10 md:space-y-16">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                     <CardResult 
                       title="O Presente" 
                       data={resultado.situacao_atual} 
@@ -343,18 +343,18 @@ export default function OraculoJornada() {
                       tipoOraculo={tipoOraculo}
                     />
                  </div>
-                 <div className="relative p-10 rounded-[56px] bg-white border border-gold/10 shadow-2xl">
-                    <p className="text-2xl md:text-3xl leading-relaxed text-foreground/80 font-light italic">
+                 <div className="relative p-6 md:p-10 rounded-[32px] md:rounded-[56px] bg-white border border-gold/10 shadow-2xl">
+                    <p className="text-xl md:text-3xl leading-relaxed text-foreground/80 font-light italic">
                       "{resultado.conselho_final}"
                     </p>
-                    {resultado.salmo_recomendado && <p className="mt-6 text-sm font-bold text-gold/60">{resultado.salmo_recomendado}</p>}
+                    {resultado.salmo_recomendado && <p className="mt-4 md:mt-6 text-xs md:text-sm font-bold text-gold/60">{resultado.salmo_recomendado}</p>}
                  </div>
               </div>
             ) : (
-              <div className="bg-white rounded-[56px] border border-gold/10 p-12 shadow-2xl">
-                <h3 className="text-4xl font-bold text-gold mb-4">{resultado.veredito}</h3>
-                <p className="text-xl leading-relaxed text-foreground/70 font-light mb-6">{resultado.previsao}</p>
-                <div className="bg-gold/5 p-6 rounded-3xl border border-gold/10 italic text-lg">"{resultado.conselho}"</div>
+              <div className="bg-white rounded-[32px] md:rounded-[56px] border border-gold/10 p-6 md:p-12 shadow-2xl">
+                <h3 className="text-2xl md:text-4xl font-bold text-gold mb-4">{resultado.veredito}</h3>
+                <p className="text-lg md:text-xl leading-relaxed text-foreground/70 font-light mb-6">{resultado.previsao}</p>
+                <div className="bg-gold/5 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gold/10 italic text-base md:text-lg">"{resultado.conselho}"</div>
               </div>
             )}
 
