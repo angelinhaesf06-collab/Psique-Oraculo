@@ -95,7 +95,13 @@ export async function POST(req: Request) {
 
     const result = await model.generateContent(promptParts);
     const responseText = result.response.text();
-    const cleanJson = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+    
+    // Extração robusta de JSON (procurando pelo primeiro '{' e último '}')
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("A IA não retornou um formato JSON válido.");
+    }
+    const cleanJson = jsonMatch[0];
     const jsonResponse = JSON.parse(cleanJson);
 
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
