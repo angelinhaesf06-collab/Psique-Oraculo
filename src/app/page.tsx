@@ -184,6 +184,15 @@ export default function OraculoJornada() {
           audio: audioBase64
         })
       });
+
+      // Verificar se a resposta é JSON antes de tentar ler
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const errorText = await res.text();
+        console.error("Resposta não-JSON recebida:", errorText);
+        throw new Error("O servidor retornou uma página de erro (HTML) em vez de dados. Isso geralmente significa que o modelo gemini-3.1 não está disponível ou houve um erro interno grave.");
+      }
+
       const data = await res.json();
       if (data.error) {
         toast.error(`O oráculo falhou: ${data.details || 'Tente novamente.'}`);
@@ -195,7 +204,7 @@ export default function OraculoJornada() {
       setPasso(4); 
     } catch (error: any) {
       console.error('Erro detalhado:', error);
-      toast.error(`Erro de conexão: ${error.message || 'Verifique o console para mais detalhes.'}`);
+      toast.error(`Erro de conexão: ${error.message}`);
     } finally {
       setLoading(false);
     }

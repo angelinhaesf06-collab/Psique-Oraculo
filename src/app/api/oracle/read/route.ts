@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getGeminiModel } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
 
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       console.error("Erro ao inicializar o modelo Gemini:", modelError);
       return NextResponse.json({ 
         error: "Modelo de IA indisponível", 
-        details: "O modelo gemini-3.1-flash-lite pode não estar ativo para sua conta. Erro: " + modelError.message 
+        details: "O modelo gemini-3.1-flash-lite pode não estar ativo ou o nome está incorreto. Erro: " + modelError.message 
       }, { status: 500 });
     }
 
@@ -29,137 +29,62 @@ export async function POST(req: Request) {
       - Arquetípico: Referencie conceitos como Sombra, Persona, Ânima/Ânimus quando fizer sentido para o contexto.
       - Acolhedor: Trate o desabafo do usuário com a reverência de um terapeuta experiente.
 
-      REFERÊNCIA DE DECK PARA TARÔ (78 Arcanos):
-      - Use como base estética e simbólica o Tarô de Rider-Waite-Smith ou o Tarô de Marselha, mas com uma interpretação Junguiana (ex: Arcano Sem Nome é transformação necessária, não morte física).
-
-      REFERÊNCIA DE DECK PARA BARALHO CIGANO:
-      - Base: "Gilded Reverie Lenormand" de Ciro Marchetti. 
-      - Foco: Clareza prática unida à intuição visual. Explore os detalhes luxuosos das imagens para descrever a energia da leitura.
-
-      REFERÊNCIA DE DECK PARA TARÔ DOS ANJOS:
-      - Base: Radleigh Valentine. 
-      - Voz: Extremamente suave e protetora.
-
-      DIRETRIZES DE INTERPRETAÇÃO:
-      1. Sincronicidade: Trate a pergunta do usuário e as cartas como um evento de sincronicidade.
-      2. Abordagem Terapêutica: Se a carta for negativa (ex: A Torre, 3 de Espadas), não cause medo. Trate como um "colapso necessário para a reconstrução" ou uma "limpeza emocional".
-      3. Empowerment: Sempre termine com um direcionamento que devolva o poder de escolha ao usuário.
-      4. Personalização: Identifique os nomes das pessoas mencionadas pelo usuário na pergunta/desabafo e utilize esses nomes naturalmente em sua resposta (conselho_final ou conselho), tornando a experiência mais íntima e direta.
-      5. Espiritualidade: OBRIGATÓRIO incluir sempre um Salmo ou Versículo da Bíblia que complemente a energia da leitura, independentemente do oráculo escolhido.
-
       ESTRUTURA DE RETORNO (JSON) - OBRIGATÓRIO:
-
-      Se tipoLeitura for "completa" ou envolver 3 cartas:
+      Se tipoLeitura for "completa":
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { 
-          "carta": "Nome da Carta", 
-          "card_slug": "nome-da-carta-slug",
-          "interpretacao": "O que esta energia revela sobre o agora (estilo Junguiano)."
-        },
-        "caminho_acao": { 
-          "carta": "Nome da Carta", 
-          "card_slug": "nome-da-carta-slug",
-          "interpretacao": "A sugestão do inconsciente para o movimento."
-        },
-        "resultado_conselho": { 
-          "carta": "Nome da Carta", 
-          "card_slug": "nome-da-carta-slug",
-          "interpretacao": "A síntese arquetípica do possível desfecho."
-        },
-        "conselho_final": "Uma narrativa fluida e profunda conectando as cartas ao desabafo do usuário, usando os nomes citados.",
-        "complemento_terapeutico": "Um mantra ou insight curto.",
-        "salmo_recomendado": "Salmo X ou Versículo Y (Obrigatório)"
+        "situacao_atual": { "carta": "...", "card_slug": "...", "interpretacao": "..." },
+        "caminho_acao": { "carta": "...", "card_slug": "...", "interpretacao": "..." },
+        "resultado_conselho": { "carta": "...", "card_slug": "...", "interpretacao": "..." },
+        "conselho_final": "...",
+        "complemento_terapeutico": "...",
+        "salmo_recomendado": "..."
       }
-
-      Se tipoLeitura for "sim_nao", "foto" ou 1 carta:
+      Se for "sim_nao" ou "foto":
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "veredito": "SIM / NÃO / TALVEZ",
-        "previsao": "Uma explicação breve baseada nos arquétipos, usando os nomes citados se houver.",
-        "conselho": "O conselho final da alma para o usuário.",
-        "complemento_terapeutico": "Um mantra ou insight curto.",
-        "salmo_recomendado": "Salmo X ou Versículo Y (Obrigatório)",
-        "carta_sorteada": {
-          "carta": "Nome da Carta",
-          "card_slug": "nome-da-carta-slug"
-        }
+        "veredito": "SIM/NÃO/TALVEZ",
+        "previsao": "...",
+        "conselho": "...",
+        "complemento_terapeutico": "...",
+        "salmo_recomendado": "...",
+        "carta_sorteada": { "carta": "...", "card_slug": "..." }
       }
-
-      REGRAS PARA card_slug:
-      - Use apenas letras minúsculas, números e hífens.
-      - Remova acentos.
-      - Exemplo: "O Mago" vira "o-mago", "Ás de Copas" vira "as-de-copas".
     `;
 
-    let userContext = "Tema Selecionado: " + tema + "\nPergunta/Desabafo: " + (pergunta || "O usuário busca orientação geral.");
-    
-    let prompt = `
-      Contexto do Usuário:
-      ${userContext}
-      
-      Tipo de Leitura: ${tipoLeitura}
-      Elementos Fornecidos: ${cartas ? (Array.isArray(cartas) ? cartas.join(", ") : cartas) : "Analise os arquétipos presentes ou sorteie se necessário."}
-      
-      Por favor, gere a leitura integrando o desabafo do usuário com os arquétipos do ${tipoOraculo}.
-      Se houver áudio, ele contém o desabafo do usuário que deve ser considerado para a interpretação.
-    `;
-
+    const prompt = `Contexto: ${tema}. Pergunta: ${pergunta}. Tipo: ${tipoLeitura}. Cartas: ${cartas}.`;
     const promptParts: any[] = [systemInstructions + prompt];
 
-    if (imagem) {
-        const imageData = imagem.split(",")[1] || imagem;
-        promptParts.push({ inlineData: { data: imageData, mimeType: "image/jpeg" } });
-    }
+    if (imagem) promptParts.push({ inlineData: { data: imagem.split(",")[1] || imagem, mimeType: "image/jpeg" } });
+    if (audio) promptParts.push({ inlineData: { data: audio.split(",")[1] || audio, mimeType: "audio/mp3" } });
 
-    if (audio) {
-        const audioData = audio.split(",")[1] || audio;
-        promptParts.push({ inlineData: { data: audioData, mimeType: "audio/mp3" } });
-    }
-
-    console.log("Chamando Gemini 1.5 Flash...");
     const result = await model.generateContent(promptParts);
     const responseText = result.response.text();
-    console.log("Resposta bruta da IA:", responseText);
     
-    // Extração robusta de JSON (procurando pelo primeiro '{' e último '}')
     const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      console.error("Erro: Resposta da IA não contém JSON válido");
-      throw new Error("A IA não retornou um formato JSON válido.");
-    }
-    const cleanJson = jsonMatch[0];
-    const jsonResponse = JSON.parse(cleanJson);
-    console.log("JSON processado com sucesso");
+    if (!jsonMatch) throw new Error("A IA não retornou um JSON válido.");
+    
+    const jsonResponse = JSON.parse(jsonMatch[0]);
 
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
         try {
-            const supabaseAdmin = createClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.SUPABASE_SERVICE_ROLE_KEY
-            );
-
+            const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY);
             await supabaseAdmin.from("historico_leituras").insert({
                 user_id: userId || null,
                 tipo_oraculo: tipoOraculo,
                 tipo_leitura: tipoLeitura,
-                pergunta_tema: tema + ": " + (pergunta || "Consulta via Contexto Híbrido"),
-                cartas_sorteadas: cartas || null,
-                resposta_ia: jsonResponse,
-                image_url: imagem ? "processada" : null
+                pergunta_tema: tema + ": " + (pergunta || "Consulta"),
+                resposta_ia: jsonResponse
             });
-            console.log("Histórico salvo no Supabase");
-        } catch (dbError) {
-            console.error("Erro ao salvar no banco (mas a leitura continua):", dbError);
-        }
+        } catch (dbError) { console.error("Erro Supabase:", dbError); }
     }
 
     return NextResponse.json(jsonResponse);
 
   } catch (error: any) {
     console.error("Erro na API Oracle:", error);
-    return NextResponse.json({ error: "Falha ao processar leitura", details: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Falha na IA", details: error.message }, { status: 500 });
   }
 }
