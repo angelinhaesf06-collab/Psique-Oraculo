@@ -43,15 +43,15 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const imagePath = `/assets/decks/${folder}/${data.card_slug}.jpg`;
 
   return (
-    <div className="flex flex-col items-center gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
-      <h5 className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] text-foreground/40 text-center">{title}</h5>
-      <div className="w-[100px] md:w-[180px] relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[16px] md:rounded-[24px] border-[1px] md:border-[2px] border-[#D4B982]/30 p-1 md:p-2 shadow-lg md:shadow-xl">
-        <div className="w-full h-full rounded-[12px] md:rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
+    <div className="flex flex-col items-center gap-1 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
+      <h5 className="text-[7px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] text-foreground/40 text-center leading-none">{title}</h5>
+      <div className="w-[85px] md:w-[180px] relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[12px] md:rounded-[24px] border-[1px] md:border-[2px] border-[#D4B982]/30 p-1 md:p-2 shadow-lg">
+        <div className="w-full h-full rounded-[10px] md:rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
            {!imageError ? (
              <img src={imagePath} alt={data.carta} className="w-full h-full object-contain" onError={() => setImageError(true)} />
            ) : (
-             <div className="p-2 text-center">
-               <span className="text-gold font-bold text-[8px] md:text-xs uppercase tracking-widest block">{data.carta}</span>
+             <div className="p-1 text-center">
+               <span className="text-gold font-bold text-[7px] md:text-xs uppercase tracking-widest block leading-tight">{data.carta}</span>
              </div>
            )}
         </div>
@@ -111,15 +111,11 @@ export default function OraculoJornada() {
         recognition.lang = 'pt-BR';
         recognition.continuous = true;
         recognition.interimResults = true;
-
         recognition.onresult = (event: any) => {
           let transcript = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
-          }
+          for (let i = event.resultIndex; i < event.results.length; i++) transcript += event.results[i][0].transcript;
           setDesabafo(transcript);
         };
-
         recognition.start();
         (window as any).recognition = recognition;
       }
@@ -130,16 +126,15 @@ export default function OraculoJornada() {
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = () => {
-          const base64data = reader.result as string;
-          setAudioBase64(base64data);
-          toast.success('Sua voz foi sintonizada ao campo.');
+          setAudioBase64(reader.result as string);
+          toast.success('Sintonizado.');
         };
       };
 
       recorder.start();
       setIsGravando(true);
     } catch (err) {
-      toast.error('Erro ao acessar microfone. Verifique as permissões.');
+      toast.error('Verifique o microfone.');
     }
   };
 
@@ -148,7 +143,6 @@ export default function OraculoJornada() {
       mediaRecorderRef.current.stop();
       setIsGravando(false);
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-
       if ((window as any).recognition) {
         (window as any).recognition.stop();
         delete (window as any).recognition;
@@ -160,9 +154,7 @@ export default function OraculoJornada() {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        handleLeitura('foto', reader.result as string);
-      };
+      reader.onloadend = () => handleLeitura('foto', reader.result as string);
       reader.readAsDataURL(file);
     }
   };
@@ -175,35 +167,25 @@ export default function OraculoJornada() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          tipoOraculo,
-          tipoLeitura: tipo,
-          tema,
-          pergunta: desabafo,
+          tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo,
           cartas: tipo === 'foto' ? null : cartasSorteadas,
-          imagem: imageData || null,
-          audio: audioBase64
+          imagem: imageData || null, audio: audioBase64
         })
       });
 
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        const text = await res.text();
-        console.error("Erro do Servidor:", text);
-        throw new Error(`Erro ${res.status}: O servidor falhou ao processar o modelo gemini-3.1. Isso pode ser uma falha de conexão ou modelo inexistente.`);
+        throw new Error(`Erro ${res.status}: Servidor instável.`);
       }
 
       const data = await res.json();
-      if (data.error) {
-        toast.error(`Falha: ${data.details || data.error}`);
-        setLoading(false);
-        return;
-      }
+      if (data.error) throw new Error(data.details || data.error);
+      
       setResultado(data);
       setAudioBase64(null);
       setPasso(4); 
     } catch (error: any) {
-      console.error('Erro detalhado:', error);
-      toast.error(`Erro de conexão: ${error.message}`);
+      toast.error(`Falha: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -212,38 +194,30 @@ export default function OraculoJornada() {
   return (
     <div className="h-[100dvh] w-full text-foreground font-sans p-2 md:p-12 flex flex-col items-center justify-start md:justify-center relative bg-[#F5F2EA] overflow-hidden">
       
+      {/* Elementos Fixos (Mandala e Ícone) */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[900px] md:h-[900px] opacity-[0.05]">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[900px] md:h-[900px] opacity-[0.06]">
            <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
         </div>
-
-        <div className="absolute top-4 left-4 md:top-8 md:left-8 w-12 h-12 md:w-48 md:h-48 opacity-20"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /><circle cx="20" cy="20" r="3" /></svg></div>
-        <div className="absolute top-4 right-4 md:top-8 md:right-8 w-12 h-12 md:w-48 md:h-48 opacity-20 rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
-        <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 w-12 h-12 md:w-48 md:h-48 opacity-20 -rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
-        <div className="absolute bottom-4 right-4 md:bottom-8 md:left-8 w-12 h-12 md:w-48 md:h-48 opacity-20 rotate-180"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
       </div>
 
+      {/* Ícone Cabeçalho Perfeito */}
       <div className={`fixed z-50 pointer-events-none transition-all duration-700 ${
         passo === 0
           ? "opacity-0 invisible scale-0"
-          : (passo === 1 || passo === 2 || passo === 3)
-            ? "top-2 md:top-6 left-0 right-0 flex justify-center items-center" 
-            : "top-2 left-2 md:top-8 md:left-8"
+          : "top-4 md:top-8 left-0 right-0 flex justify-center items-center" 
       }`}>
-        <div className={`bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden border-2 border-gold/30 pointer-events-auto transition-all duration-700 ${
-          (passo === 1 || passo === 2 || passo === 3) ? "w-16 h-16 md:w-32 md:h-32" : "w-12 h-12 md:w-24 md:h-24"
-        }`}>
-          <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover" />
+        <div className="w-16 h-16 md:w-32 md:h-32 bg-white rounded-full flex items-center justify-center shadow-[0_10px_40px_rgba(0,0,0,0.1)] overflow-hidden border-2 border-gold/20 pointer-events-auto">
+          <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover scale-105" />
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl mt-12 md:mt-48">
+      <div className="relative z-10 w-full max-w-2xl pt-24 md:pt-48 flex flex-col items-center">
+        
         {passo === 0 && (
-          <div className="flex flex-col items-center space-y-4 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000">
-            <div className="text-center space-y-2 mb-2">
-              <h2 className="text-3xl md:text-6xl font-serif text-gold leading-tight px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Qual arcano você escolhe hoje?</h2>
-            </div>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 w-full px-6">
+          <div className="flex flex-col items-center space-y-4 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000 mt-[-2rem]">
+            <h2 className="text-2xl md:text-5xl font-serif text-gold leading-tight text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Qual arcano você escolhe hoje?</h2>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 w-full px-4">
               {[
                 { id: 'Tarô', title: 'TARÔ', img: '/assets/decks/covers/taro.jpg', borderColor: 'border-[#E5D9C3]' },
                 { id: 'Baralho Cigano', title: 'CIGANO', img: '/assets/decks/covers/cigano.jpg', borderColor: 'border-[#D4B982]' },
@@ -252,38 +226,23 @@ export default function OraculoJornada() {
                 <button 
                   key={o.id}
                   onClick={() => { setTipoOraculo(o.id); nextPasso(); }}
-                  className={`w-full max-w-[140px] md:max-w-[240px] flex flex-col items-center bg-[#FDFBF7] rounded-[20px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-2 md:p-5 shadow-xl transition-all hover:scale-105 active:scale-95`}
+                  className={`w-full max-w-[120px] md:max-w-[200px] flex flex-col items-center bg-[#FDFBF7] rounded-[18px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-1.5 md:p-4 shadow-xl transition-all hover:scale-105 active:scale-95`}
                 >
-                  <h3 className="text-[10px] md:text-base font-bold text-foreground/80 tracking-widest mb-1 md:mb-5 font-sans">{o.title}</h3>
-                  <div className="w-full aspect-[3/4.5] rounded-[8px] md:rounded-[16px] overflow-hidden border border-gold/5 bg-white/50 flex items-center justify-center p-0">
+                  <h3 className="text-[9px] md:text-sm font-bold text-foreground/80 tracking-widest mb-1 md:mb-4 font-sans">{o.title}</h3>
+                  <div className="w-full aspect-[3/4.5] rounded-[10px] md:rounded-[16px] overflow-hidden bg-white flex items-center justify-center">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover" />
                   </div>
                 </button>
               ))}
             </div>
-            <div className="flex flex-col items-center gap-2 pt-2">
-               <div className="flex items-center gap-4 text-gold/20">
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.908 3.152-1.928 4.176-1.224 1.224-3.136 2.52-6.528 2.52-5.32 0-9.624-4.304-9.624-9.624s4.304-9.624 9.624-9.624c2.88 0 5.032 1.136 6.592 2.616l2.32-2.32C18.664 1.256 15.8 0 12.48 0 6.312 0 1.296 5.016 1.296 11.184s5.016 11.184 11.184 11.184c3.392 0 5.968-1.12 7.968-3.2 2.072-2.072 2.728-4.968 2.728-7.312 0-.704-.064-1.376-.184-1.936l-10.512.016z"/></svg>
-                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-2.415-2.828 0-1.927 1.572-3.123 3.018-3.123 1.056 0 2.214.654 2.214 1.884 0 1.23-.96 2.153-2.14 2.153-.346 0-.67-.09-.96-.237l-.022.016c.365.807 1.096 1.488 2.305 1.488 1.99 0 3.255-1.63 3.255-3.64 0-2.03-1.64-3.522-3.87-3.522-2.525 0-4.437 1.846-4.437 4.295 0 2.235 1.594 4.17 3.524 4.17.653 0 1.24-.19 1.7-.514l-.004-.002a4.4 4.4 0 0 1-2.168.652z"/></svg>
-                  <Sun className="w-4 h-4" strokeWidth={1.5} />
-               </div>
-               <h2 className="text-2xl md:text-5xl font-serif text-[#A08149]/30 tracking-tight font-sans text-center px-4 leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
-               
-               <div className="flex flex-col items-center gap-4 mt-4">
-                  <button 
-                    onClick={() => setModalAberto('assinatura')}
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/20 hover:bg-gold/20 transition-all group"
-                  >
-                    <Crown className="w-3 h-3 text-gold" />
-                    <span className="text-[8px] font-bold text-gold uppercase tracking-[0.2em]">Seja Premium • R$ 89,00/ano</span>
-                  </button>
-
-                  <div className="flex items-center gap-3 text-[8px] font-black uppercase tracking-[0.2em] text-gold/30">
-                    <button onClick={() => setModalAberto('ajuda')} className="hover:text-gold/60 transition-colors">Ajuda</button>
-                    <span>•</span>
-                    <button onClick={() => setModalAberto('politicas')} className="hover:text-gold/60 transition-colors">Políticas</button>
-                    <span>•</span>
-                    <button onClick={handleLogout} className="hover:text-ruby transition-colors">Sair</button>
+            <div className="flex flex-col items-center gap-4 pt-4 pb-20">
+               <h2 className="text-2xl md:text-4xl font-serif text-[#A08149]/30 tracking-tight text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
+               <div className="flex flex-col items-center gap-4">
+                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 px-6 py-2 rounded-full bg-gold/10 border border-gold/20"><Crown className="w-4 h-4 text-gold" /><span className="text-[10px] font-bold text-gold uppercase tracking-widest">Premium</span></button>
+                  <div className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-gold/30">
+                    <button onClick={() => setModalAberto('ajuda')}>Ajuda</button><span>•</span>
+                    <button onClick={() => setModalAberto('politicas')}>Políticas</button><span>•</span>
+                    <button onClick={handleLogout} className="text-ruby/40">Sair</button>
                   </div>
                </div>
             </div>
@@ -291,227 +250,102 @@ export default function OraculoJornada() {
         )}
 
         {passo === 1 && (
-          <div className="space-y-4 md:space-y-12 animate-in fade-in slide-in-from-right-4 duration-700 relative text-center">
-            <div className="space-y-1">
-              <h2 className="text-2xl md:text-5xl font-serif text-gold leading-tight px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Onde sua alma busca luz?</h2>
-            </div>
-            <div className="flex flex-col gap-2 w-full max-w-[280px] mx-auto px-2">
+          <div className="w-full flex flex-col items-center space-y-4 md:space-y-8 animate-in fade-in duration-700 mt-[-1rem]">
+            <h2 className="text-2xl md:text-5xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Onde sua alma busca luz?</h2>
+            <div className="flex flex-col gap-2 w-full max-w-[280px] mx-auto">
               {TEMAS.map((t) => (
-                <button 
-                  key={t.label} 
-                  onClick={() => { setTema(t.label); nextPasso(); }} 
-                  className={`w-full h-12 md:h-20 rounded-[16px] bg-gradient-to-r ${t.color} p-[1px] shadow-lg hover:scale-[1.03] transition-all group overflow-hidden border border-gold/10`}
-                >
-                  <div className="w-full h-full bg-black/20 backdrop-blur-sm flex items-center justify-between px-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-full bg-white/10 ${t.textColor}`}>
-                        <t.icon className="w-4 h-4 md:w-6 md:h-6" />
-                      </div>
-                      <span className={`text-sm md:text-xl font-medium ${t.textColor} tracking-[0.1em] font-sans`}>{t.label}</span>
+                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-12 md:h-16 rounded-[16px] bg-gradient-to-r ${t.color} p-[1px] shadow-lg hover:scale-[1.02] transition-all`}>
+                  <div className="w-full h-full bg-black/30 backdrop-blur-md rounded-[15px] flex items-center justify-between px-6">
+                    <div className="flex items-center gap-4">
+                      <t.icon className={`w-5 h-5 ${t.textColor}`} />
+                      <span className={`text-[15px] md:text-xl font-medium ${t.textColor} tracking-wide font-sans`}>{t.label}</span>
                     </div>
-                    <ChevronLeft className="w-4 h-4 opacity-0 group-hover:opacity-40 rotate-180 transition-all text-white" />
+                    <ChevronLeft className="w-4 h-4 rotate-180 opacity-30 text-white" />
                   </div>
                 </button>
               ))}
             </div>
-            <div className="pt-2">
-               <button onClick={prevPasso} className="text-gold/60 hover:text-gold flex items-center justify-center gap-2 mx-auto text-[8px] font-bold uppercase tracking-[0.2em] bg-white/10 px-6 py-2 rounded-full border border-gold/10 backdrop-blur-md transition-all">
-                 <ChevronLeft size={10} /> Mudar Oráculo
-               </button>
-            </div>
+            <button onClick={prevPasso} className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold/30 pt-4">‹ Mudar Oráculo</button>
           </div>
         )}
 
         {passo === 2 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500 relative px-4 text-center mt-[-1rem]">
-            <div className="space-y-1">
-              <h2 className="text-2xl md:text-4xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>Abra o seu coração</h2>
-            </div>
-            <div className="relative bg-[#FDFBF7] rounded-[24px] border border-gold/10 p-4 shadow-xl max-w-sm mx-auto">
-              <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva aqui sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base font-light text-foreground/80" />
-              <div className="flex flex-col justify-between items-center mt-2 border-t border-gold/5 pt-3 gap-3">
-                <button 
-                  onMouseDown={startRecording} 
-                  onMouseUp={stopRecording}
-                  onTouchStart={startRecording}
-                  onTouchEnd={stopRecording}
-                  className={`w-full flex items-center justify-center gap-2 px-6 py-3 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${isGravando ? 'bg-ruby text-white scale-105' : 'bg-gold/5 text-gold border border-gold/10'}`}
-                >
-                  <Mic size={18} className={isGravando ? 'text-white' : 'text-gold'} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
-                </button>
-                <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-gold text-white px-8 py-3 rounded-full text-[8px] font-bold uppercase tracking-widest shadow-lg disabled:opacity-30">Prosseguir</button>
+          <div className="w-full flex flex-col items-center space-y-4 animate-in fade-in duration-500 px-4 mt-[-1rem]">
+            <h2 className="text-2xl md:text-4xl font-serif text-gold text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Abra o seu coração</h2>
+            <div className="relative bg-white rounded-[28px] border border-gold/10 p-4 shadow-2xl w-full max-w-[340px]">
+              <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base font-light text-foreground/70" />
+              <div className="space-y-3 pt-3 border-t border-gold/5">
+                <button onMouseDown={startRecording} onMouseUp={stopRecording} onTouchStart={startRecording} onTouchEnd={stopRecording} className={`w-full py-3 rounded-full flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest ${isGravando ? 'bg-ruby text-white animate-pulse' : 'bg-gold/5 text-gold border border-gold/10'}`}><Mic size={18} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}</button>
+                <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-gold text-white py-3 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg disabled:opacity-20">Prosseguir</button>
               </div>
             </div>
-            <div className="pt-4">
-               <button onClick={prevPasso} className="text-gold/40 hover:text-gold flex items-center justify-center gap-2 mx-auto text-[8px] font-bold uppercase tracking-widest bg-white/30 px-6 py-2 rounded-full border border-gold/5 transition-all">
-                 <ChevronLeft size={10} /> Trocar Foco ({tema})
-               </button>
-            </div>
+            <button onClick={prevPasso} className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold/30 pt-4">‹ Trocar Foco ({tema})</button>
           </div>
         )}
 
-
         {passo === 3 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500 px-4 text-center mt-[-2rem] md:mt-0">
-            <div className="space-y-2">
-              <h2 className="text-3xl md:text-5xl font-serif text-gold leading-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
-            </div>
-            <input 
-              type="file" 
-              accept="image/*" 
-              capture="environment" 
-              className="hidden" 
-              ref={fileInputRef} 
-              onChange={handleCaptureImage}
-            />
-            <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 max-w-4xl mx-auto px-4">
+          <div className="w-full flex flex-col items-center space-y-6 animate-in fade-in duration-500 px-4 mt-[-1rem]">
+            <h2 className="text-2xl md:text-5xl font-serif text-gold text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
+            <div className="flex flex-col md:flex-row gap-3 w-full max-w-[320px] md:max-w-xl">
               {[
-                { id: 'foto', icon: Camera, title: 'Foto do seu Jogo Físico', color: 'bg-emerald-600', action: () => fileInputRef.current?.click() },
-                { id: 'completa', icon: LayoutGrid, title: 'Situação, Caminho e Resultado', color: 'bg-ruby', action: () => handleLeitura('completa') },
-                { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
+                { id: 'foto', icon: Camera, title: 'Foto Jogo Físico', color: 'bg-emerald-600', action: () => fileInputRef.current?.click() },
+                { id: 'completa', icon: Sparkles, title: 'Caminho Completo', color: 'bg-ruby', action: () => handleLeitura('completa') },
+                { id: 'sim_nao', icon: CheckCircle2, title: 'Sim ou Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
-                <button key={m.id} onClick={m.action} className="w-full max-w-[280px] md:max-w-[200px] flex flex-col items-center gap-2 bg-white border border-gold/10 p-3 md:p-5 rounded-[24px] hover:shadow-2xl transition-all group">
-                  <div className={`w-14 h-14 md:w-16 md:h-16 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-110`}><m.icon size={28} /></div>
-                  <h4 className="font-bold text-[8px] md:text-xs text-foreground/80 uppercase tracking-widest leading-tight">{m.title}</h4>
+                <button key={m.id} onClick={m.action} className="w-full flex flex-col items-center gap-2 bg-white border border-gold/10 p-3 rounded-[24px] shadow-lg active:scale-95 transition-all">
+                  <div className={`w-12 h-12 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg`}><m.icon size={24} /></div>
+                  <h4 className="font-bold text-[8px] md:text-xs text-foreground/80 uppercase tracking-widest text-center leading-tight">{m.title}</h4>
                 </button>
               ))}
             </div>
-            <div className="pt-6">
-               <button onClick={prevPasso} className="text-gold/40 hover:text-gold flex items-center justify-center gap-2 mx-auto text-[9px] font-bold uppercase tracking-widest bg-white/30 px-6 py-2 rounded-full border border-gold/5 transition-all">
-                 <ChevronLeft size={12} /> Refazer Pergunta
-               </button>
-            </div>
+            <button onClick={prevPasso} className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold/30 pt-6">‹ Refazer Pergunta</button>
+            <input type="file" accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleCaptureImage} />
           </div>
         )}
 
         {passo === 4 && resultado && (
-          <div className="animate-in fade-in zoom-in-95 duration-1000 space-y-8 pb-24 text-center px-4">
-            <div className="space-y-4">
-              <div className="inline-block px-6 py-2 bg-gold/10 rounded-full text-[10px] font-bold text-gold uppercase tracking-[0.3em] border border-gold/20">{resultado.oraculo_utilizado} • {resultado.tema}</div>
-              <h2 className="text-4xl md:text-6xl font-serif text-gold leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>Sua Revelação</h2>
+          <div className="animate-in fade-in zoom-in-95 duration-1000 space-y-4 pb-10 text-center px-4 mt-[-1rem]">
+            <div className="space-y-1">
+              <div className="inline-block px-4 py-1 bg-gold/5 rounded-full text-[8px] font-bold text-gold uppercase tracking-widest border border-gold/10">{resultado.tema}</div>
+              <h2 className="text-3xl md:text-6xl font-serif text-gold leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>Sua Revelação</h2>
             </div>
             {resultado.situacao_atual ? (
-              <div className="space-y-10">
-                 <div className="flex flex-row flex-wrap items-start justify-center gap-3 md:gap-8 px-2">
-                    <CardResult title="Presente" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
-                    <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
-                    <CardResult title="Síntese" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
-                 </div>
-                 <div className="relative p-6 md:p-10 rounded-[32px] bg-white border border-gold/10 shadow-2xl">
-                    <p className="text-xl md:text-2xl leading-relaxed text-foreground/80 font-light italic font-sans mb-6">"{resultado.conselho_final}"</p>
-                    {resultado.salmo_recomendado && <p className="text-sm font-bold text-gold/80 uppercase tracking-widest bg-gold/5 py-2 px-4 rounded-full border border-gold/10 inline-block">{resultado.salmo_recomendado}</p>}
-                 </div>
+              <div className="flex flex-row justify-center gap-2 md:gap-8">
+                <CardResult title="Presente" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
+                <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
+                <CardResult title="Síntese" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
               </div>
             ) : (
-              <div className="space-y-10">
-                <div className="flex justify-center mx-auto">
-                  {resultado.carta_sorteada && <CardResult title="A Resposta" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}
-                </div>
-                <div className="bg-white rounded-[32px] border border-gold/10 p-6 shadow-2xl">
-                  <h3 className="text-2xl font-bold text-gold mb-4 font-sans">{resultado.veredito}</h3>
-                  <p className="text-lg leading-relaxed text-foreground/70 font-light mb-6 font-sans">{resultado.previsao}</p>
-                  <div className="bg-gold/5 p-4 rounded-2xl border border-gold/10 italic text-base font-sans mb-4">"{resultado.conselho}"</div>
-                  {resultado.salmo_recomendado && <p className="text-sm font-bold text-gold/80 uppercase tracking-widest bg-gold/5 py-2 px-4 rounded-full border border-gold/10 inline-block">{resultado.salmo_recomendado}</p>}
-                </div>
-              </div>
+              <div className="flex justify-center">{resultado.carta_sorteada && <CardResult title="A Resposta" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}</div>
             )}
-            <div className="space-y-8">
-              {resultado.complemento_terapeutico && (
-                <div className="bg-gold/10 p-6 rounded-[24px] border border-gold/20 max-w-2xl mx-auto shadow-inner">
-                  <p className="text-xs font-black uppercase tracking-[0.5em] text-gold/40 mb-2">Mantra do Dia</p>
-                  <p className="text-xl md:text-2xl font-bold text-gold tracking-tight font-sans animate-in fade-in duration-1000">
-                    {resultado.complemento_terapeutico}
-                  </p>
-                </div>
-              )}
-              <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="px-12 py-5 rounded-full text-[11px] font-bold uppercase tracking-[0.3em] text-gold border border-gold/20 hover:bg-gold hover:text-white transition-all shadow-lg shadow-gold/10">Novo Ciclo Arquetípico</button>
+            <div className="bg-white/80 backdrop-blur-sm rounded-[24px] border border-gold/10 p-4 shadow-xl max-w-sm">
+                <p className="text-[13px] md:text-xl leading-relaxed text-foreground/80 font-light italic font-sans italic line-clamp-4">"{resultado.conselho_final || resultado.conselho}"</p>
+                <div className="mt-3 pt-3 border-t border-gold/5 flex justify-center"><button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Novo Ciclo ✨</button></div>
             </div>
           </div>
         )}
 
         {loading && (
-          <div className="fixed inset-0 bg-white/90 backdrop-blur-md z-[100] flex flex-col items-center justify-center gap-6">
-            <div className="w-16 h-16 border-t-2 border-gold rounded-full animate-spin"></div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-gold animate-pulse">Consultando o Inconsciente</p>
+          <div className="fixed inset-0 bg-white/95 backdrop-blur-xl z-[100] flex flex-col items-center justify-center gap-4">
+            <div className="w-12 h-12 border-t-2 border-gold rounded-full animate-spin"></div>
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gold animate-pulse">Sintonizando Inconsciente...</p>
           </div>
         )}
       </div>
 
+      {/* MODAIS */}
       {modalAberto && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-[#2C2420]/60 backdrop-blur-sm" onClick={() => setModalAberto(null)} />
-          
-          <div className="relative w-full max-w-lg bg-[#FDFBF7] rounded-[32px] border border-gold/20 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
-            <div className="p-6 border-b border-gold/10 flex justify-between items-center bg-white/50">
-              <h3 className="text-xl font-serif text-gold capitalize" style={{ fontFamily: 'var(--font-great-vibes)' }}>
-                {modalAberto === 'assinatura' ? 'Desperte seu Poder Interior' : modalAberto}
-              </h3>
-              <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-gold/5 rounded-full transition-colors">
-                <X className="w-5 h-5 text-gold" />
-              </button>
+          <div className="relative w-full max-w-lg bg-[#FDFBF7] rounded-[32px] border border-gold/20 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
+            <div className="p-4 border-b border-gold/10 flex justify-between items-center bg-white/50">
+              <h3 className="text-xl font-serif text-gold capitalize" style={{ fontFamily: 'var(--font-great-vibes)' }}>{modalAberto}</h3>
+              <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-gold/5 rounded-full"><X className="w-5 h-5 text-gold" /></button>
             </div>
-
-            <div className="p-8 overflow-y-auto font-sans text-foreground/70 leading-relaxed">
-              {modalAberto === 'assinatura' && (
-                <div className="space-y-8">
-                  <div className="text-center space-y-2">
-                    <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/20">
-                      <Crown className="w-10 h-10 text-gold" />
-                    </div>
-                    <p className="text-xs font-bold uppercase tracking-widest text-gold/60">Plano Anual Vitalício</p>
-                    <div className="text-4xl font-bold text-foreground">R$ 89,00</div>
-                  </div>
-
-                  <ul className="space-y-4">
-                    {[
-                      'Consultas ilimitadas aos 3 oráculos',
-                      'Acesso a todas as tiragens especiais',
-                      'Leitura de fotos de cartas físicas ilimitadas',
-                      'Suporte prioritário e campo energético limpo',
-                    ].map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button className="w-full py-5 bg-gold text-white rounded-[24px] font-bold text-xs uppercase tracking-[0.3em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all">
-                    Assinar Agora
-                  </button>
-                  <p className="text-[10px] text-center text-foreground/40 px-4">Pagamento único anual. Acesso imediato a todas as ferramentas de autoconhecimento.</p>
-                </div>
-              )}
-
-              {modalAberto === 'ajuda' && (
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Como Consultar</h4>
-                    <p className="text-sm">Escolha seu oráculo, defina um tema e abra seu coração. Você pode digitar sua dúvida ou usar o microfone para gravar seu desabafo.</p>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Métodos de Leitura</h4>
-                    <p className="text-sm">Oferecemos tiragens virtuais completas (Situação, Caminho e Síntese) ou a análise da sua própria carta física através da câmera.</p>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Dúvidas Técnicas?</h4>
-                    <p className="text-sm">Entre em contato através do portal de luz: <span className="font-bold">suporte@psiqueoraculo.com</span></p>
-                  </div>
-                </div>
-              )}
-
-              {modalAberto === 'politicas' && (
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Privacidade</h4>
-                    <p className="text-xs italic">Sua jornada é sagrada. Não armazenamos seus dados sensíveis nem compartilhamos suas consultas. O campo energético é restrito entre você e o oráculo.</p>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Termos de Uso</h4>
-                    <p className="text-xs italic">O Psiquê Oráculo é uma ferramenta de autoconhecimento e apoio terapêutico. As orientações não substituem acompanhamento médico ou profissional especializado.</p>
-                  </div>
-                </div>
-              )}
+            <div className="p-6 overflow-y-auto font-sans text-foreground/70 text-sm leading-relaxed">
+              {modalAberto === 'assinatura' && <div className="space-y-6 text-center"><Crown className="w-12 h-12 text-gold mx-auto" /><div className="text-3xl font-bold text-foreground">R$ 89,00/ano</div><button className="w-full py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-widest shadow-xl">Assinar Agora</button></div>}
+              {modalAberto === 'ajuda' && <p>Consulte seu oráculo, abra seu coração e receba a luz. Suporte: suporte@psiqueoraculo.com</p>}
+              {modalAberto === 'politicas' && <p>Sua jornada é sagrada e privada. O Psiquê Oráculo é uma ferramenta de autoconhecimento.</p>}
             </div>
           </div>
         </div>
