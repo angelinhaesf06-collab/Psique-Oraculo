@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Mic, Type, Camera, LayoutGrid, CheckCircle2, ChevronLeft, Heart, Briefcase, DollarSign, Activity, Users, LogOut, Sun, Moon, Star } from 'lucide-react';
+import { Sparkles, Mic, Type, Camera, LayoutGrid, CheckCircle2, ChevronLeft, Heart, Briefcase, DollarSign, Activity, Users, LogOut, Sun, Moon, Star, X, Info, ShieldCheck, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/navigation';
 import { useRouter } from 'next/navigation';
@@ -63,6 +63,7 @@ export default function OraculoJornada() {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
+  const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -206,9 +207,9 @@ export default function OraculoJornada() {
          <div className="absolute bottom-4 right-4 md:bottom-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20 rotate-180"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
       </div>
 
-      {/* Header com Ícone Centralizado e Maior */}
-      <div className="fixed top-4 md:top-6 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
-        <div className="w-16 h-16 md:w-28 md:h-28 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto">
+      {/* Header com Ícone Fixo no Canto Esquerdo */}
+      <div className="fixed top-4 left-4 md:top-8 md:left-8 z-50 pointer-events-none">
+        <div className="w-16 h-16 md:w-24 md:h-24 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto">
           <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover" />
         </div>
       </div>
@@ -242,8 +243,26 @@ export default function OraculoJornada() {
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-2.415-2.828 0-1.927 1.572-3.123 3.018-3.123 1.056 0 2.214.654 2.214 1.884 0 1.23-.96 2.153-2.14 2.153-.346 0-.67-.09-.96-.237l-.022.016c.365.807 1.096 1.488 2.305 1.488 1.99 0 3.255-1.63 3.255-3.64 0-2.03-1.64-3.522-3.87-3.522-2.525 0-4.437 1.846-4.437 4.295 0 2.235 1.594 4.17 3.524 4.17.653 0 1.24-.19 1.7-.514l-.004-.002a4.4 4.4 0 0 1-2.168.652z"/></svg>
                   <Sun className="w-6 h-6" strokeWidth={1.5} />
                </div>
-               <h2 className="text-xl md:text-3xl font-bold text-[#A08149]/30 tracking-[0.4em] font-sans text-center px-4">PSIQUEORÁCULO</h2>
-               <button onClick={handleLogout} className="mt-8 text-[9px] font-black uppercase tracking-[0.5em] text-gold/20 hover:text-gold/40 transition-colors">Encerrar Conexão</button>
+               <h2 className="text-xl md:text-3xl font-bold text-[#A08149]/30 tracking-[0.4em] font-sans text-center px-4 uppercase">PSIQUEORÁCULO</h2>
+               
+               {/* Footer Menu */}
+               <div className="flex flex-col items-center gap-6 mt-12">
+                  <button 
+                    onClick={() => setModalAberto('assinatura')}
+                    className="flex items-center gap-2 px-6 py-2 rounded-full bg-gold/10 border border-gold/20 hover:bg-gold/20 transition-all group"
+                  >
+                    <Crown className="w-4 h-4 text-gold" />
+                    <span className="text-[10px] font-bold text-gold uppercase tracking-[0.2em]">Seja Premium • R$ 89,00/ano</span>
+                  </button>
+
+                  <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-gold/30">
+                    <button onClick={() => setModalAberto('ajuda')} className="hover:text-gold/60 transition-colors">Ajuda</button>
+                    <span>•</span>
+                    <button onClick={() => setModalAberto('politicas')} className="hover:text-gold/60 transition-colors">Políticas</button>
+                    <span>•</span>
+                    <button onClick={handleLogout} className="hover:text-ruby transition-colors">Sair</button>
+                  </div>
+               </div>
             </div>
           </div>
         )}
@@ -334,7 +353,7 @@ export default function OraculoJornada() {
                 { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
                 <button key={m.id} onClick={m.action} className="w-full max-w-[180px] md:max-w-[200px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
-                  <div className={`w-16 h-16 ${m.color}/10 rounded-2xl flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-all`}><m.icon size={32} /></div>
+                  <div className={`w-16 h-16 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg shadow-${m.color.split('-')[1]}/20 transition-all group-hover:scale-110`}><m.icon size={32} /></div>
                   <h4 className="font-bold text-[9px] md:text-xs text-foreground/80 uppercase tracking-widest leading-tight">{m.title}</h4>
                 </button>
               ))}
@@ -400,6 +419,87 @@ export default function OraculoJornada() {
           </div>
         )}
       </div>
+
+      {/* MODAIS */}
+      {modalAberto && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-[#2C2420]/60 backdrop-blur-sm" onClick={() => setModalAberto(null)} />
+          
+          <div className="relative w-full max-w-lg bg-[#FDFBF7] rounded-[32px] border border-gold/20 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-gold/10 flex justify-between items-center bg-white/50">
+              <h3 className="text-xl font-serif text-gold capitalize" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+                {modalAberto === 'assinatura' ? 'Desperte seu Poder Interior' : modalAberto}
+              </h3>
+              <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-gold/5 rounded-full transition-colors">
+                <X className="w-5 h-5 text-gold" />
+              </button>
+            </div>
+
+            <div className="p-8 overflow-y-auto font-sans text-foreground/70 leading-relaxed">
+              {modalAberto === 'assinatura' && (
+                <div className="space-y-8">
+                  <div className="text-center space-y-2">
+                    <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/20">
+                      <Crown className="w-10 h-10 text-gold" />
+                    </div>
+                    <p className="text-xs font-bold uppercase tracking-widest text-gold/60">Plano Anual Vitalício</p>
+                    <div className="text-4xl font-bold text-foreground">R$ 89,00</div>
+                  </div>
+
+                  <ul className="space-y-4">
+                    {[
+                      'Consultas ilimitadas aos 3 oráculos',
+                      'Acesso a todas as tiragens especiais',
+                      'Leitura de fotos de cartas físicas ilimitadas',
+                      'Suporte prioritário e campo energético limpo',
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3 text-sm">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button className="w-full py-5 bg-gold text-white rounded-[24px] font-bold text-xs uppercase tracking-[0.3em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all">
+                    Assinar Agora
+                  </button>
+                  <p className="text-[10px] text-center text-foreground/40 px-4">Pagamento único anual. Acesso imediato a todas as ferramentas de autoconhecimento.</p>
+                </div>
+              )}
+
+              {modalAberto === 'ajuda' && (
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Como Consultar</h4>
+                    <p className="text-sm">Escolha seu oráculo, defina um tema e abra seu coração. Você pode digitar sua dúvida ou usar o microfone para gravar seu desabafo.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Métodos de Leitura</h4>
+                    <p className="text-sm">Oferecemos tiragens virtuais completas (Situação, Caminho e Síntese) ou a análise da sua própria carta física através da câmera.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Dúvidas Técnicas?</h4>
+                    <p className="text-sm">Entre em contato através do portal de luz: <span className="font-bold">suporte@psiqueoraculo.com</span></p>
+                  </div>
+                </div>
+              )}
+
+              {modalAberto === 'politicas' && (
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Privacidade</h4>
+                    <p className="text-xs italic">Sua jornada é sagrada. Não armazenamos seus dados sensíveis nem compartilhamos suas consultas. O campo energético é restrito entre você e o oráculo.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2">Termos de Uso</h4>
+                    <p className="text-xs italic">O Psiquê Oráculo é uma ferramenta de autoconhecimento e apoio terapêutico. As orientações não substituem acompanhamento médico ou profissional especializado.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
