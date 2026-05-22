@@ -4,70 +4,118 @@ import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
   try {
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // 1. Verificar Autenticação (Bearer Token)
+    const authHeader = req.headers.get("Authorization");
+    let userId = null; // null permite salvar histórico sem vínculo se o DB permitir, ou evitamos salvar
+
+    if (authHeader && authHeader.startsWith("Bearer ") && authHeader !== "Bearer undefined" && authHeader !== "Bearer null") {
+      const token = authHeader.split(" ")[1];
+      const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+      if (!authError && user) {
+        userId = user.id;
+      }
+    }
+
     const body = await req.json();
-    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, audio, userId, isPremiumRC } = body;
+    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, audio } = body;
 
-    console.log("Requisitando Oráculo Holístico Profundo (MODO TESTE):", { tipoOraculo, tipoLeitura, tema });
+    console.log("Requisitando Oráculo para Usuário:", userId);
 
-    // 1. Validação de Créditos (DESATIVADA PARA TESTES)
+    // 2. Validação e Consumo de Créditos (TEMPORARIAMENTE DESATIVADO PARA TESTES)
+    let creditStatus = { allowed: true, type: "test_mode" };
+
     /* 
-    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-    const { data: creditStatus } = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId, p_is_premium_rc: isPremiumRC || false });
-    if (!creditStatus?.allowed) { ... }
+    if (userId !== "demo-user") {
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      );
+      const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('check_and_consume_reading', { 
+        p_user_id: userId
+      });
+
+      if (rpcError) {
+        console.error("Erro no RPC de Créditos:", rpcError);
+        return NextResponse.json({ error: "Erro ao sintonizar seus créditos." }, { status: 500 });
+      }
+      creditStatus = rpcData;
+    }
+
+    if (!creditStatus?.allowed) {
+      return NextResponse.json({ 
+        error: creditStatus?.reason, 
+        code: creditStatus?.code || "LIMIT_REACHED",
+        details: creditStatus?.reason
+      }, { status: 403 });
+    }
     */
 
-    // 2. Inicialização do Modelo Premium 3.1
+    // 3. Inicialização do Modelo Gemini
     const model = getGeminiModel();
 
     const systemInstruction = `
-      Você é um(a) Oraculista e Terapeuta Holístico(a) de Alta Performance. Sua missão é realizar leituras profundas utilizando o sistema: ${tipoOraculo}.
+      Você é o "Psiquê Oráculo", um(a) mentor(a) de alma, terapeuta holístico(a) e oraculista de tom profundamente íntimo, acolhedor e poético.
 
-      DIRETRIZES DE TOM E ABORDAGEM:
-      1. Fusão Terapêutica: Mescle a sabedoria adivinhatória tradicional dos oráculos com acolhimento psicológico e visão quântica.
-      2. Sem Alarmismo: Foque na chave do aprendizado e evolução espiritual.
-      3. Ancoragem: Gere Mantras, Salmos, Banhos e Cristais.
+      DIRETRIZES DE PERSONALIZAÇÃO:
+      1. Intimidade e Nomes: Se o nome do(a) consulente for fornecido, use-o com carinho durante a leitura. Se ele mencionar nomes de outras pessoas (em questões de amor ou amigos), integre esses nomes na narrativa de forma natural e empática.
+      2. Anti-Engessamento: NUNCA use respostas genéricas ou frases prontas. Cada consulta deve ser uma nova jornada. Varie o vocabulário, as metáforas e a abordagem terapêutica Junguiana.
+      3. Tom de Voz: Sua voz deve soar como uma conversa privada à luz de velas — profunda, misteriosa, mas extremamente segura e luz.
+      4. Foco no Tema: O tema é "${tema}". Mergulhe nele com detalhes específicos, não fique apenas no superficial.
+
+      DINÂMICA DA LEITURA:
+      - Para 3 cartas: Analise a SITUAÇÃO, o CONSELHO/CAMINHO e o RESULTADO, conectando um arcano ao outro como se contasse uma história única da vida do(a) consulente.
+      - Para 1 carta (Sim/Não): Seja direto(a), mas mantenha o acolhimento e a profundidade.
 
       ESTRUTURA DE RETORNO (JSON OBRIGATÓRIO):
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "leitura_caminho": { "titulo": "...", "analise_detalhada": "...", "veredito_direto": "..." },
-        "acolhimento_quantum": { "titulo": "...", "conteudo": "..." },
-        "ancoragem_rituais": { "mantra": "...", "salmo": "...", "banho": "...", "cristal": "...", "biblia": "..." },
-        "situacao_atual": null, "caminho_acao": null, "resultado_conselho": null, "carta_sorteada": null
+        "situacao_atual": { "carta": "Nome da Carta 1", "interpretacao": "Análise íntima e pessoal" },
+        "caminho_acao": { "carta": "Nome da Carta 2", "interpretacao": "Conselho profundo e direcionado" },
+        "resultado_conselho": { "carta": "Nome da Carta 3", "interpretacao": "Tendência futura e fechamento" },
+        "carta_sorteada": { "carta": "Nome da Carta (apenas se for 1 carta)", "interpretacao": "Análise direta e acolhedora" },
+        "leitura_caminho": { "titulo": "Um título poético e único", "analise_detalhada": "O resumo da alma da leitura, integrando tudo o que foi dito", "veredito_direto": "Uma frase final de impacto e luz" },
+        "acolhimento_quantum": { "titulo": "Sussurro da Alma", "conteudo": "Uma mensagem final de extremo carinho e conforto" },
+        "ancoragem_rituais": { "mantra": "...", "salmo": "...", "banho": "...", "cristal": "...", "biblia": "..." }
       }
     `;
 
-    const prompt = `Consulente: ${tema}. Pergunta: ${pergunta || "Geral"}. Cartas: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição"}. Tipo: ${tipoLeitura}.`;
+    const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição"}. Método: ${tipoLeitura}.`;
 
-    // 3. Chamada da IA com Limite de Tokens Controlado
+    // 4. Chamada da IA com temperatura maior para evitar repetição
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: systemInstruction + prompt }] }],
       generationConfig: {
         responseMimeType: "application/json",
-        temperature: 0.8,
-        maxOutputTokens: 800,
+        temperature: 0.9, // Aumentado para maior criatividade e variedade
+        maxOutputTokens: 1200,
       }
     });
 
     const responseText = result.response.text();
     const jsonResponse = JSON.parse(responseText);
 
-    // 4. Salvando no Histórico (Opcional durante testes)
+    // 5. Salvando no Histórico
     try {
-        const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
         await supabaseAdmin.from("historico_leituras").insert({
             user_id: userId,
             tipo_oraculo: tipoOraculo,
             tipo_leitura: tipoLeitura,
-            pergunta_tema: tema + ": " + (pergunta || "Consulta"),
+            pergunta_tema: tema + (pergunta ? ": " + pergunta : ""),
             resposta_ia: jsonResponse
         });
-    } catch (e) { console.warn("Supabase Histórico Ignorado em Teste"); }
+    } catch (e) { 
+      console.warn("Falha ao salvar histórico:", e); 
+    }
 
     return NextResponse.json({
       ...jsonResponse,
-      usage: { allowed: true, type: "test_mode" }
+      usage: creditStatus
     });
 
   } catch (error: any) {

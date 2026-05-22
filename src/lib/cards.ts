@@ -17,5 +17,12 @@ export const DECKS = {
 export function drawCards(deckName: string, count: number = 3) {
   const deck = DECKS[deckName as keyof typeof DECKS] || DECKS['Tarô'];
   const shuffled = [...deck].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+  return shuffled.slice(0, count).map(name => ({
+    name,
+    slug: name.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+  }));
 }

@@ -74,7 +74,7 @@ export default function OraculoJornada() {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
-  const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | null>(null);
+  const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | null>(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -162,14 +162,22 @@ export default function OraculoJornada() {
   const handleLeitura = async (tipo: string, imageData?: string) => {
     setLoading(true);
     try {
-      const cartasSorteadas = tipo === 'completa' ? drawCards(tipoOraculo, 3) : drawCards(tipoOraculo, 1);
+      // Foto e Caminho do Destino (completa) usam 3 cartas. Bússola (sim_nao) usa 1 carta.
+      const cartasSorteadas = (tipo === 'completa' || tipo === 'foto') ? drawCards(tipoOraculo, 3) : drawCards(tipoOraculo, 1);
+      const { data: { session } } = await supabase.auth.getSession();
+      const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
+      
       const res = await fetch('/api/oracle/read', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
         body: JSON.stringify({
           tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo,
           cartas: tipo === 'foto' ? null : cartasSorteadas,
-          imagem: imageData || null, audio: audioBase64
+          imagem: imageData || null, audio: audioBase64,
+          userName // Enviando o nome para personalização
         })
       });
 
@@ -187,6 +195,12 @@ export default function OraculoJornada() {
       }
       if (data.error) throw new Error(data.details || data.error);
       
+      // Mapear os slugs das cartas sorteadas de volta para o resultado da IA
+      if (data.situacao_atual) data.situacao_atual.card_slug = cartasSorteadas[0]?.slug;
+      if (data.caminho_acao) data.caminho_acao.card_slug = cartasSorteadas[1]?.slug;
+      if (data.resultado_conselho) data.resultado_conselho.card_slug = cartasSorteadas[2]?.slug;
+      if (data.carta_sorteada) data.carta_sorteada.card_slug = cartasSorteadas[0]?.slug;
+
       setResultado(data);
       setAudioBase64(null);
       setPasso(4); 
@@ -409,22 +423,73 @@ export default function OraculoJornada() {
           <div className="absolute inset-0 bg-[#2C2420]/60 backdrop-blur-sm" onClick={() => setModalAberto(null)} />
           <div className="relative w-full max-w-lg bg-[#FDFBF7] rounded-[32px] border border-gold/20 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
             <div className="p-4 border-b border-gold/10 flex justify-between items-center bg-white/50">
-              <h3 className="text-xl font-serif text-gold capitalize" style={{ fontFamily: 'var(--font-great-vibes)' }}>{modalAberto}</h3>
+              <h3 className="text-xl font-serif text-gold capitalize" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+                {modalAberto === 'assinatura' || modalAberto === 'paywall' ? 'Portal da Abundância' : 
+                 modalAberto === 'limite_diario' ? 'Momento de Pausa' : modalAberto}
+              </h3>
               <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-gold/5 rounded-full"><X className="w-5 h-5 text-gold" /></button>
             </div>
-            <div className="p-6 overflow-y-auto font-sans text-foreground/70 text-sm leading-relaxed">
-              {modalAberto === 'assinatura' && (
-                <div className="space-y-6 text-center">
-                  <Crown className="w-12 h-12 text-gold mx-auto" />
-                  <div className="text-3xl font-bold text-foreground">R$ 89,00/ano</div>
-                  <ul className="space-y-3 text-left max-w-[240px] mx-auto py-4">
-                    {['Consultas ilimitadas', 'Acesso total aos 3 oráculos', 'Leitura de fotos ilimitada', 'Suporte prioritário'].map((item, i) => (
-                      <li key={i} className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider">
+            <div className="p-6 overflow-y-auto font-sans text-foreground/70 text-sm leading-relaxed text-center">
+              
+              {(modalAberto === 'assinatura' || modalAberto === 'paywall') && (
+                <div className="space-y-6">
+                  <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto">
+                    <Crown className="w-10 h-10 text-gold" />
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-xl font-bold text-[#2C2420]">✨ Sua jornada de conexão começou...</h4>
+                    <p className="text-xs leading-relaxed opacity-80">
+                      Suas 3 leituras gratuitas foram concluídas! A energia dos oráculos se conectou com o seu caminho, e as respostas para o seu ano de 2026 estão prontas para ser reveladas.
+                    </p>
+                    <p className="text-xs leading-relaxed opacity-80 font-medium">
+                      Para ter acesso a consultas diárias, rituais, banhos e leituras por foto com acolhimento quântico, assine o nosso plano anual.
+                    </p>
+                  </div>
+
+                  <div className="bg-gold/5 p-4 rounded-2xl border border-gold/10">
+                    <div className="text-3xl font-black text-gold">R$ 89,00<span className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">/ano</span></div>
+                  </div>
+
+                  <ul className="space-y-3 text-left max-w-[240px] mx-auto py-2">
+                    {[
+                      '5 Consultas diárias',
+                      'Acesso total aos 3 oráculos',
+                      'Leitura de fotos e áudio',
+                      'Rituais e Ancoragem Exclusiva'
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#A08149]">
                         <CheckCircle2 className="w-4 h-4 text-emerald-500" /> {item}
                       </li>
                     ))}
                   </ul>
-                  <button className="w-full py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-widest shadow-xl">Assinar Agora</button>
+
+                  <button className="w-full py-4 bg-gradient-to-r from-gold to-[#A08149] text-white rounded-2xl font-bold uppercase tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-xs">
+                    Desbloquear Meu Acesso Anual
+                  </button>
+                </div>
+              )}
+
+              {modalAberto === 'limite_diario' && (
+                <div className="space-y-6">
+                  <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
+                    <Sun className="w-10 h-10 text-emerald-600 animate-spin-slow" />
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-xl font-bold text-[#2C2420]">🌿 Hora de pausar e ancorar sua energia...</h4>
+                    <p className="text-xs leading-relaxed opacity-80 italic">
+                      Você atingiu o seu limite de 5 leituras por hoje. No universo quântico, a mente precisa de tempo para absorver os conselhos, mentalizar os mantras e permitir que as respostas se manifestem no seu caminho.
+                    </p>
+                    <p className="text-xs leading-relaxed opacity-80">
+                      Pratique o banho de ervas recomendado, medite com o seu cristal e volte amanhã. Suas cartas estarão esperando por você à meia-noite!
+                    </p>
+                  </div>
+
+                  <button 
+                    onClick={() => setModalAberto(null)}
+                    className="w-full py-4 bg-[#2C2420] text-white rounded-2xl font-bold uppercase tracking-[0.2em] shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-xs"
+                  >
+                    Compreendido
+                  </button>
                 </div>
               )}
               
@@ -440,7 +505,7 @@ export default function OraculoJornada() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Dúvidas Técnicas?</h4>
-                    <p className="text-xs">Entre em contato através do portal de luz: <span className="font-bold text-gold/80">suporte@psiqueoraculo.com</span></p>
+                    <p className="text-xs">Entre em contato através do portal de luz: <span className="font-bold text-gold/80">angelinhaesf06@gmail.com</span></p>
                   </div>
                 </div>
               )}
