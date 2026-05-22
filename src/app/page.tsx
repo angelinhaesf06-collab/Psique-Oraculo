@@ -515,10 +515,12 @@ export default function OraculoJornada() {
                   <div>
                     <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Privacidade Sagrada</h4>
                     <p className="text-xs italic">Sua jornada é sagrada. Não armazenamos seus dados sensíveis nem compartilhamos suas consultas. O campo energético é restrito entre você e o oráculo.</p>
+                    <button onClick={() => router.push('/privacy')} className="text-[9px] text-gold font-bold uppercase tracking-widest mt-2 underline">Ler Política Completa</button>
                   </div>
                   <div>
                     <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Termos de Uso</h4>
                     <p className="text-xs italic">O Psiquê Oráculo é uma ferramenta de autoconhecimento e apoio terapêutico. As orientações arquetípicas não substituem acompanhamento médico ou profissional especializado.</p>
+                    <button onClick={() => router.push('/terms')} className="text-[9px] text-gold font-bold uppercase tracking-widest mt-2 underline">Ler Termos de Uso</button>
                   </div>
                 </div>
               )}

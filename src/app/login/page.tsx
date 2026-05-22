@@ -86,6 +86,14 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full space-y-3 md:space-y-6">
+           <input
+              type="text"
+              placeholder="SEU NOME"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl bg-white border border-gold/10 focus:border-gold/30 outline-none text-[10px] font-bold tracking-widest text-center uppercase"
+            />
+
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
