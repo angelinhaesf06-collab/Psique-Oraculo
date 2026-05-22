@@ -184,45 +184,52 @@ export default function OraculoJornada() {
       setResultado(data);
       setAudioBase64(null);
       setPasso(4); 
-    } catch (error) {
-      toast.error('Erro ao conectar com o oráculo. Verifique sua conexão.');
+    } catch (error: any) {
+      console.error('Erro detalhado:', error);
+      toast.error(`Erro de conexão: ${error.message || 'Verifique o console para mais detalhes.'}`);
     } finally {
       setLoading(false);
     }
   };
 
+export default function OraculoJornada() {
+  // ... (estados anteriores)
+
   return (
     <div className="min-h-screen text-foreground font-sans p-4 md:p-12 flex flex-col items-center justify-start md:justify-center relative bg-[#F5F2EA]">
       
-      {/* Background Mandala Estática e Fixa */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] md:w-[900px] md:h-[900px] opacity-[0.05] pointer-events-none z-0">
-         <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
+      {/* Elementos Fixos (Mandala e Ícone) fora do container de conteúdo para não subirem no scroll */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        {/* Background Mandala Estática */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] md:w-[900px] md:h-[900px] opacity-[0.05]">
+           <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
+        </div>
+
+        {/* Ornamentos de Canto */}
+        <div className="absolute top-4 left-4 md:top-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /><circle cx="20" cy="20" r="3" /></svg></div>
+        <div className="absolute top-4 right-4 md:top-8 md:right-8 w-16 h-16 md:w-48 md:h-48 opacity-20 rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
+        <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20 -rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
+        <div className="absolute bottom-4 right-4 md:bottom-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20 rotate-180"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
       </div>
 
-      {/* Ornamentos de Canto */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-         <div className="absolute top-4 left-4 md:top-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /><circle cx="20" cy="20" r="3" /></svg></div>
-         <div className="absolute top-4 right-4 md:top-8 md:right-8 w-16 h-16 md:w-48 md:h-48 opacity-20 rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
-         <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20 -rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
-         <div className="absolute bottom-4 right-4 md:bottom-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20 rotate-180"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
-      </div>
-
-      {/* Header com Ícone Dinâmico */}
+      {/* Ícone Dinâmico Fixo */}
       <div className={`fixed z-50 pointer-events-none transition-all duration-700 ${
         passo === 0
-          ? "bottom-12 md:bottom-24 left-0 right-0 flex justify-center items-center"
-          : (passo === 1 || passo === 2)
+          ? "bottom-8 md:bottom-16 left-0 right-0 flex justify-center items-center"
+          : (passo === 1 || passo === 2 || passo === 3)
             ? "top-4 md:top-6 left-0 right-0 flex justify-center items-center" 
             : "top-4 left-4 md:top-8 md:left-8"
       }`}>
         <div className={`bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto transition-all duration-700 ${
-          (passo === 1 || passo === 2) ? "w-20 h-20 md:w-32 md:h-32" : "w-16 h-16 md:w-24 md:h-24"
+          passo === 0 ? "w-14 h-14 md:w-20 md:h-20" : 
+          (passo === 1 || passo === 2 || passo === 3) ? "w-20 h-20 md:w-32 md:h-32" : "w-16 h-16 md:w-24 md:h-24"
         }`}>
           <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover" />
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl mt-12 md:mt-24">
+      <div className="relative z-10 w-full max-w-6xl mt-12 md:mt-24 pb-20">
+        {/* ... (restante do conteúdo dos passos) */}
         
         {/* PASSO 0: ESCOLHA SEU ORÁCULO */}
         {passo === 0 && (

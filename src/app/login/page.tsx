@@ -50,25 +50,14 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Background Decorativo Suave */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-        <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain scale-150" />
+      {/* Background Mandala Estática e Fixa */}
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] md:w-[900px] md:h-[900px] opacity-[0.05] pointer-events-none z-0">
+         <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
       </div>
 
       <div className="w-full max-w-[400px] space-y-10 text-center z-10">
         
-        {/* Mandala Principal */}
-        <div className="relative mx-auto w-40 h-40 md:w-48 md:h-48 animate-in fade-in zoom-in duration-1000">
-            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#D4B982]/30 shadow-[0_20px_50px_rgba(212,185,130,0.2)] bg-white flex items-center justify-center p-2">
-                <img 
-                    src="/assets/brand/mandala-login.png" 
-                    alt="Psiquê Oráculo" 
-                    className="w-full h-full object-contain"
-                />
-            </div>
-        </div>
-
-        <div className="space-y-2">
+        <div className="space-y-2 pt-12 md:pt-0">
           <h2 className="text-4xl md:text-5xl font-serif text-[#A08149] tracking-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
           <p className="text-[#2C2420]/40 text-[10px] tracking-[0.4em] font-bold uppercase">Sintonize sua Essência</p>
         </div>
