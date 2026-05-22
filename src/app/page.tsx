@@ -179,6 +179,12 @@ export default function OraculoJornada() {
       }
 
       const data = await res.json();
+      if (res.status === 403 && data.code === "PAYWALL") {
+        setModalAberto('assinatura');
+        toast.error(data.details);
+        setLoading(false);
+        return;
+      }
       if (data.error) throw new Error(data.details || data.error);
       
       setResultado(data);

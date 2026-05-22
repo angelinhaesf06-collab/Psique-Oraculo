@@ -9,85 +9,81 @@ export async function POST(req: Request) {
 
     console.log("Requisitando Oráculo Holístico Profundo:", { tipoOraculo, tipoLeitura, tema });
 
+    // 1. Validação de Créditos e Assinatura via Supabase
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: creditStatus, error: creditError } = await supabaseAdmin.rpc(
+      'check_and_consume_reading',
+      { p_user_id: userId }
+    );
+
+    if (creditError || !creditStatus?.allowed) {
+      return NextResponse.json({ 
+        error: "Bloqueio de Acesso", 
+        details: creditStatus?.reason || "Verifique sua assinatura.",
+        code: "PAYWALL" 
+      }, { status: 403 });
+    }
+
+    // 2. Inicialização do Modelo
     const model = getGeminiModel();
 
     const systemInstruction = `
       Você é um(a) Oraculista e Terapeuta Holístico(a) de Alta Performance. Sua missão é realizar leituras profundas utilizando o sistema: ${tipoOraculo}.
 
       DIRETRIZES DE TOM E ABORDAGEM:
-      1. Fusão Terapêutica: Mescle a sabedoria adivinhatória tradicional dos oráculos com acolhimento psicológico (linguagem empática, sem julgamentos) e visão quântica (focando na cocriação da realidade, frequência vibracional e infinitas possibilidades).
-      2. Sem Alarmismo: Mesmo diante de cartas desafiadoras, foque na chave do aprendizado, na evolução espiritual e no direcionamento positivo.
+      1. Fusão Terapêutica: Mescle a sabedoria adivinhatória tradicional dos oráculos com acolhimento psicológico e visão quântica.
+      2. Sem Alarmismo: Foque na chave do aprendizado e evolução.
       3. Sabedoria Sagrada: Integre mantras, salmos e versículos bíblicos.
 
       ESTRUTURA DE RETORNO (JSON OBRIGATÓRIO):
-      
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "leitura_caminho": {
-          "titulo": "A LEITURA DO SEU CAMINHO",
-          "analise_detalhada": "Interpretação profunda baseada no ${tipoLeitura}. Se for Situação-Caminho-Resultado, divida nesses três momentos.",
-          "veredito_direto": "Resposta para Sim/Não ou Síntese da leitura."
-        },
-        "acolhimento_quantum": {
-          "titulo": "ACOLHIMENTO PSICOLÓGICO E VISÃO QUÂNTICA",
-          "conteudo": "Análise comportamental, postura mental recomendada e como elevar a frequência quântica."
-        },
-        "ancoragem_rituais": {
-          "titulo": "ANCORAGEM ENERGÉTICA E RITUAIS",
-          "mantra": "Frase curta de poder e afirmação.",
-          "salmo": "Número do Salmo e breve explicação do motivo.",
-          "banho": "Receita simples de banho de ervas.",
-          "cristal": "Cristal indicado para conexão ou proteção.",
-          "biblia": "Dizer ou versículo bíblico que ressoe com o tema."
-        },
-        "situacao_atual": null, 
-        "caminho_acao": null,
-        "resultado_conselho": null,
-        "carta_sorteada": null
+        "leitura_caminho": { "titulo": "...", "analise_detalhada": "...", "veredito_direto": "..." },
+        "acolhimento_quantum": { "titulo": "...", "conteudo": "..." },
+        "ancoragem_rituais": { "mantra": "...", "salmo": "...", "banho": "...", "cristal": "...", "biblia": "..." }
       }
-
-      IMPORTANTE: Mapeie as cartas fornecidas (${Array.isArray(cartas) ? cartas.join(", ") : cartas}) para os campos 'situacao_atual', 'caminho_acao' e 'resultado_conselho' (se leitura completa) ou 'carta_sorteada' (se 1 carta), mantendo a estrutura original do banco de dados nos campos extras.
     `;
 
-    const prompt = `
-      Consulente: ${tema}. 
-      Pergunta/Desabafo: ${pergunta || "Orientação para o caminho de individuação."}
-      Cartas do Campo: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição."}
-      Tipo de Tiragem: ${tipoLeitura}.
-    `;
+    const prompt = `Consulente: ${tema}. Pergunta: ${pergunta || "Geral"}. Cartas: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição"}. Tipo: ${tipoLeitura}.`;
 
     const parts: any[] = [{ text: systemInstruction + prompt }];
     if (imagem) parts.push({ inlineData: { data: imagem.split(",")[1] || imagem, mimeType: "image/jpeg" } });
     if (audio) parts.push({ inlineData: { data: audio.split(",")[1] || audio, mimeType: "audio/mp3" } });
 
+    // 3. Chamada da IA com Limite de Tokens (Otimização de Custo)
     const result = await model.generateContent({
       contents: [{ role: "user", parts }],
       generationConfig: {
         responseMimeType: "application/json",
         temperature: 0.8,
+        maxOutputTokens: 800, // Limite controlado entre 600-800 conforme solicitado
       }
     });
 
     const responseText = result.response.text();
     const jsonResponse = JSON.parse(responseText);
 
-    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      try {
-        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY);
-        await supabase.from("historico_leituras").insert({
-          user_id: userId || null,
-          tipo_oraculo: tipoOraculo,
-          pergunta_tema: tema + ": " + (pergunta || "Consulta"),
-          resposta_ia: jsonResponse
-        });
-      } catch (e) { console.error("Erro Supabase:", e); }
-    }
+    // 4. Salvando Histórico
+    await supabaseAdmin.from("historico_leituras").insert({
+      user_id: userId,
+      tipo_oraculo: tipoOraculo,
+      pergunta_tema: tema + ": " + (pergunta || "Consulta"),
+      resposta_ia: jsonResponse
+    });
 
-    return NextResponse.json(jsonResponse);
+    return NextResponse.json({
+      ...jsonResponse,
+      credits_used: creditStatus.type === 'free' ? 1 : 0,
+      usage_type: creditStatus.type
+    });
 
   } catch (error: any) {
-    console.error("Erro na API Holística:", error);
-    return NextResponse.json({ error: "Falha na conexão sagrada", details: error.message }, { status: 500 });
+    console.error("Erro na API Business:", error);
+    return NextResponse.json({ error: "Erro na jornada", details: error.message }, { status: 500 });
   }
 }
