@@ -207,9 +207,17 @@ export default function OraculoJornada() {
          <div className="absolute bottom-4 right-4 md:bottom-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20 rotate-180"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
       </div>
 
-      {/* Header com Ícone Fixo no Canto Esquerdo */}
-      <div className="fixed top-4 left-4 md:top-8 md:left-8 z-50 pointer-events-none">
-        <div className="w-16 h-16 md:w-24 md:h-24 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto">
+      {/* Header com Ícone Dinâmico */}
+      <div className={`fixed z-50 pointer-events-none transition-all duration-700 ${
+        passo === 0
+          ? "bottom-12 md:bottom-24 left-0 right-0 flex justify-center items-center"
+          : (passo === 1 || passo === 2)
+            ? "top-4 md:top-6 left-0 right-0 flex justify-center items-center" 
+            : "top-4 left-4 md:top-8 md:left-8"
+      }`}>
+        <div className={`bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto transition-all duration-700 ${
+          (passo === 1 || passo === 2) ? "w-20 h-20 md:w-32 md:h-32" : "w-16 h-16 md:w-24 md:h-24"
+        }`}>
           <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover" />
         </div>
       </div>
@@ -219,6 +227,9 @@ export default function OraculoJornada() {
         {/* PASSO 0: ESCOLHA SEU ORÁCULO */}
         {passo === 0 && (
           <div className="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000">
+            <div className="text-center space-y-4 mb-4">
+              <h2 className="text-4xl md:text-6xl font-serif text-gold leading-tight px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Qual arcano você escolhe hoje?</h2>
+            </div>
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 w-full px-8">
               {[
                 { id: 'Tarô', title: 'TARÔ', img: '/assets/decks/covers/taro.jpg', borderColor: 'border-[#E5D9C3]' },
@@ -237,7 +248,7 @@ export default function OraculoJornada() {
                 </button>
               ))}
             </div>
-            <div className="flex flex-col items-center gap-4 pt-4">
+            <div className="flex flex-col items-center gap-4 pt-4 pb-32">
                <div className="flex items-center gap-6 text-gold/20">
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.908 3.152-1.928 4.176-1.224 1.224-3.136 2.52-6.528 2.52-5.32 0-9.624-4.304-9.624-9.624s4.304-9.624 9.624-9.624c2.88 0 5.032 1.136 6.592 2.616l2.32-2.32C18.664 1.256 15.8 0 12.48 0 6.312 0 1.296 5.016 1.296 11.184s5.016 11.184 11.184 11.184c3.392 0 5.968-1.12 7.968-3.2 2.072-2.072 2.728-4.968 2.728-7.312 0-.704-.064-1.376-.184-1.936l-10.512.016z"/></svg>
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-2.415-2.828 0-1.927 1.572-3.123 3.018-3.123 1.056 0 2.214.654 2.214 1.884 0 1.23-.96 2.153-2.14 2.153-.346 0-.67-.09-.96-.237l-.022.016c.365.807 1.096 1.488 2.305 1.488 1.99 0 3.255-1.63 3.255-3.64 0-2.03-1.64-3.522-3.87-3.522-2.525 0-4.437 1.846-4.437 4.295 0 2.235 1.594 4.17 3.524 4.17.653 0 1.24-.19 1.7-.514l-.004-.002a4.4 4.4 0 0 1-2.168.652z"/></svg>
@@ -269,32 +280,32 @@ export default function OraculoJornada() {
 
         {/* PASSO 1: TEMA */}
         {passo === 1 && (
-          <div className="space-y-10 animate-in fade-in slide-in-from-right-4 duration-700 relative text-center">
+          <div className="space-y-8 md:space-y-12 animate-in fade-in slide-in-from-right-4 duration-700 relative text-center">
             <div className="space-y-2">
               <h2 className="text-3xl md:text-5xl font-serif text-gold leading-tight px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Onde sua alma busca luz?</h2>
             </div>
-            <div className="flex flex-col gap-5 w-full max-w-md mx-auto px-4 pb-12">
+            <div className="flex flex-col gap-3 md:gap-4 w-full max-w-sm mx-auto px-4 pb-8">
               {TEMAS.map((t) => (
                 <button 
                   key={t.label} 
                   onClick={() => { setTema(t.label); nextPasso(); }} 
-                  className={`w-full h-24 rounded-[24px] bg-gradient-to-r ${t.color} p-[1px] shadow-2xl hover:scale-[1.03] transition-all group overflow-hidden border border-gold/10`}
+                  className={`w-full h-16 md:h-20 rounded-[20px] bg-gradient-to-r ${t.color} p-[1px] shadow-xl hover:scale-[1.03] transition-all group overflow-hidden border border-gold/10`}
                 >
-                  <div className="w-full h-full bg-black/20 backdrop-blur-sm flex items-center justify-between px-8">
-                    <div className="flex items-center gap-6">
-                      <div className={`p-4 rounded-full bg-white/10 ${t.textColor} group-hover:scale-110 transition-transform`}>
-                        <t.icon className="w-8 h-8" />
+                  <div className="w-full h-full bg-black/20 backdrop-blur-sm flex items-center justify-between px-6">
+                    <div className="flex items-center gap-4">
+                      <div className={`p-2.5 rounded-full bg-white/10 ${t.textColor} group-hover:scale-110 transition-transform`}>
+                        <t.icon className="w-5 h-5 md:w-6 md:h-6" />
                       </div>
-                      <span className={`text-2xl font-medium ${t.textColor} tracking-[0.1em] font-sans`}>{t.label}</span>
+                      <span className={`text-lg md:text-xl font-medium ${t.textColor} tracking-[0.1em] font-sans`}>{t.label}</span>
                     </div>
-                    <ChevronLeft className="w-6 h-6 opacity-0 group-hover:opacity-40 rotate-180 transition-all text-white" />
+                    <ChevronLeft className="w-5 h-5 opacity-0 group-hover:opacity-40 rotate-180 transition-all text-white" />
                   </div>
                 </button>
               ))}
             </div>
-            <div className="pt-4">
-               <button onClick={prevPasso} className="text-gold/60 hover:text-gold flex items-center justify-center gap-2 mx-auto text-[10px] font-bold uppercase tracking-[0.3em] bg-white/10 px-10 py-4 rounded-full border border-gold/10 backdrop-blur-md transition-all">
-                 <ChevronLeft size={14} /> Mudar Oráculo
+            <div className="pt-2">
+               <button onClick={prevPasso} className="text-gold/60 hover:text-gold flex items-center justify-center gap-2 mx-auto text-[9px] font-bold uppercase tracking-[0.2em] bg-white/10 px-8 py-3 rounded-full border border-gold/10 backdrop-blur-md transition-all">
+                 <ChevronLeft size={12} /> Mudar Oráculo
                </button>
             </div>
           </div>
