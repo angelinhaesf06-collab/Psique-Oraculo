@@ -228,9 +228,7 @@ export default function OraculoJornada() {
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl mt-12 md:mt-24 pb-20">
-        {/* ... (restante do conteúdo dos passos) */}
-        
+      <div className="relative z-10 w-full max-w-6xl mt-28 md:mt-48 pb-20">
         {/* PASSO 0: ESCOLHA SEU ORÁCULO */}
         {passo === 0 && (
           <div className="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000">
