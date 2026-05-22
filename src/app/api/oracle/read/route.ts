@@ -7,30 +7,14 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, audio, userId, isPremiumRC } = body;
 
-    console.log("Requisitando Oráculo Holístico Profundo:", { tipoOraculo, tipoLeitura, tema });
+    console.log("Requisitando Oráculo Holístico Profundo (MODO TESTE):", { tipoOraculo, tipoLeitura, tema });
 
-    // 1. Validação de Créditos e Assinatura via Supabase
-    // isPremiumRC deve vir do front-end validado pelo RevenueCat
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    const { data: creditStatus, error: creditError } = await supabaseAdmin.rpc(
-      'check_and_consume_reading',
-      { 
-        p_user_id: userId,
-        p_is_premium_rc: isPremiumRC || false 
-      }
-    );
-
-    if (creditError || !creditStatus?.allowed) {
-      return NextResponse.json({ 
-        error: "Bloqueio de Acesso", 
-        details: creditStatus?.reason || "Limite de acesso atingido.",
-        code: creditStatus?.code || "PAYWALL" 
-      }, { status: 403 });
-    }
+    // 1. Validação de Créditos (DESATIVADA PARA TESTES)
+    /* 
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    const { data: creditStatus } = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId, p_is_premium_rc: isPremiumRC || false });
+    if (!creditStatus?.allowed) { ... }
+    */
 
     // 2. Inicialização do Modelo Premium 3.1
     const model = getGeminiModel();
@@ -56,31 +40,34 @@ export async function POST(req: Request) {
 
     const prompt = `Consulente: ${tema}. Pergunta: ${pergunta || "Geral"}. Cartas: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição"}. Tipo: ${tipoLeitura}.`;
 
-    // 3. Chamada da IA com Limite de Tokens Controlado (Otimização de Custo)
+    // 3. Chamada da IA com Limite de Tokens Controlado
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: systemInstruction + prompt }] }],
       generationConfig: {
         responseMimeType: "application/json",
         temperature: 0.8,
-        maxOutputTokens: 800, // Limite entre 600 e 800 tokens conforme solicitado
+        maxOutputTokens: 800,
       }
     });
 
     const responseText = result.response.text();
     const jsonResponse = JSON.parse(responseText);
 
-    // 4. Salvando no Histórico com as cartas mapeadas
-    await supabaseAdmin.from("historico_leituras").insert({
-      user_id: userId,
-      tipo_oraculo: tipoOraculo,
-      tipo_leitura: tipoLeitura,
-      pergunta_tema: tema + ": " + (pergunta || "Consulta"),
-      resposta_ia: jsonResponse
-    });
+    // 4. Salvando no Histórico (Opcional durante testes)
+    try {
+        const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+        await supabaseAdmin.from("historico_leituras").insert({
+            user_id: userId,
+            tipo_oraculo: tipoOraculo,
+            tipo_leitura: tipoLeitura,
+            pergunta_tema: tema + ": " + (pergunta || "Consulta"),
+            resposta_ia: jsonResponse
+        });
+    } catch (e) { console.warn("Supabase Histórico Ignorado em Teste"); }
 
     return NextResponse.json({
       ...jsonResponse,
-      usage: creditStatus
+      usage: { allowed: true, type: "test_mode" }
     });
 
   } catch (error: any) {
