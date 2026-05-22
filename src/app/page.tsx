@@ -499,7 +499,11 @@ export default function OraculoJornada() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Dúvidas Técnicas?</h4>
-                    <p className="text-xs">Entre em contato através do portal de luz: <span className="font-bold text-gold/80">angelinhaesf06@gmail.com</span></p>
+                    <p className="text-xs">Entre em contato através do portal de luz:</p>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-xs font-bold text-gold/80">angelinhaesf06@gmail.com</p>
+                      <p className="text-xs font-bold text-gold/80">Brasil: +55 18 98119-6386</p>
+                    </div>
                   </div>
                 </div>
               )}
