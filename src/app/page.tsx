@@ -392,12 +392,6 @@ export default function OraculoJornada() {
                         <div><span className="block font-black text-[9px] uppercase tracking-widest text-gold/60">Banho de Ervas</span>{resultado.ancoragem_rituais.banho}</div>
                       </div>
                     )}
-                    {resultado.ancoragem_rituais?.cristal && (
-                      <div className="flex gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center shrink-0"><ShieldCheck size={14} className="text-gold" /></div>
-                        <div><span className="block font-black text-[9px] uppercase tracking-widest text-gold/60">Cristal de Conexão</span>{resultado.ancoragem_rituais.cristal}</div>
-                      </div>
-                    )}
                   </div>
                </div>
 

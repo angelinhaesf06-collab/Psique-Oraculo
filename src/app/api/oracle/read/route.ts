@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
       DINÂMICA DA LEITURA:
       - Para 3 cartas: Analise a SITUAÇÃO, o CONSELHO/CAMINHO e o RESULTADO, conectando um arcano ao outro como se contasse uma história única da vida do(a) consulente.
-      - Para 1 carta (Sim/Não): Seja direto(a), mas mantenha o acolhimento e a profundidade.
+      - Para 1 carta (Bússola Sim ou Não): Comece o "veredito_direto" obrigatoriamente com "SIM" ou "NÃO" em letras maiúsculas, seguido de uma breve explicação baseada no arcano.
 
       ESTRUTURA DE RETORNO (JSON OBRIGATÓRIO):
       {
@@ -79,9 +79,9 @@ export async function POST(req: Request) {
         "caminho_acao": { "carta": "Nome da Carta 2", "interpretacao": "Conselho profundo e direcionado" },
         "resultado_conselho": { "carta": "Nome da Carta 3", "interpretacao": "Tendência futura e fechamento" },
         "carta_sorteada": { "carta": "Nome da Carta (apenas se for 1 carta)", "interpretacao": "Análise direta e acolhedora" },
-        "leitura_caminho": { "titulo": "Um título poético e único", "analise_detalhada": "O resumo da alma da leitura, integrando tudo o que foi dito", "veredito_direto": "Uma frase final de impacto e luz" },
+        "leitura_caminho": { "titulo": "Um título poético e único", "analise_detalhada": "O resumo da alma da leitura, integrando tudo o que foi dito", "veredito_direto": "Começar com SIM ou NÃO (se for bússola) + Conselho final de impacto" },
         "acolhimento_quantum": { "titulo": "Sussurro da Alma", "conteudo": "Uma mensagem final de extremo carinho e conforto" },
-        "ancoragem_rituais": { "mantra": "...", "salmo": "...", "banho": "...", "cristal": "...", "biblia": "..." }
+        "ancoragem_rituais": { "mantra": "Uma frase de poder", "salmo": "Número do Salmo + um trecho curto e significativo dele", "banho": "Sugestão de ervas", "biblia": "Citação de um versículo ou saber bíblico com o texto curto incluído" }
       }
     `;
 
