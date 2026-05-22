@@ -1,4 +1,4 @@
-package com.angela.psiqueoraculo;
+package com.psiqueoraculo;
 
 import com.getcapacitor.BridgeActivity;
 
