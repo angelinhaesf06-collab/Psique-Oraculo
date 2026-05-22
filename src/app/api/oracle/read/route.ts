@@ -4,9 +4,21 @@ import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: Request) {
   try {
-    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, audio, userId } = await req.json();
+    const body = await req.json();
+    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, audio, userId } = body;
 
-    const model = getGeminiModel();
+    console.log("Iniciando requisição para oráculo:", { tipoOraculo, tipoLeitura, tema });
+
+    let model;
+    try {
+      model = getGeminiModel();
+    } catch (modelError: any) {
+      console.error("Erro ao inicializar o modelo Gemini:", modelError);
+      return NextResponse.json({ 
+        error: "Modelo de IA indisponível", 
+        details: "O modelo gemini-3.1-flash-lite pode não estar ativo para sua conta. Erro: " + modelError.message 
+      }, { status: 500 });
+    }
 
     const systemInstructions = `
       Você é o "Psiquê Oráculo", um conselheiro de alma, integrando a sabedoria ancestral dos oráculos com a profundidade da Psicologia Analítica (Junguiana). 
