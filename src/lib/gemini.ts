@@ -8,9 +8,9 @@ if (!apiKey) {
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
-export const getGeminiModel = (modelName: string = "gemini-2.0-flash-lite-preview-02-05") => {
+export const getGeminiModel = (modelName: string = "gemini-3.1-flash-lite") => {
   if (!apiKey) throw new Error("Chave de API do Gemini não configurada.");
-  console.log("Inicializando modelo:", modelName);
+  console.log("Inicializando modelo Premium:", modelName);
   return genAI.getGenerativeModel({ 
     model: modelName,
     systemInstruction: `Você é o "Psiquê Oráculo", um conselheiro de alma Junguiano. 

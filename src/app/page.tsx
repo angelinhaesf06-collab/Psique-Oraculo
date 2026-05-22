@@ -192,16 +192,16 @@ export default function OraculoJornada() {
   };
 
   return (
-    <div className="h-[100dvh] w-full text-foreground font-sans p-2 md:p-12 flex flex-col items-center justify-start md:justify-center relative bg-[#F5F2EA] overflow-hidden">
+    <div className="h-[100dvh] w-full text-foreground font-sans p-2 md:p-12 flex flex-col items-center relative bg-[#F5F2EA] overflow-hidden">
       
-      {/* Elementos Fixos (Mandala e Ícone) */}
+      {/* Background Mandala */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[900px] md:h-[900px] opacity-[0.06]">
            <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
         </div>
       </div>
 
-      {/* Ícone Cabeçalho Perfeito */}
+      {/* Ícone Cabeçalho Centralizado */}
       <div className={`fixed z-50 pointer-events-none transition-all duration-700 ${
         passo === 0
           ? "opacity-0 invisible scale-0"
@@ -212,10 +212,11 @@ export default function OraculoJornada() {
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-2xl pt-4 md:pt-48 flex flex-col items-center flex-1 justify-between">
+      <div className="relative z-10 w-full max-w-2xl flex-1 flex flex-col items-center justify-between pt-4 md:pt-48">
         
+        {/* PASSO 0: ESCOLHA */}
         {passo === 0 && (
-          <div className="flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-1000 w-full">
+          <div className="flex flex-col items-center justify-between w-full h-full py-4">
             <h2 className="text-2xl md:text-5xl font-serif text-gold leading-tight text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Qual arcano você escolhe hoje?</h2>
             <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 w-full px-4">
               {[
@@ -223,56 +224,48 @@ export default function OraculoJornada() {
                 { id: 'Baralho Cigano', title: 'CIGANO', img: '/assets/decks/covers/cigano.jpg', borderColor: 'border-[#D4B982]' },
                 { id: 'Tarô dos Anjos', title: 'ANJOS', img: '/assets/decks/covers/anjos.jpg', borderColor: 'border-[#E5D9C3]' }
               ].map((o) => (
-                <button 
-                  key={o.id}
-                  onClick={() => { setTipoOraculo(o.id); nextPasso(); }}
-                  className={`w-full max-w-[90px] md:max-w-[200px] flex flex-col items-center bg-[#FDFBF7] rounded-[14px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-1 md:p-4 shadow-xl transition-all hover:scale-105 active:scale-95`}
-                >
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className={`w-full max-w-[90px] md:max-w-[200px] flex flex-col items-center bg-[#FDFBF7] rounded-[14px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-1 md:p-4 shadow-xl transition-all hover:scale-105 active:scale-95`}>
                   <h3 className="text-[8px] md:text-sm font-bold text-foreground/80 tracking-widest mb-0.5 md:mb-4 font-sans uppercase">{o.title}</h3>
-                  <div className="w-full aspect-[3/4.5] rounded-[6px] md:rounded-[16px] overflow-hidden bg-white flex items-center justify-center">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover" />
-                  </div>
+                  <div className="w-full aspect-[3/4.5] rounded-[6px] md:rounded-[16px] overflow-hidden bg-white flex items-center justify-center"><img src={o.img} alt={o.title} className="w-full h-full object-cover" /></div>
                 </button>
               ))}
             </div>
-            
-            <div className="flex flex-col items-center gap-2 pt-2 pb-6">
+            <div className="flex flex-col items-center gap-2 pb-2">
                <h2 className="text-2xl md:text-4xl font-serif text-[#A08149]/30 tracking-tight text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
                <div className="flex flex-col items-center gap-3">
                   <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 px-6 py-1.5 rounded-full bg-gold/10 border border-gold/20 shadow-sm"><Crown className="w-4 h-4 text-gold" /><span className="text-[10px] font-bold text-gold uppercase tracking-widest">Premium</span></button>
                   <div className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-gold/30">
-                    <button onClick={() => setModalAberto('ajuda')} className="hover:text-gold/60 transition-colors">Ajuda</button><span>•</span>
-                    <button onClick={() => setModalAberto('politicas')} className="hover:text-gold/60 transition-colors">Políticas</button><span>•</span>
-                    <button onClick={handleLogout} className="text-ruby/40 hover:text-ruby transition-colors">Sair</button>
+                    <button onClick={() => setModalAberto('ajuda')}>Ajuda</button><span>•</span>
+                    <button onClick={() => setModalAberto('politicas')}>Políticas</button><span>•</span>
+                    <button onClick={handleLogout} className="text-ruby/40">Sair</button>
                   </div>
                </div>
             </div>
           </div>
         )}
 
+        {/* PASSO 1: TEMA */}
         {passo === 1 && (
-          <div className="w-full flex flex-col items-center space-y-4 md:space-y-8 animate-in fade-in duration-700 mt-[-1rem]">
+          <div className="flex flex-col items-center justify-between w-full h-full py-20">
             <h2 className="text-2xl md:text-5xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Onde sua alma busca luz?</h2>
-            <div className="flex flex-col gap-2 w-full max-w-[280px] mx-auto">
+            <div className="flex flex-col gap-2 w-full max-w-[280px]">
               {TEMAS.map((t) => (
                 <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-12 md:h-16 rounded-[16px] bg-gradient-to-r ${t.color} p-[1px] shadow-lg hover:scale-[1.02] transition-all`}>
                   <div className="w-full h-full bg-black/30 backdrop-blur-md rounded-[15px] flex items-center justify-between px-6">
-                    <div className="flex items-center gap-4">
-                      <t.icon className={`w-5 h-5 ${t.textColor}`} />
-                      <span className={`text-[15px] md:text-xl font-medium ${t.textColor} tracking-wide font-sans`}>{t.label}</span>
-                    </div>
+                    <div className="flex items-center gap-4"><t.icon className={`w-5 h-5 ${t.textColor}`} /><span className={`text-[15px] md:text-xl font-medium ${t.textColor} tracking-wide font-sans`}>{t.label}</span></div>
                     <ChevronLeft className="w-4 h-4 rotate-180 opacity-30 text-white" />
                   </div>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold/30 pt-4">‹ Mudar Oráculo</button>
+            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-4 bg-white/50 px-8 rounded-full border border-gold/10">‹ Mudar Oráculo</button>
           </div>
         )}
 
+        {/* PASSO 2: PERGUNTA */}
         {passo === 2 && (
-          <div className="w-full flex flex-col items-center space-y-4 animate-in fade-in duration-500 px-4 mt-[-1rem]">
-            <h2 className="text-2xl md:text-4xl font-serif text-gold text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Abra o seu coração</h2>
+          <div className="flex flex-col items-center justify-between w-full h-full py-20">
+            <h2 className="text-2xl md:text-4xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Abra o seu coração</h2>
             <div className="relative bg-white rounded-[28px] border border-gold/10 p-4 shadow-2xl w-full max-w-[340px]">
               <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base font-light text-foreground/70" />
               <div className="space-y-3 pt-3 border-t border-gold/5">
@@ -280,13 +273,14 @@ export default function OraculoJornada() {
                 <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-gold text-white py-3 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg disabled:opacity-20">Prosseguir</button>
               </div>
             </div>
-            <button onClick={prevPasso} className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold/30 pt-4">‹ Trocar Foco ({tema})</button>
+            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-4 bg-white/50 px-8 rounded-full border border-gold/10">‹ Trocar Foco ({tema})</button>
           </div>
         )}
 
+        {/* PASSO 3: MÉTODO */}
         {passo === 3 && (
-          <div className="w-full flex flex-col items-center space-y-6 animate-in fade-in duration-500 px-4 mt-[-1rem]">
-            <h2 className="text-2xl md:text-5xl font-serif text-gold text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
+          <div className="flex flex-col items-center justify-between w-full h-full py-20">
+            <h2 className="text-2xl md:text-5xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
             <div className="flex flex-col md:flex-row gap-3 w-full max-w-[320px] md:max-w-xl">
               {[
                 { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-emerald-600', action: () => fileInputRef.current?.click() },
@@ -299,14 +293,15 @@ export default function OraculoJornada() {
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="text-[9px] font-bold uppercase tracking-[0.3em] text-gold/30 pt-6">‹ Refazer Pergunta</button>
+            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-4 bg-white/50 px-8 rounded-full border border-gold/10">‹ Refazer Pergunta</button>
             <input type="file" accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleCaptureImage} />
           </div>
         )}
 
+        {/* PASSO 4: RESULTADO */}
         {passo === 4 && resultado && (
-          <div className="animate-in fade-in zoom-in-95 duration-1000 space-y-4 pb-10 text-center px-4 mt-[-1rem]">
-            <div className="space-y-1">
+          <div className="flex flex-col items-center justify-between w-full h-full py-12 animate-in fade-in zoom-in-95 duration-1000 px-4">
+            <div className="space-y-1 text-center">
               <div className="inline-block px-4 py-1 bg-gold/5 rounded-full text-[8px] font-bold text-gold uppercase tracking-widest border border-gold/10">{resultado.tema}</div>
               <h2 className="text-3xl md:text-6xl font-serif text-gold leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>Sua Revelação</h2>
             </div>
@@ -319,9 +314,9 @@ export default function OraculoJornada() {
             ) : (
               <div className="flex justify-center">{resultado.carta_sorteada && <CardResult title="A Resposta" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}</div>
             )}
-            <div className="bg-white/80 backdrop-blur-sm rounded-[24px] border border-gold/10 p-4 shadow-xl max-w-sm">
-                <p className="text-[13px] md:text-xl leading-relaxed text-foreground/80 font-light italic font-sans italic line-clamp-4">"{resultado.conselho_final || resultado.conselho}"</p>
-                <div className="mt-3 pt-3 border-t border-gold/5 flex justify-center"><button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Novo Ciclo ✨</button></div>
+            <div className="bg-white/80 backdrop-blur-sm rounded-[24px] border border-gold/10 p-4 shadow-xl max-w-sm w-full">
+                <p className="text-[13px] md:text-xl leading-relaxed text-foreground/80 font-light italic font-sans italic line-clamp-4 text-center">"{resultado.conselho_final || resultado.conselho}"</p>
+                <div className="mt-3 pt-3 border-t border-gold/5 flex justify-center"><button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-3 bg-[#A08149]/5 w-full rounded-xl border border-gold/10">Novo Ciclo ✨</button></div>
             </div>
           </div>
         )}
