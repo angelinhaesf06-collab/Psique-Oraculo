@@ -212,10 +212,10 @@ export default function OraculoJornada() {
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-2xl pt-24 md:pt-48 flex flex-col items-center">
+      <div className="relative z-10 w-full max-w-2xl pt-4 md:pt-48 flex flex-col items-center flex-1 justify-between">
         
         {passo === 0 && (
-          <div className="flex flex-col items-center space-y-4 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000 mt-[-2rem]">
+          <div className="flex flex-col items-center space-y-4 animate-in fade-in zoom-in-95 duration-1000 w-full">
             <h2 className="text-2xl md:text-5xl font-serif text-gold leading-tight text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Qual arcano você escolhe hoje?</h2>
             <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 w-full px-4">
               {[
@@ -226,23 +226,24 @@ export default function OraculoJornada() {
                 <button 
                   key={o.id}
                   onClick={() => { setTipoOraculo(o.id); nextPasso(); }}
-                  className={`w-full max-w-[120px] md:max-w-[200px] flex flex-col items-center bg-[#FDFBF7] rounded-[18px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-1.5 md:p-4 shadow-xl transition-all hover:scale-105 active:scale-95`}
+                  className={`w-full max-w-[90px] md:max-w-[200px] flex flex-col items-center bg-[#FDFBF7] rounded-[14px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-1 md:p-4 shadow-xl transition-all hover:scale-105 active:scale-95`}
                 >
-                  <h3 className="text-[9px] md:text-sm font-bold text-foreground/80 tracking-widest mb-1 md:mb-4 font-sans">{o.title}</h3>
-                  <div className="w-full aspect-[3/4.5] rounded-[10px] md:rounded-[16px] overflow-hidden bg-white flex items-center justify-center">
+                  <h3 className="text-[8px] md:text-sm font-bold text-foreground/80 tracking-widest mb-0.5 md:mb-4 font-sans uppercase">{o.title}</h3>
+                  <div className="w-full aspect-[3/4.5] rounded-[6px] md:rounded-[16px] overflow-hidden bg-white flex items-center justify-center">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover" />
                   </div>
                 </button>
               ))}
             </div>
-            <div className="flex flex-col items-center gap-4 pt-4 pb-20">
+            
+            <div className="flex flex-col items-center gap-2 pt-2 pb-6">
                <h2 className="text-2xl md:text-4xl font-serif text-[#A08149]/30 tracking-tight text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
-               <div className="flex flex-col items-center gap-4">
-                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 px-6 py-2 rounded-full bg-gold/10 border border-gold/20"><Crown className="w-4 h-4 text-gold" /><span className="text-[10px] font-bold text-gold uppercase tracking-widest">Premium</span></button>
+               <div className="flex flex-col items-center gap-3">
+                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 px-6 py-1.5 rounded-full bg-gold/10 border border-gold/20 shadow-sm"><Crown className="w-4 h-4 text-gold" /><span className="text-[10px] font-bold text-gold uppercase tracking-widest">Premium</span></button>
                   <div className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-gold/30">
-                    <button onClick={() => setModalAberto('ajuda')}>Ajuda</button><span>•</span>
-                    <button onClick={() => setModalAberto('politicas')}>Políticas</button><span>•</span>
-                    <button onClick={handleLogout} className="text-ruby/40">Sair</button>
+                    <button onClick={() => setModalAberto('ajuda')} className="hover:text-gold/60 transition-colors">Ajuda</button><span>•</span>
+                    <button onClick={() => setModalAberto('politicas')} className="hover:text-gold/60 transition-colors">Políticas</button><span>•</span>
+                    <button onClick={handleLogout} className="text-ruby/40 hover:text-ruby transition-colors">Sair</button>
                   </div>
                </div>
             </div>
