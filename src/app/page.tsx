@@ -300,23 +300,91 @@ export default function OraculoJornada() {
 
         {/* PASSO 4: RESULTADO */}
         {passo === 4 && resultado && (
-          <div className="flex flex-col items-center justify-between w-full h-full py-12 animate-in fade-in zoom-in-95 duration-1000 px-4">
+          <div className="flex flex-col items-center gap-6 w-full py-12 animate-in fade-in zoom-in-95 duration-1000 px-4">
             <div className="space-y-1 text-center">
               <div className="inline-block px-4 py-1 bg-gold/5 rounded-full text-[8px] font-bold text-gold uppercase tracking-widest border border-gold/10">{resultado.tema}</div>
               <h2 className="text-3xl md:text-6xl font-serif text-gold leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>Sua Revelação</h2>
             </div>
-            {resultado.situacao_atual ? (
-              <div className="flex flex-row justify-center gap-2 md:gap-8">
-                <CardResult title="Presente" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
-                <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
-                <CardResult title="Síntese" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
-              </div>
-            ) : (
-              <div className="flex justify-center">{resultado.carta_sorteada && <CardResult title="A Resposta" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}</div>
-            )}
-            <div className="bg-white/80 backdrop-blur-sm rounded-[24px] border border-gold/10 p-4 shadow-xl max-w-sm w-full">
-                <p className="text-[13px] md:text-xl leading-relaxed text-foreground/80 font-light italic font-sans italic line-clamp-4 text-center">"{resultado.conselho_final || resultado.conselho}"</p>
-                <div className="mt-3 pt-3 border-t border-gold/5 flex justify-center"><button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-3 bg-[#A08149]/5 w-full rounded-xl border border-gold/10">Novo Ciclo ✨</button></div>
+            
+            {/* Cartas */}
+            <div className="flex flex-row justify-center gap-2 md:gap-8">
+              {resultado.situacao_atual && <CardResult title="Situação" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />}
+              {resultado.caminho_acao && <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />}
+              {resultado.resultado_conselho && <CardResult title="Resultado" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />}
+              {!resultado.situacao_atual && resultado.carta_sorteada && <CardResult title="Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}
+            </div>
+
+            {/* Conteúdo Holístico */}
+            <div className="w-full max-w-xl space-y-6">
+               
+               {/* 1. Leitura do Caminho */}
+               <div className="bg-white/90 backdrop-blur-sm rounded-[28px] border border-gold/10 p-6 shadow-xl">
+                  <h3 className="text-gold font-serif text-xl mb-3 flex items-center gap-2" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+                    <Sparkles size={18} /> {resultado.leitura_caminho?.titulo || "A Leitura do seu Caminho"}
+                  </h3>
+                  <p className="text-[13px] md:text-base leading-relaxed text-foreground/80 font-light text-justify">
+                    {resultado.leitura_caminho?.analise_detalhada}
+                  </p>
+                  {resultado.leitura_caminho?.veredito_direto && (
+                    <div className="mt-4 pt-3 border-t border-gold/5 text-center font-bold text-gold uppercase text-[11px] tracking-widest">
+                      {resultado.leitura_caminho.veredito_direto}
+                    </div>
+                  )}
+               </div>
+
+               {/* 2. Acolhimento e Quantum */}
+               <div className="bg-gradient-to-br from-white/95 to-gold/5 backdrop-blur-sm rounded-[28px] border border-gold/10 p-6 shadow-xl">
+                  <h3 className="text-gold font-serif text-xl mb-3 flex items-center gap-2" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+                    <Activity size={18} /> {resultado.acolhimento_quantum?.titulo || "Acolhimento Quântico"}
+                  </h3>
+                  <p className="text-[13px] md:text-base leading-relaxed text-foreground/80 font-light text-justify italic">
+                    {resultado.acolhimento_quantum?.conteudo}
+                  </p>
+               </div>
+
+               {/* 3. Rituais e Ancoragem */}
+               <div className="bg-[#2C2420] rounded-[28px] border border-white/5 p-6 shadow-2xl text-white/90">
+                  <h3 className="text-gold font-serif text-xl mb-4 flex items-center gap-2" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+                    <Wand2 size={18} /> {resultado.ancoragem_rituais?.titulo || "Ancoragem Energética"}
+                  </h3>
+                  <div className="space-y-4 text-[12px] md:text-sm">
+                    {resultado.ancoragem_rituais?.mantra && (
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center shrink-0"><Sparkles size={14} className="text-gold" /></div>
+                        <div><span className="block font-black text-[9px] uppercase tracking-widest text-gold/60">Mantra Quântico</span>{resultado.ancoragem_rituais.mantra}</div>
+                      </div>
+                    )}
+                    {resultado.ancoragem_rituais?.salmo && (
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center shrink-0"><Star size={14} className="text-gold" /></div>
+                        <div><span className="block font-black text-[9px] uppercase tracking-widest text-gold/60">Salmo de Proteção</span>{resultado.ancoragem_rituais.salmo}</div>
+                      </div>
+                    )}
+                    {resultado.ancoragem_rituais?.biblia && (
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center shrink-0"><Info size={14} className="text-gold" /></div>
+                        <div><span className="block font-black text-[9px] uppercase tracking-widest text-gold/60">Sabedoria Bíblica</span>{resultado.ancoragem_rituais.biblia}</div>
+                      </div>
+                    )}
+                    {resultado.ancoragem_rituais?.banho && (
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center shrink-0"><Activity size={14} className="text-gold" /></div>
+                        <div><span className="block font-black text-[9px] uppercase tracking-widest text-gold/60">Banho de Ervas</span>{resultado.ancoragem_rituais.banho}</div>
+                      </div>
+                    )}
+                    {resultado.ancoragem_rituais?.cristal && (
+                      <div className="flex gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gold/10 flex items-center justify-center shrink-0"><ShieldCheck size={14} className="text-gold" /></div>
+                        <div><span className="block font-black text-[9px] uppercase tracking-widest text-gold/60">Cristal de Conexão</span>{resultado.ancoragem_rituais.cristal}</div>
+                      </div>
+                    )}
+                  </div>
+               </div>
+
+               {/* Botão Reiniciar */}
+               <div className="pt-4 pb-12 flex justify-center">
+                  <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-4 bg-white/50 px-12 rounded-full border border-gold/10 shadow-lg hover:bg-gold hover:text-white transition-all">Novo Ciclo ✨</button>
+               </div>
             </div>
           </div>
         )}

@@ -7,53 +7,53 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, audio, userId } = body;
 
-    console.log("Requisitando Oráculo Profundo:", { tipoOraculo, tipoLeitura, tema });
+    console.log("Requisitando Oráculo Holístico Profundo:", { tipoOraculo, tipoLeitura, tema });
 
     const model = getGeminiModel();
 
     const systemInstruction = `
-      Você é o "Psiquê Oráculo", uma inteligência arquetípica que integra a sabedoria milenar da adivinhação oracular, a profundidade da Psicologia Analítica (Junguiana) e a força espiritual de mantras, salmos e provérbios bíblicos.
+      Você é um(a) Oraculista e Terapeuta Holístico(a) de Alta Performance. Sua missão é realizar leituras profundas utilizando o sistema: ${tipoOraculo}.
 
-      SUA MISSÃO:
-      1. Divinação: Revele as energias e tendências presentes, trazendo clareza sobre o momento atual.
-      2. Aconselhamento: Ofereça uma visão terapêutica sobre o processo de individuação, sombra e luz do consulente.
-      3. Espiritualidade: Conecte a leitura ao sagrado, recomendando um Mantra, um Salmo específico e um versículo/dizer bíblico que ressoe com o tema.
-
-      IDENTIDADE:
-      - Voz sofisticada, acolhedora, mística e clinicamente profunda.
-      - Use termos como Sincronicidade, Inconsciente Coletivo e Fluxo Energético.
+      DIRETRIZES DE TOM E ABORDAGEM:
+      1. Fusão Terapêutica: Mescle a sabedoria adivinhatória tradicional dos oráculos com acolhimento psicológico (linguagem empática, sem julgamentos) e visão quântica (focando na cocriação da realidade, frequência vibracional e infinitas possibilidades).
+      2. Sem Alarmismo: Mesmo diante de cartas desafiadoras, foque na chave do aprendizado, na evolução espiritual e no direcionamento positivo.
+      3. Sabedoria Sagrada: Integre mantras, salmos e versículos bíblicos.
 
       ESTRUTURA DE RETORNO (JSON OBRIGATÓRIO):
       
-      Se tipoLeitura for "completa" (3 cartas):
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "Nome", "card_slug": "slug", "interpretacao": "Análise da Sincronicidade atual." },
-        "caminho_acao": { "carta": "Nome", "card_slug": "slug", "interpretacao": "Ação recomendada para o ego." },
-        "resultado_conselho": { "carta": "Nome", "card_slug": "slug", "interpretacao": "Síntese e potencial futuro." },
-        "conselho_final": "Narrativa profunda integrando a psicologia com a previsão espiritual.",
-        "complemento_terapeutico": "MANTRA: [Mantra aqui]. VERSÍCULO: [Dizer bíblico aqui].",
-        "salmo_recomendado": "Salmo [Número] - [Versículo principal]"
+        "leitura_caminho": {
+          "titulo": "A LEITURA DO SEU CAMINHO",
+          "analise_detalhada": "Interpretação profunda baseada no ${tipoLeitura}. Se for Situação-Caminho-Resultado, divida nesses três momentos.",
+          "veredito_direto": "Resposta para Sim/Não ou Síntese da leitura."
+        },
+        "acolhimento_quantum": {
+          "titulo": "ACOLHIMENTO PSICOLÓGICO E VISÃO QUÂNTICA",
+          "conteudo": "Análise comportamental, postura mental recomendada e como elevar a frequência quântica."
+        },
+        "ancoragem_rituais": {
+          "titulo": "ANCORAGEM ENERGÉTICA E RITUAIS",
+          "mantra": "Frase curta de poder e afirmação.",
+          "salmo": "Número do Salmo e breve explicação do motivo.",
+          "banho": "Receita simples de banho de ervas.",
+          "cristal": "Cristal indicado para conexão ou proteção.",
+          "biblia": "Dizer ou versículo bíblico que ressoe com o tema."
+        },
+        "situacao_atual": null, 
+        "caminho_acao": null,
+        "resultado_conselho": null,
+        "carta_sorteada": null
       }
-      
-      Se for "sim_nao" ou "foto" (1 carta):
-      {
-        "oraculo_utilizado": "${tipoOraculo}",
-        "tema": "${tema}",
-        "veredito": "SIM / NÃO / TALVEZ",
-        "previsao": "Explicação oracular e divinatória.",
-        "conselho": "Orientação psicológica junguiana.",
-        "complemento_terapeutico": "MANTRA: [Mantra aqui]. VERSÍCULO: [Dizer bíblico aqui].",
-        "salmo_recomendado": "Salmo [Número] - [Versículo principal]",
-        "carta_sorteada": { "carta": "Nome", "card_slug": "slug" }
-      }
+
+      IMPORTANTE: Mapeie as cartas fornecidas (${Array.isArray(cartas) ? cartas.join(", ") : cartas}) para os campos 'situacao_atual', 'caminho_acao' e 'resultado_conselho' (se leitura completa) ou 'carta_sorteada' (se 1 carta), mantendo a estrutura original do banco de dados nos campos extras.
     `;
 
     const prompt = `
-      Consulente busca luz sobre: ${tema}. 
-      A dúvida/desabafo: ${pergunta || "Orientação para o caminho de individuação."}
-      Elementos do Campo: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição pura."}
+      Consulente: ${tema}. 
+      Pergunta/Desabafo: ${pergunta || "Orientação para o caminho de individuação."}
+      Cartas do Campo: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição."}
       Tipo de Tiragem: ${tipoLeitura}.
     `;
 
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       contents: [{ role: "user", parts }],
       generationConfig: {
         responseMimeType: "application/json",
-        temperature: 0.75,
+        temperature: 0.8,
       }
     });
 
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     return NextResponse.json(jsonResponse);
 
   } catch (error: any) {
-    console.error("Erro na API Profunda:", error);
+    console.error("Erro na API Holística:", error);
     return NextResponse.json({ error: "Falha na conexão sagrada", details: error.message }, { status: 500 });
   }
 }
