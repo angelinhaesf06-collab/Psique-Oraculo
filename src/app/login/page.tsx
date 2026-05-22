@@ -41,37 +41,37 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-start md:justify-center p-6 relative">
+    <div className="h-[100dvh] w-full bg-[#FDFBF7] flex flex-col items-center justify-center p-4 relative overflow-hidden">
       
       {/* Header com Ícone Centralizado e Fixo */}
-      <div className="fixed top-6 md:top-10 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
-        <div className="w-24 h-24 md:w-40 md:h-40 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto">
+      <div className="fixed top-4 md:top-10 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
+        <div className="w-20 h-20 md:w-40 md:h-40 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto">
           <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover" />
         </div>
       </div>
 
       {/* Background Mandala Estática e Fixa */}
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] md:w-[900px] md:h-[900px] opacity-[0.05] pointer-events-none z-0">
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] md:w-[900px] md:h-[900px] opacity-[0.05] pointer-events-none z-0">
          <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
       </div>
 
-      <div className="w-full max-w-[400px] space-y-10 text-center z-10 pt-24 md:pt-32">
+      <div className="w-full max-w-[340px] space-y-4 md:space-y-10 text-center z-10 pt-12 md:pt-32">
         
-        <div className="space-y-2 pt-16 md:pt-20">
-          <h2 className="text-4xl md:text-5xl font-serif text-[#A08149] tracking-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
-          <p className="text-[#2C2420]/40 text-[10px] tracking-[0.4em] font-bold uppercase">Sintonize sua Essência</p>
+        <div className="space-y-1 md:space-y-2 pt-8 md:pt-20">
+          <h2 className="text-3xl md:text-5xl font-serif text-[#A08149] tracking-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
+          <p className="text-[#2C2420]/40 text-[9px] tracking-[0.4em] font-bold uppercase">Sintonize sua Essência</p>
         </div>
 
         {/* Área de Acesso Minimalista */}
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
           
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
              <input
                 type="text"
                 placeholder="SEU NOME"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                className="w-full px-6 py-4 rounded-2xl bg-white border border-gold/10 focus:border-gold/30 outline-none transition-all text-xs font-bold tracking-widest text-center uppercase"
+                className="w-full px-5 py-3 rounded-xl bg-white border border-gold/10 focus:border-gold/30 outline-none transition-all text-[10px] font-bold tracking-widest text-center uppercase"
               />
           </div>
 
@@ -79,46 +79,46 @@ export default function LoginPage() {
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
-            className="w-full py-5 bg-white border-2 border-gold/20 rounded-[32px] flex flex-col items-center justify-center gap-3 shadow-xl hover:border-gold/40 hover:scale-[1.02] active:scale-95 transition-all group disabled:opacity-50"
+            className="w-full py-3 bg-white border-2 border-gold/20 rounded-[24px] flex flex-col items-center justify-center gap-2 shadow-lg hover:border-gold/40 hover:scale-[1.02] active:scale-95 transition-all group disabled:opacity-50"
           >
-            <div className={`p-3 rounded-full ${loading ? 'bg-gold/10' : 'bg-gold/5 group-hover:bg-gold/10'} transition-colors`}>
-                <Fingerprint size={32} className={loading ? 'text-gold animate-pulse' : 'text-gold'} strokeWidth={1.5} />
+            <div className={`p-2 rounded-full ${loading ? 'bg-gold/10' : 'bg-gold/5 group-hover:bg-gold/10'} transition-colors`}>
+                <Fingerprint size={24} className={loading ? 'text-gold animate-pulse' : 'text-gold'} strokeWidth={1.5} />
             </div>
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-gold/60">Entrar com Digital</span>
+            <span className="text-[8px] font-black uppercase tracking-[0.4em] text-gold/60">Entrar com Digital</span>
           </button>
 
-          <div className="flex items-center gap-4 py-2">
+          <div className="flex items-center gap-3 py-1">
             <div className="h-[1px] flex-1 bg-gold/10" />
-            <span className="text-[8px] font-bold text-gold/30 uppercase tracking-widest">ou por e-mail</span>
+            <span className="text-[7px] font-bold text-gold/30 uppercase tracking-widest">ou e-mail</span>
             <div className="h-[1px] flex-1 bg-gold/10" />
           </div>
 
-          <form onSubmit={handleEmailLogin} className="space-y-4">
+          <form onSubmit={handleEmailLogin} className="space-y-3 md:space-y-4">
             <div className="relative">
-              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gold/40">
-                <Mail size={18} />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold/40">
+                <Mail size={16} />
               </div>
               <input
                 type="email"
                 placeholder="SEU E-MAIL"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-14 pr-6 py-4 rounded-2xl bg-white border border-gold/10 focus:border-gold/30 outline-none transition-all text-xs font-bold tracking-widest uppercase"
+                className="w-full pl-12 pr-5 py-3 rounded-xl bg-white border border-gold/10 focus:border-gold/30 outline-none transition-all text-[10px] font-bold tracking-widest uppercase"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-gradient-to-r from-[#008B8B] to-[#006666] text-white rounded-2xl font-bold text-[10px] uppercase tracking-[0.3em] shadow-lg active:scale-98 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-[#008B8B] to-[#006666] text-white rounded-xl font-bold text-[9px] uppercase tracking-[0.3em] shadow-md active:scale-98 transition-all flex items-center justify-center gap-2"
             >
-              <LogIn size={16} /> Abrir Portal
+              <LogIn size={14} /> Abrir Portal
             </button>
           </form>
         </div>
 
         {/* Rodapé */}
-        <div className="pt-8">
-            <p className="text-[9px] font-medium text-gold/20 tracking-[0.5em] uppercase">Luxo • Misticismo • Psicologia</p>
+        <div className="pt-4 md:pt-8">
+            <p className="text-[8px] font-medium text-gold/20 tracking-[0.4em] uppercase leading-none">Luxo • Misticismo • Psicologia</p>
         </div>
       </div>
     </div>
