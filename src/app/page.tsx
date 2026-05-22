@@ -3,22 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Sparkles, Mic, Type, Camera, LayoutGrid, CheckCircle2, ChevronLeft, Heart, Briefcase, DollarSign, Activity, Users, LogOut, Sun, Moon, Star, X, Info, ShieldCheck, Crown } from 'lucide-react';
 import { toast } from 'sonner';
-import Link from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { drawCards } from '@/lib/cards';
-
-const ButterflyIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M12,16c0,0-1,2-3,2s-3-2-3-2s-1-4,3-4s3,4,3,4M12,16c0,0,1,2,3,2s3-2,3-2s1-4-3-4s-3,4-3,4 M12,8c0,0-1-2-3-2S6,8,6,8s-1,4,3,4s3-4,3-4M12,8c0,0,1-2,3-2s3,2,3,2s1,4-3,4s-3-4-3-4" />
-  </svg>
-);
-
-const WingsIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M11,6c0,0-4-1-7,3s0,9,0,9s5,0,7-5s0-7,0-7 M13,6c0,0,4-1,7,3s0,9,0,9s-5,0-7-5s0-7,0-7" />
-  </svg>
-);
 
 const FairyIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -48,6 +35,30 @@ const TEMAS = [
   { label: 'Saúde', icon: FairyIcon, color: 'from-[#064e3b] via-[#065f46] to-[#064e3b]', textColor: 'text-emerald-200' },
   { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#2e1065] via-[#4c1d95] to-[#2e1065]', textColor: 'text-purple-200' },
 ];
+
+function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
+  const [imageError, setImageError] = useState(false);
+  const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
+  const folder = folderMap[tipoOraculo] || 'taro';
+  const imagePath = `/assets/decks/${folder}/${data.card_slug}.jpg`;
+
+  return (
+    <div className="flex flex-col items-center gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
+      <h5 className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] text-foreground/40 text-center">{title}</h5>
+      <div className="w-[100px] md:w-[180px] relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[16px] md:rounded-[24px] border-[1px] md:border-[2px] border-[#D4B982]/30 p-1 md:p-2 shadow-lg md:shadow-xl">
+        <div className="w-full h-full rounded-[12px] md:rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
+           {!imageError ? (
+             <img src={imagePath} alt={data.carta} className="w-full h-full object-contain" onError={() => setImageError(true)} />
+           ) : (
+             <div className="p-2 text-center">
+               <span className="text-gold font-bold text-[8px] md:text-xs uppercase tracking-widest block">{data.carta}</span>
+             </div>
+           )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function OraculoJornada() {
   const [user, setUser] = useState<any>(null);
@@ -94,7 +105,6 @@ export default function OraculoJornada() {
       mediaRecorderRef.current = recorder;
       audioChunksRef.current = [];
 
-      // Iniciar Transcrição de Voz
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       if (SpeechRecognition) {
         const recognition = new SpeechRecognition();
@@ -117,7 +127,6 @@ export default function OraculoJornada() {
       recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
       recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = () => {
@@ -192,27 +201,20 @@ export default function OraculoJornada() {
     }
   };
 
-export default function OraculoJornada() {
-  // ... (estados anteriores)
-
   return (
-    <div className="min-h-screen text-foreground font-sans p-4 md:p-12 flex flex-col items-center justify-start md:justify-center relative bg-[#F5F2EA]">
+    <div className="min-h-[100dvh] w-full text-foreground font-sans p-4 md:p-12 flex flex-col items-center justify-start md:justify-center relative bg-[#F5F2EA] overflow-x-hidden">
       
-      {/* Elementos Fixos (Mandala e Ícone) fora do container de conteúdo para não subirem no scroll */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        {/* Background Mandala Estática */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] md:w-[900px] md:h-[900px] opacity-[0.05]">
            <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
         </div>
 
-        {/* Ornamentos de Canto */}
         <div className="absolute top-4 left-4 md:top-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /><circle cx="20" cy="20" r="3" /></svg></div>
         <div className="absolute top-4 right-4 md:top-8 md:right-8 w-16 h-16 md:w-48 md:h-48 opacity-20 rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
         <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20 -rotate-90"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
         <div className="absolute bottom-4 right-4 md:bottom-8 md:left-8 w-16 h-16 md:w-48 md:h-48 opacity-20 rotate-180"><svg viewBox="0 0 200 200" className="w-full h-full text-gold fill-current"><path d="M20,20 Q100,20 100,100 Q100,180 180,180" fill="none" stroke="currentColor" strokeWidth="1" /></svg></div>
       </div>
 
-      {/* Ícone Dinâmico Fixo */}
       <div className={`fixed z-50 pointer-events-none transition-all duration-700 ${
         passo === 0
           ? "bottom-8 md:bottom-16 left-0 right-0 flex justify-center items-center"
@@ -229,7 +231,6 @@ export default function OraculoJornada() {
       </div>
 
       <div className="relative z-10 w-full max-w-6xl mt-28 md:mt-48 pb-20">
-        {/* PASSO 0: ESCOLHA SEU ORÁCULO */}
         {passo === 0 && (
           <div className="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000">
             <div className="text-center space-y-4 mb-4">
@@ -261,7 +262,6 @@ export default function OraculoJornada() {
                </div>
                <h2 className="text-xl md:text-3xl font-bold text-[#A08149]/30 tracking-[0.4em] font-sans text-center px-4 uppercase">PSIQUEORÁCULO</h2>
                
-               {/* Footer Menu */}
                <div className="flex flex-col items-center gap-6 mt-12">
                   <button 
                     onClick={() => setModalAberto('assinatura')}
@@ -283,7 +283,6 @@ export default function OraculoJornada() {
           </div>
         )}
 
-        {/* PASSO 1: TEMA */}
         {passo === 1 && (
           <div className="space-y-8 md:space-y-12 animate-in fade-in slide-in-from-right-4 duration-700 relative text-center">
             <div className="space-y-2">
@@ -316,7 +315,6 @@ export default function OraculoJornada() {
           </div>
         )}
 
-        {/* PASSO 2: PERGUNTA */}
         {passo === 2 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 relative px-4 text-center">
             <div className="space-y-4">
@@ -345,7 +343,6 @@ export default function OraculoJornada() {
           </div>
         )}
 
-        {/* PASSO 3: MÉTODO */}
         {passo === 3 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 px-4 text-center">
             <div className="space-y-4">
@@ -369,7 +366,7 @@ export default function OraculoJornada() {
                 { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
                 <button key={m.id} onClick={m.action} className="w-full max-w-[180px] md:max-w-[200px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
-                  <div className={`w-16 h-16 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg shadow-${m.color.split('-')[1]}/20 transition-all group-hover:scale-110`}><m.icon size={32} /></div>
+                  <div className={`w-16 h-16 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-110`}><m.icon size={32} /></div>
                   <h4 className="font-bold text-[9px] md:text-xs text-foreground/80 uppercase tracking-widest leading-tight">{m.title}</h4>
                 </button>
               ))}
@@ -382,7 +379,6 @@ export default function OraculoJornada() {
           </div>
         )}
 
-        {/* PASSO 4: RESULTADO */}
         {passo === 4 && resultado && (
           <div className="animate-in fade-in zoom-in-95 duration-1000 space-y-8 pb-24 text-center px-4">
             <div className="space-y-4">
@@ -436,7 +432,6 @@ export default function OraculoJornada() {
         )}
       </div>
 
-      {/* MODAIS */}
       {modalAberto && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-[#2C2420]/60 backdrop-blur-sm" onClick={() => setModalAberto(null)} />
@@ -516,30 +511,6 @@ export default function OraculoJornada() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
-  const [imageError, setImageError] = useState(false);
-  const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
-  const folder = folderMap[tipoOraculo] || 'taro';
-  const imagePath = `/assets/decks/${folder}/${data.card_slug}.jpg`;
-
-  return (
-    <div className="flex flex-col items-center gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
-      <h5 className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] text-foreground/40 text-center">{title}</h5>
-      <div className="w-[100px] md:w-[180px] relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[16px] md:rounded-[24px] border-[1px] md:border-[2px] border-[#D4B982]/30 p-1 md:p-2 shadow-lg md:shadow-xl">
-        <div className="w-full h-full rounded-[12px] md:rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
-           {!imageError ? (
-             <img src={imagePath} alt={data.carta} className="w-full h-full object-contain" onError={() => setImageError(true)} />
-           ) : (
-             <div className="p-2 text-center">
-               <span className="text-gold font-bold text-[8px] md:text-xs uppercase tracking-widest block">{data.carta}</span>
-             </div>
-           )}
-        </div>
-      </div>
     </div>
   );
 }
