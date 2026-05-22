@@ -217,22 +217,21 @@ export default function OraculoJornada() {
 
       <div className={`fixed z-50 pointer-events-none transition-all duration-700 ${
         passo === 0
-          ? "bottom-8 md:bottom-16 left-0 right-0 flex justify-center items-center"
+          ? "opacity-0 invisible scale-0"
           : (passo === 1 || passo === 2 || passo === 3)
             ? "top-4 md:top-6 left-0 right-0 flex justify-center items-center" 
             : "top-4 left-4 md:top-8 md:left-8"
       }`}>
         <div className={`bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto transition-all duration-700 ${
-          passo === 0 ? "w-14 h-14 md:w-20 md:h-20" : 
           (passo === 1 || passo === 2 || passo === 3) ? "w-20 h-20 md:w-32 md:h-32" : "w-16 h-16 md:w-24 md:h-24"
         }`}>
           <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover" />
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl mt-28 md:mt-48 pb-20">
+      <div className="relative z-10 w-full max-w-6xl mt-20 md:mt-48 pb-20">
         {passo === 0 && (
-          <div className="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000">
+          <div className="flex flex-col items-center space-y-8 md:space-y-12 animate-in fade-in zoom-in-95 duration-1000 mt-[-2rem] md:mt-[-4rem]">
             <div className="text-center space-y-4 mb-4">
               <h2 className="text-4xl md:text-6xl font-serif text-gold leading-tight px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Qual arcano você escolhe hoje?</h2>
             </div>
@@ -260,7 +259,7 @@ export default function OraculoJornada() {
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor"><path d="M12.152 6.896c-.948 0-2.415-1.078-2.415-2.828 0-1.927 1.572-3.123 3.018-3.123 1.056 0 2.214.654 2.214 1.884 0 1.23-.96 2.153-2.14 2.153-.346 0-.67-.09-.96-.237l-.022.016c.365.807 1.096 1.488 2.305 1.488 1.99 0 3.255-1.63 3.255-3.64 0-2.03-1.64-3.522-3.87-3.522-2.525 0-4.437 1.846-4.437 4.295 0 2.235 1.594 4.17 3.524 4.17.653 0 1.24-.19 1.7-.514l-.004-.002a4.4 4.4 0 0 1-2.168.652z"/></svg>
                   <Sun className="w-6 h-6" strokeWidth={1.5} />
                </div>
-               <h2 className="text-xl md:text-3xl font-bold text-[#A08149]/30 tracking-[0.4em] font-sans text-center px-4 uppercase">PSIQUEORÁCULO</h2>
+               <h2 className="text-3xl md:text-5xl font-serif text-[#A08149]/30 tracking-tight font-sans text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
                
                <div className="flex flex-col items-center gap-6 mt-12">
                   <button 
@@ -344,12 +343,9 @@ export default function OraculoJornada() {
         )}
 
         {passo === 3 && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 px-4 text-center">
-            <div className="space-y-4">
-              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/20 shadow-inner">
-                <LayoutGrid className="w-10 h-10 text-gold" />
-              </div>
-              <h2 className="text-3xl md:text-4xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
+          <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500 px-4 text-center mt-[-2rem] md:mt-0">
+            <div className="space-y-2">
+              <h2 className="text-3xl md:text-5xl font-serif text-gold leading-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
             </div>
             <input 
               type="file" 
@@ -359,21 +355,21 @@ export default function OraculoJornada() {
               ref={fileInputRef} 
               onChange={handleCaptureImage}
             />
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 max-w-4xl mx-auto px-8">
+            <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 max-w-4xl mx-auto px-4">
               {[
                 { id: 'foto', icon: Camera, title: 'Foto do seu Jogo Físico', color: 'bg-emerald-600', action: () => fileInputRef.current?.click() },
                 { id: 'completa', icon: LayoutGrid, title: 'Situação, Caminho e Resultado', color: 'bg-ruby', action: () => handleLeitura('completa') },
                 { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
-                <button key={m.id} onClick={m.action} className="w-full max-w-[180px] md:max-w-[200px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
-                  <div className={`w-16 h-16 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-110`}><m.icon size={32} /></div>
-                  <h4 className="font-bold text-[9px] md:text-xs text-foreground/80 uppercase tracking-widest leading-tight">{m.title}</h4>
+                <button key={m.id} onClick={m.action} className="w-full max-w-[280px] md:max-w-[200px] flex flex-col items-center gap-2 bg-white border border-gold/10 p-3 md:p-5 rounded-[24px] hover:shadow-2xl transition-all group">
+                  <div className={`w-14 h-14 md:w-16 md:h-16 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg transition-all group-hover:scale-110`}><m.icon size={28} /></div>
+                  <h4 className="font-bold text-[8px] md:text-xs text-foreground/80 uppercase tracking-widest leading-tight">{m.title}</h4>
                 </button>
               ))}
             </div>
-            <div className="pt-16">
-               <button onClick={prevPasso} className="text-gold/40 hover:text-gold flex items-center justify-center gap-2 mx-auto text-[10px] font-bold uppercase tracking-widest bg-white/30 px-8 py-3 rounded-full border border-gold/5 transition-all">
-                 <ChevronLeft size={14} /> Refazer Pergunta
+            <div className="pt-6">
+               <button onClick={prevPasso} className="text-gold/40 hover:text-gold flex items-center justify-center gap-2 mx-auto text-[9px] font-bold uppercase tracking-widest bg-white/30 px-6 py-2 rounded-full border border-gold/5 transition-all">
+                 <ChevronLeft size={12} /> Refazer Pergunta
                </button>
             </div>
           </div>
