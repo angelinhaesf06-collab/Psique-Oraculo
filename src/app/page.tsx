@@ -339,9 +339,50 @@ export default function OraculoJornada() {
               <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-gold/5 rounded-full"><X className="w-5 h-5 text-gold" /></button>
             </div>
             <div className="p-6 overflow-y-auto font-sans text-foreground/70 text-sm leading-relaxed">
-              {modalAberto === 'assinatura' && <div className="space-y-6 text-center"><Crown className="w-12 h-12 text-gold mx-auto" /><div className="text-3xl font-bold text-foreground">R$ 89,00/ano</div><button className="w-full py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-widest shadow-xl">Assinar Agora</button></div>}
-              {modalAberto === 'ajuda' && <p>Consulte seu oráculo, abra seu coração e receba a luz. Suporte: suporte@psiqueoraculo.com</p>}
-              {modalAberto === 'politicas' && <p>Sua jornada é sagrada e privada. O Psiquê Oráculo é uma ferramenta de autoconhecimento.</p>}
+              {modalAberto === 'assinatura' && (
+                <div className="space-y-6 text-center">
+                  <Crown className="w-12 h-12 text-gold mx-auto" />
+                  <div className="text-3xl font-bold text-foreground">R$ 89,00/ano</div>
+                  <ul className="space-y-3 text-left max-w-[240px] mx-auto py-4">
+                    {['Consultas ilimitadas', 'Acesso total aos 3 oráculos', 'Leitura de fotos ilimitada', 'Suporte prioritário'].map((item, i) => (
+                      <li key={i} className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500" /> {item}
+                      </li>
+                    ))}
+                  </ul>
+                  <button className="w-full py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-widest shadow-xl">Assinar Agora</button>
+                </div>
+              )}
+              
+              {modalAberto === 'ajuda' && (
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Como Consultar</h4>
+                    <p className="text-xs">Escolha seu oráculo, defina um tema e abra seu coração. Você pode digitar sua dúvida ou usar o microfone para gravar seu desabafo em tempo real.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Métodos de Leitura</h4>
+                    <p className="text-xs">Oferecemos o 'Caminho do Destino' para visões completas (Situação, Caminho e Síntese) ou a análise da sua própria carta física através da 'Visão do Jogo Físico'.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Dúvidas Técnicas?</h4>
+                    <p className="text-xs">Entre em contato através do portal de luz: <span className="font-bold text-gold/80">suporte@psiqueoraculo.com</span></p>
+                  </div>
+                </div>
+              )}
+
+              {modalAberto === 'politicas' && (
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Privacidade Sagrada</h4>
+                    <p className="text-xs italic">Sua jornada é sagrada. Não armazenamos seus dados sensíveis nem compartilhamos suas consultas. O campo energético é restrito entre você e o oráculo.</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-gold uppercase text-[10px] tracking-widest mb-2 border-b border-gold/10 pb-1">Termos de Uso</h4>
+                    <p className="text-xs italic">O Psiquê Oráculo é uma ferramenta de autoconhecimento e apoio terapêutico. As orientações arquetípicas não substituem acompanhamento médico ou profissional especializado.</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
