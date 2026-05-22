@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Psique Oraculo</string>
+    <string name="title_activity_main">Psique Oraculo</string>
+    <string name="package_name">com.angela.psiqueoraculo</string>
+    <string name="custom_url_scheme">com.angela.psiqueoraculo</string>
+</resources>

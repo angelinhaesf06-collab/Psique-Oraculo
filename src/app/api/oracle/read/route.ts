@@ -27,12 +27,13 @@ export async function POST(req: Request) {
       REFERÊNCIA DE DECK PARA TARÔ DOS ANJOS:
       - Base: Radleigh Valentine. 
       - Voz: Extremamente suave e protetora.
-      - OBRIGATÓRIO: Recomendar um Salmo ou uma Afirmação de Luz para o Anjo regente.
 
       DIRETRIZES DE INTERPRETAÇÃO:
       1. Sincronicidade: Trate a pergunta do usuário e as cartas como um evento de sincronicidade.
       2. Abordagem Terapêutica: Se a carta for negativa (ex: A Torre, 3 de Espadas), não cause medo. Trate como um "colapso necessário para a reconstrução" ou uma "limpeza emocional".
       3. Empowerment: Sempre termine com um direcionamento que devolva o poder de escolha ao usuário.
+      4. Personalização: Identifique os nomes das pessoas mencionadas pelo usuário na pergunta/desabafo e utilize esses nomes naturalmente em sua resposta (conselho_final ou conselho), tornando a experiência mais íntima e direta.
+      5. Espiritualidade: OBRIGATÓRIO incluir sempre um Salmo ou Versículo da Bíblia que complemente a energia da leitura, independentemente do oráculo escolhido.
 
       ESTRUTURA DE RETORNO (JSON) - OBRIGATÓRIO:
 
@@ -55,9 +56,9 @@ export async function POST(req: Request) {
           "card_slug": "nome-da-carta-slug",
           "interpretacao": "A síntese arquetípica do possível desfecho."
         },
-        "conselho_final": "Uma narrativa fluida e profunda conectando as cartas ao desabafo do usuário.",
+        "conselho_final": "Uma narrativa fluida e profunda conectando as cartas ao desabafo do usuário, usando os nomes citados.",
         "complemento_terapeutico": "Um mantra ou insight curto.",
-        "salmo_recomendado": "Salmo X (Obrigatório se Tarô dos Anjos)"
+        "salmo_recomendado": "Salmo X ou Versículo Y (Obrigatório)"
       }
 
       Se tipoLeitura for "sim_nao", "foto" ou 1 carta:
@@ -65,9 +66,10 @@ export async function POST(req: Request) {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
         "veredito": "SIM / NÃO / TALVEZ",
-        "previsao": "Uma explicação breve baseada nos arquétipos.",
+        "previsao": "Uma explicação breve baseada nos arquétipos, usando os nomes citados se houver.",
         "conselho": "O conselho final da alma para o usuário.",
         "complemento_terapeutico": "Um mantra ou insight curto.",
+        "salmo_recomendado": "Salmo X ou Versículo Y (Obrigatório)",
         "carta_sorteada": {
           "carta": "Nome da Carta",
           "card_slug": "nome-da-carta-slug"
