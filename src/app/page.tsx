@@ -93,6 +93,26 @@ export default function OraculoJornada() {
       mediaRecorderRef.current = recorder;
       audioChunksRef.current = [];
 
+      // Iniciar Transcrição de Voz
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (event: any) => {
+          let transcript = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          setDesabafo(transcript);
+        };
+
+        recognition.start();
+        (window as any).recognition = recognition;
+      }
+
       recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
       recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
@@ -102,7 +122,6 @@ export default function OraculoJornada() {
         reader.onloadend = () => {
           const base64data = reader.result as string;
           setAudioBase64(base64data);
-          setDesabafo(prev => prev + (prev ? " " : "") + "[Mensagem de Voz Processada]");
           toast.success('Sua voz foi sintonizada ao campo.');
         };
       };
@@ -119,6 +138,11 @@ export default function OraculoJornada() {
       mediaRecorderRef.current.stop();
       setIsGravando(false);
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+
+      if ((window as any).recognition) {
+        (window as any).recognition.stop();
+        delete (window as any).recognition;
+      }
     }
   };
 
@@ -167,7 +191,7 @@ export default function OraculoJornada() {
   };
 
   return (
-    <div className="min-h-screen text-foreground font-sans p-4 md:p-12 flex flex-col items-center justify-center relative overflow-hidden bg-[#F5F2EA]">
+    <div className="min-h-screen text-foreground font-sans p-4 md:p-12 flex flex-col items-center justify-start md:justify-center relative bg-[#F5F2EA]">
       
       {/* Background Mandala Estática e Fixa */}
       <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] md:w-[900px] md:h-[900px] opacity-[0.05] pointer-events-none z-0">
@@ -184,7 +208,7 @@ export default function OraculoJornada() {
 
       {/* Header com Ícone Centralizado e Maior */}
       <div className="fixed top-4 md:top-6 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
-        <div className="w-12 h-12 md:w-20 md:h-20 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto">
+        <div className="w-16 h-16 md:w-28 md:h-28 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto">
           <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover" />
         </div>
       </div>
@@ -203,7 +227,7 @@ export default function OraculoJornada() {
                 <button 
                   key={o.id}
                   onClick={() => { setTipoOraculo(o.id); nextPasso(); }}
-                  className={`w-full max-w-[240px] md:max-w-[240px] flex flex-col items-center bg-[#FDFBF7] rounded-[24px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-3 md:p-5 shadow-xl transition-all hover:scale-105 active:scale-95`}
+                  className={`w-full max-w-[180px] md:max-w-[240px] flex flex-col items-center bg-[#FDFBF7] rounded-[24px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-3 md:p-5 shadow-xl transition-all hover:scale-105 active:scale-95`}
                 >
                   <h3 className="text-xs md:text-base font-bold text-foreground/80 tracking-widest mb-3 md:mb-5 font-sans">{o.title}</h3>
                   <div className="w-full aspect-[3/4.5] rounded-[12px] md:rounded-[16px] overflow-hidden border border-gold/5 bg-white/50 flex items-center justify-center p-0">
@@ -261,9 +285,6 @@ export default function OraculoJornada() {
         {passo === 2 && (
           <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 relative px-4 text-center">
             <div className="space-y-4">
-              <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto border border-gold/20 shadow-inner">
-                <Sparkles className="w-10 h-10 text-gold animate-pulse" />
-              </div>
               <h2 className="text-3xl md:text-4xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>Abra o seu coração</h2>
             </div>
             <div className="relative bg-[#FDFBF7] rounded-[30px] border border-gold/10 p-6 shadow-xl max-w-xl mx-auto">
@@ -308,13 +329,13 @@ export default function OraculoJornada() {
             />
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8 max-w-4xl mx-auto px-8">
               {[
-                { id: 'foto', icon: Camera, title: 'Foto', color: 'bg-gold', action: () => fileInputRef.current?.click() },
-                { id: 'completa', icon: LayoutGrid, title: 'Virtual', color: 'bg-ruby', action: () => handleLeitura('completa') },
-                { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-blue-400', action: () => handleLeitura('sim_nao') }
+                { id: 'foto', icon: Camera, title: 'Foto do seu Jogo Físico', color: 'bg-emerald-600', action: () => fileInputRef.current?.click() },
+                { id: 'completa', icon: LayoutGrid, title: 'Situação, Caminho e Resultado', color: 'bg-ruby', action: () => handleLeitura('completa') },
+                { id: 'sim_nao', icon: CheckCircle2, title: 'Sim/Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
-                <button key={m.id} onClick={m.action} className="w-full max-w-[180px] md:max-w-[180px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
+                <button key={m.id} onClick={m.action} className="w-full max-w-[180px] md:max-w-[200px] flex flex-col items-center gap-4 bg-white border border-gold/10 p-5 rounded-[24px] hover:shadow-2xl transition-all group">
                   <div className={`w-16 h-16 ${m.color}/10 rounded-2xl flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-all`}><m.icon size={32} /></div>
-                  <h4 className="font-bold text-xs md:text-sm text-foreground/80 uppercase tracking-widest">{m.title}</h4>
+                  <h4 className="font-bold text-[9px] md:text-xs text-foreground/80 uppercase tracking-widest leading-tight">{m.title}</h4>
                 </button>
               ))}
             </div>
@@ -335,7 +356,7 @@ export default function OraculoJornada() {
             </div>
             {resultado.situacao_atual ? (
               <div className="space-y-10">
-                 <div className="flex flex-col md:flex-row items-center justify-center gap-6 px-8">
+                 <div className="flex flex-row flex-wrap items-start justify-center gap-3 md:gap-8 px-2">
                     <CardResult title="Presente" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
                     <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
                     <CardResult title="Síntese" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
@@ -347,7 +368,7 @@ export default function OraculoJornada() {
               </div>
             ) : (
               <div className="space-y-10">
-                <div className="max-w-xs mx-auto">
+                <div className="flex justify-center mx-auto">
                   {resultado.carta_sorteada && <CardResult title="A Resposta" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}
                 </div>
                 <div className="bg-white rounded-[32px] border border-gold/10 p-6 shadow-2xl">
@@ -390,16 +411,15 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const imagePath = `/assets/decks/${folder}/${data.card_slug}.jpg`;
 
   return (
-    <div className="w-full max-w-[180px] md:max-w-full flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
-      <h5 className="text-[10px] font-bold uppercase tracking-[0.4em] text-foreground/30">{title}</h5>
-      <div className="relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[24px] border-[2px] border-[#D4B982]/30 p-2 shadow-xl">
-        <div className="h-full rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
+    <div className="flex flex-col items-center gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
+      <h5 className="text-[8px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] text-foreground/40 text-center">{title}</h5>
+      <div className="w-[100px] md:w-[180px] relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[16px] md:rounded-[24px] border-[1px] md:border-[2px] border-[#D4B982]/30 p-1 md:p-2 shadow-lg md:shadow-xl">
+        <div className="w-full h-full rounded-[12px] md:rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
            {!imageError ? (
              <img src={imagePath} alt={data.carta} className="w-full h-full object-contain" onError={() => setImageError(true)} />
            ) : (
-             <div className="p-4 text-center">
-               <Sparkles className="w-10 h-10 text-gold/30 mx-auto mb-2" />
-               <span className="text-gold font-bold text-xs uppercase tracking-widest block">{data.carta}</span>
+             <div className="p-2 text-center">
+               <span className="text-gold font-bold text-[8px] md:text-xs uppercase tracking-widest block">{data.carta}</span>
              </div>
            )}
         </div>

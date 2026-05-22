@@ -41,8 +41,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-start md:justify-center p-6 relative">
       
+      {/* Header com Ícone Centralizado e Fixo */}
+      <div className="fixed top-4 md:top-6 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
+        <div className="w-16 h-16 md:w-28 md:h-28 bg-white rounded-full flex items-center justify-center shadow-xl overflow-hidden border-2 border-gold/30 pointer-events-auto">
+          <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover" />
+        </div>
+      </div>
+
       {/* Background Decorativo Suave */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
         <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain scale-150" />
