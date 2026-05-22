@@ -192,7 +192,7 @@ export default function OraculoJornada() {
   };
 
   return (
-    <div className="h-[100dvh] w-full text-foreground font-sans p-2 md:p-12 flex flex-col items-center relative bg-[#F5F2EA] overflow-hidden">
+    <div className={`h-[100dvh] w-full text-foreground font-sans p-2 md:p-12 flex flex-col items-center relative bg-[#F5F2EA] ${passo === 4 ? "overflow-y-auto" : "overflow-hidden justify-center"}`}>
       
       {/* Background Mandala */}
       <div className="fixed inset-0 pointer-events-none z-0">
