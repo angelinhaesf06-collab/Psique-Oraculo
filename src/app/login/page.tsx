@@ -51,17 +51,17 @@ export default function LoginPage() {
       </div>
 
       {/* Header com Ícone Perfeito */}
-      <div className="fixed top-4 md:top-10 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
-        <div className="w-16 h-16 md:w-40 md:h-40 bg-white rounded-full flex items-center justify-center shadow-[0_10px_40px_rgba(0,0,0,0.1)] overflow-hidden border-2 border-gold/20 pointer-events-auto">
-          <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover scale-105" />
+      <div className="fixed top-6 md:top-10 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
+        <div className="w-24 h-24 md:w-40 md:h-40 bg-white rounded-full flex items-center justify-center shadow-[0_15px_50px_rgba(0,0,0,0.15)] overflow-hidden border-2 border-gold/20 pointer-events-auto">
+          <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover scale-110" />
         </div>
       </div>
 
-      <div className="w-full max-w-[320px] space-y-4 md:space-y-10 text-center z-10 pt-16 md:pt-32 flex flex-col items-center">
+      <div className="w-full max-w-[320px] space-y-4 md:space-y-10 text-center z-10 pt-20 md:pt-32 flex flex-col items-center">
         
-        <div className="space-y-1 pt-4 md:pt-20">
-          <h2 className="text-3xl md:text-5xl font-serif text-[#A08149]" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
-          <p className="text-[#2C2420]/40 text-[8px] tracking-[0.4em] font-bold uppercase">Sintonize sua Essência</p>
+        <div className="space-y-1 pt-8 md:pt-20">
+          <h2 className="text-4xl md:text-6xl font-serif text-[#A08149] leading-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
+          <p className="text-[#2C2420]/40 text-[10px] tracking-[0.4em] font-bold uppercase">Sintonize sua Essência</p>
         </div>
 
         <div className="w-full space-y-3 md:space-y-6">

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Sparkles, Mic, Type, Camera, LayoutGrid, CheckCircle2, ChevronLeft, Heart, Briefcase, DollarSign, Activity, Users, LogOut, Sun, Moon, Star, X, Info, ShieldCheck, Crown } from 'lucide-react';
+import { Sparkles, Mic, Type, Camera, LayoutGrid, CheckCircle2, ChevronLeft, Heart, Briefcase, DollarSign, Activity, Users, LogOut, Sun, Moon, Star, X, Info, ShieldCheck, Crown, Eye, Wand2, Compass } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -288,11 +288,11 @@ export default function OraculoJornada() {
             <h2 className="text-2xl md:text-5xl font-serif text-gold text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
             <div className="flex flex-col md:flex-row gap-3 w-full max-w-[320px] md:max-w-xl">
               {[
-                { id: 'foto', icon: Camera, title: 'Foto Jogo Físico', color: 'bg-emerald-600', action: () => fileInputRef.current?.click() },
-                { id: 'completa', icon: Sparkles, title: 'Caminho Completo', color: 'bg-ruby', action: () => handleLeitura('completa') },
-                { id: 'sim_nao', icon: CheckCircle2, title: 'Sim ou Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
+                { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-emerald-600', action: () => fileInputRef.current?.click() },
+                { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-ruby', action: () => handleLeitura('completa') },
+                { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
-                <button key={m.id} onClick={m.action} className="w-full flex flex-col items-center gap-2 bg-white border border-gold/10 p-3 rounded-[24px] shadow-lg active:scale-95 transition-all">
+                <button key={m.id} onClick={m.action} className="w-full flex flex-col items-center gap-1.5 bg-white border border-gold/10 p-2 rounded-[20px] shadow-lg active:scale-95 transition-all">
                   <div className={`w-12 h-12 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg`}><m.icon size={24} /></div>
                   <h4 className="font-bold text-[8px] md:text-xs text-foreground/80 uppercase tracking-widest text-center leading-tight">{m.title}</h4>
                 </button>
