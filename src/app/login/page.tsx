@@ -134,50 +134,54 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-[#FDFBF7] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="h-[100dvh] w-full bg-[#FDFBF7] flex flex-col items-center relative overflow-hidden">
       
-      {/* Background Mandala Estática */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[900px] md:h-[900px] opacity-[0.06]">
-           <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain" />
-        </div>
+      {/* Mandala Centralizada de Fundo */}
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] z-0">
+        <img src="/assets/brand/mandala-login.png" alt="" className="w-[150%] max-w-none animate-spin-slow" />
       </div>
 
-      <div className="w-full max-w-[320px] space-y-4 md:space-y-6 text-center z-10 flex flex-col items-center overflow-y-auto max-h-screen py-8">
+      <div className="relative z-10 w-full max-w-[340px] flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
         
-        {/* Ícone Protagonista (Agora dentro do fluxo para não cortar o nome) */}
-        <div className="w-32 h-32 md:w-48 md:h-48 bg-white rounded-full flex items-center justify-center shadow-[0_15px_45px_rgba(0,0,0,0.15)] overflow-hidden border-2 border-gold/30 animate-in zoom-in duration-1000 shrink-0">
-          <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover scale-110" />
+        {/* Logo/Mandala Superior */}
+        <div className="w-32 h-32 md:w-40 md:h-40 mb-8 animate-in zoom-in duration-1000">
+          <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
         </div>
 
-        <div className="space-y-1">
-          <h2 className="text-5xl md:text-7xl font-serif text-[#A08149] leading-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
-          <p className="text-[#2C2420]/60 text-[10px] tracking-[0.4em] font-bold uppercase">Seu oráculo de bolso</p>
-          <p className="text-[#2C2420]/20 text-[8px] tracking-[0.2em] font-medium uppercase mt-1">Sintonize sua Essência</p>
+        <div className="mb-10">
+          <h1 className="text-5xl md:text-7xl font-serif text-[#C4A484] italic mb-2" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+            Psiquê Oráculo
+          </h1>
+          <h2 className="text-[10px] md:text-xs font-bold tracking-[0.4em] text-[#8B735B] uppercase mb-1">
+            Seu oráculo de bolso
+          </h2>
+          <p className="text-[8px] font-medium tracking-[0.2em] text-[#C4A484]/60 uppercase">
+            Sintonize sua Essência
+          </p>
         </div>
 
-        <div className="w-full space-y-4">
-           <input
-              type="text"
-              placeholder="SEU NOME"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-white border border-gold/10 focus:border-gold/30 outline-none text-[10px] font-bold tracking-widest text-center uppercase"
-            />
+        <div className="w-full space-y-4 mb-12">
+          <input
+            type="text"
+            placeholder="SEU NOME"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            className="w-full h-12 bg-white rounded-xl border border-[#E5D9C3] px-6 text-[10px] font-bold tracking-widest text-center uppercase focus:border-[#C4A484] outline-none transition-colors"
+          />
 
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
-            className="w-full py-2.5 bg-white border-2 border-gold/20 rounded-[20px] flex flex-col items-center justify-center gap-1 shadow-lg hover:scale-[1.02] active:scale-95 transition-all group disabled:opacity-50"
+            className="w-full h-20 bg-white border-2 border-[#E5D9C3] rounded-[24px] flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all disabled:opacity-50"
           >
-            <Fingerprint size={24} className={loading ? 'text-gold animate-pulse' : 'text-gold'} strokeWidth={1.5} />
-            <span className="text-[7px] font-black uppercase tracking-[0.4em] text-gold/60">Entrar com Digital</span>
+            <Fingerprint className="w-7 h-7 text-[#C4A484]" strokeWidth={1.5} />
+            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#8B735B]/60">Entrar com Digital</span>
           </button>
 
-          <div className="flex items-center gap-3 py-1">
-            <div className="h-[1px] flex-1 bg-gold/10" />
-            <span className="text-[7px] font-bold text-gold/30 uppercase tracking-widest leading-none">Entrada</span>
-            <div className="h-[1px] flex-1 bg-gold/10" />
+          <div className="flex items-center gap-4 py-2 opacity-30">
+            <div className="h-[0.5px] flex-1 bg-[#8B735B]" />
+            <span className="text-[8px] font-bold uppercase tracking-widest">Entrada</span>
+            <div className="h-[0.5px] flex-1 bg-[#8B735B]" />
           </div>
 
           <button
@@ -186,33 +190,33 @@ export default function LoginPage() {
               const testEmail = email || 'visitante@psique.com';
               setNome(testName);
               setEmail(testEmail);
-              
               const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
               handleEmailLogin(fakeEvent);
             }}
             disabled={loading}
-            className="w-full py-4 bg-gradient-to-r from-[#A08149] to-[#2C2420] text-white rounded-2xl font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex flex-col items-center justify-center gap-1"
+            className="w-full h-20 bg-gradient-to-br from-[#4A3B28] via-[#2C2420] to-[#1A1614] text-white rounded-[28px] shadow-2xl active:scale-95 transition-all flex flex-col items-center justify-center gap-1 group overflow-hidden relative"
           >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-            <span>{loading ? 'Sintonizando...' : 'ACESSO TESTE ✨'}</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+            <Sparkles className="w-6 h-6 text-[#C4A484] group-hover:rotate-12 transition-transform" />
+            <span className="text-[11px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Acesso Teste ✨</span>
           </button>
 
-          <div className="space-y-2">
-            <p className="text-[7px] text-gold/40 uppercase tracking-widest">Ou use seu e-mail para salvar histórico</p>
-            <div className="relative max-w-[200px] mx-auto">
-              <input
+          <div className="pt-4 space-y-4">
+             <p className="text-[8px] font-bold text-[#8B735B]/40 uppercase tracking-widest">Ou use seu e-mail para salvar histórico</p>
+             <input
                 type="email"
                 placeholder="SEU E-MAIL (OPCIONAL)"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 bg-transparent border-b border-gold/10 focus:border-gold/30 outline-none text-[9px] font-bold tracking-widest text-center uppercase"
+                className="w-full bg-transparent border-b border-[#E5D9C3] pb-2 text-[9px] font-bold tracking-[0.2em] text-center uppercase focus:border-[#C4A484] outline-none"
               />
-            </div>
           </div>
         </div>
 
-        <div className="pt-4">
-            <p className="text-[7px] font-medium text-gold/20 tracking-[0.4em] uppercase leading-none">Luxo • Misticismo • Psicologia</p>
+        <div className="mt-auto">
+          <p className="text-[8px] font-bold text-[#C4A484]/30 tracking-[0.5em] uppercase">
+            Luxo • Misticismo • Psicologia
+          </p>
         </div>
       </div>
     </div>

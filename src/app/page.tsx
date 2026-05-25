@@ -254,15 +254,38 @@ export default function OraculoJornada() {
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       
-      const API_BASE_URL = 'https://pisiqueoraculo.com.br'; 
-      const res = await fetch(`${API_BASE_URL}/api/oracle/read`, {
+      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      const API_BASE_URL = isNative ? 'https://pisiqueoraculo.com.br' : ''; 
+      const fetchUrl = `${API_BASE_URL}/api/oracle/read`;
+      
+      console.log(`Tentando conexão (${isNative ? 'Nativo' : 'Web'}) em:`, fetchUrl);
+      
+      const payload = { 
+        tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, 
+        cartas: cartasSorteadas, imagem: imageData || null, 
+        imageUrl: finalImageUrl, audio: audioBase64, userName 
+      };
+
+      const res = await fetch(fetchUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, imageUrl: finalImageUrl, audio: audioBase64, userName })
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': session?.access_token ? `Bearer ${session.access_token}` : ''
+        },
+        body: JSON.stringify(payload)
+      }).catch(err => {
+        console.error("Erro de Rede:", err);
+        throw new Error(`Erro de conexão: ${err.message || 'Sem sinal com o servidor'}`);
       });
 
-      if (!res.ok) throw new Error(`Conexão interrompida.`);
+      if (!res.ok) {
+        const errorDetail = await res.text().catch(() => "Erro desconhecido");
+        console.error("Erro Servidor:", res.status, errorDetail);
+        throw new Error(`O Oráculo está em silêncio (Erro ${res.status}).`);
+      }
+
       const data = await res.json();
+      console.log("Resposta recebida com sucesso!");
       if (data.error) throw new Error(data.details || data.error);
       
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
