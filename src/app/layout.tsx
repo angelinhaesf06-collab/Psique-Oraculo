@@ -32,8 +32,8 @@ export const viewport: Viewport = {
   themeColor: "#FDFBF7",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5, // Permite zoom mas mantém o padrão nítido
+  viewportFit: "cover", // Essencial para apps em tela cheia (APK)
 };
 
 export default function RootLayout({
