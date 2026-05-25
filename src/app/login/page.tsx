@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Fingerprint, Mail, LogIn, Loader2 } from 'lucide-react';
+import { Fingerprint, Mail, LogIn, Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
