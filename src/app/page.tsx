@@ -252,8 +252,8 @@ export default function OraculoJornada() {
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       
-      const API_URL = process.env.NEXT_PUBLIC_SITE_URL || '';
-      const res = await fetch(`${API_URL}/api/oracle/read`, {
+      console.log("Iniciando fetch para a API de leitura...");
+      const res = await fetch('/api/oracle/read', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -267,9 +267,16 @@ export default function OraculoJornada() {
         })
       });
 
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Erro na resposta da API:", res.status, errorText);
+        throw new Error(`Erro ${res.status}: Conexão interrompida.`);
+      }
+
       const contentType = res.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error(`Erro ${res.status}: Servidor instável.`);
+        console.error("Tipo de conteúdo inválido:", contentType);
+        throw new Error(`Servidor instável (Formato inválido).`);
       }
 
       const data = await res.json();
