@@ -21,15 +21,17 @@ export const DECKS = {
  * Se falhar, usa o fallback local com Fisher-Yates.
  */
 export async function drawCards(deckName: string, count: number = 3) {
+  console.log(`Sorteando ${count} cartas do deck: ${deckName}`);
+  
   try {
-    // 1. Tentar sortear via RPC no Supabase (Aleatoriedade Real no Postgres)
     const { data, error } = await supabase.rpc('draw_random_cards', {
       p_deck_name: deckName,
-      p_count: count
+      p_count: count,
+      p_random_seed: Math.random().toString(36).substring(2)
     });
 
-    if (error) throw error;
-    if (data && data.length > 0) {
+    if (!error && data && data.length > 0) {
+      console.log("Cartas sorteadas do Supabase:", data.map((c: any) => c.card_name));
       return data.map((card: any) => ({
         name: card.card_name,
         slug: card.card_slug,
@@ -38,14 +40,17 @@ export async function drawCards(deckName: string, count: number = 3) {
           : `${process.env.NEXT_PUBLIC_SUPABASE_URL}${card.image_url}`
       }));
     }
+    if (error) console.error("Erro RPC Supabase:", error);
   } catch (err) {
     console.warn("Falha ao sortear do Supabase, usando fallback local:", err);
   }
 
-  // 2. Fallback: Sorteio Local (Fisher-Yates)
+  // Fallback Local Robusto
+  console.log("Usando fallback local para sorteio...");
   const deck = DECKS[deckName as keyof typeof DECKS] || DECKS['Tarô'];
-  const shuffled = [...deck];
+  const shuffled = [...deck].sort(() => Math.random() - 0.5); // Shuffle simples adicional
   
+  // Algoritmo Fisher-Yates
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -55,7 +60,7 @@ export async function drawCards(deckName: string, count: number = 3) {
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[deckName] || 'taro';
 
-  return shuffled.slice(0, count).map(name => {
+  const result = shuffled.slice(0, count).map(name => {
     const slug = name.toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
@@ -68,4 +73,7 @@ export async function drawCards(deckName: string, count: number = 3) {
       image_url: `${supabaseUrl}/storage/v1/object/public/cartas-oraculo/${folder}/${slug}.webp`
     };
   });
+
+  console.log("Cartas sorteadas localmente:", result.map(c => c.name));
+  return result;
 }
