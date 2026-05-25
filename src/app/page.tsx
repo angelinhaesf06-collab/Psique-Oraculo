@@ -40,13 +40,15 @@ const TEMAS = [
 
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
   const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
   const [useLocalFallback, setUseLocalFallback] = useState(false);
   const [useCustomFallback, setUseCustomFallback] = useState(true);
   
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[tipoOraculo] || 'taro';
   
-  // Mapeamento de slugs para arquivos personalizados (Arcanos Maiores)
+  const normalizedSlug = (data.card_slug || '').replace(/_/g, '-');
+
   const customMap: Record<string, string> = {
     'o-louco': '00_louco.png.jpeg',
     'o-mago': '01_mago.png.jpeg',
@@ -72,28 +74,31 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
     'o-mundo': '21_mundo.png.jpeg'
   };
 
-  const customFile = customMap[data.card_slug];
+  const customFile = customMap[normalizedSlug];
   
-  // Lógica de Imagem:
-  // 1. Se for Tarô e tiver mapeamento customizado, tenta primeiro a imagem da Angela
-  // 2. Fallback para URL dinâmica (Storage)
-  // 3. Fallback para Ativo Local padrão
   let imagePath = (tipoOraculo === 'Tarô' && customFile && useCustomFallback)
     ? `/assets/decks/taro/custom/${customFile}`
     : (useLocalFallback 
-        ? `/assets/decks/${folder}/${data.card_slug}.jpg`
-        : (data.image_url || `/assets/decks/${folder}/${data.card_slug}.jpg`));
+        ? `/assets/decks/${folder}/${normalizedSlug}.jpg`
+        : (data.image_url || `/assets/decks/${folder}/${normalizedSlug}.jpg`));
 
   return (
-    <div className="flex flex-col items-center gap-1 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
-      <h5 className="text-[7px] md:text-[10px] font-bold uppercase tracking-[0.2em] md:tracking-[0.4em] text-foreground/40 text-center leading-none">{title}</h5>
-      <div className="w-[85px] md:w-[180px] relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[12px] md:rounded-[24px] border-[1px] md:border-[2px] border-[#D4B982]/30 p-1 md:p-2 shadow-lg">
-        <div className="w-full h-full rounded-[10px] md:rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
+    <div className="flex flex-col items-center gap-1 md:gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out" style={{ animationDelay: `${index * 200}ms` }}>
+      <h5 className="text-[7px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-gold/60 text-center leading-none mb-1">{title}</h5>
+      <div className="w-[85px] md:w-[180px] relative aspect-[3/4.5] bg-white rounded-[12px] md:rounded-[24px] border border-gold/20 p-1 md:p-2 shadow-[0_10px_30px_rgba(212,185,130,0.15)] group overflow-hidden">
+        
+        {/* Shimmer Effect */}
+        {imageLoading && !imageError && (
+          <div className="absolute inset-0 z-10 bg-gradient-to-r from-transparent via-gold/5 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
+        )}
+
+        <div className="w-full h-full rounded-[10px] md:rounded-[18px] overflow-hidden bg-[#FDFBF7] flex items-center justify-center relative">
            {!imageError ? (
              <img 
                src={imagePath} 
                alt={data.carta} 
-               className="w-full h-full object-contain" 
+               className={`w-full h-full object-contain transition-all duration-1000 ${imageLoading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} group-hover:scale-110`}
+               onLoad={() => setImageLoading(false)}
                onError={() => {
                  if (tipoOraculo === 'Tarô' && customFile && useCustomFallback) {
                    setUseCustomFallback(false);
@@ -101,14 +106,19 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
                    setUseLocalFallback(true);
                  } else {
                    setImageError(true);
+                   setImageLoading(false);
                  }
                }} 
              />
            ) : (
-             <div className="p-1 text-center">
-               <span className="text-gold font-bold text-[7px] md:text-xs uppercase tracking_widest block leading-tight">{data.carta}</span>
+             <div className="p-4 text-center bg-gold/5 w-full h-full flex flex-col items-center justify-center gap-2">
+               <Sparkles className="text-gold/20 w-8 h-8" />
+               <span className="text-gold font-serif text-[8px] md:text-sm italic leading-tight">{data.carta}</span>
              </div>
            )}
+           
+           {/* Overlay Decorativo Premium */}
+           <div className="absolute inset-0 pointer-events-none border-[0.5px] border-gold/10 rounded-[10px] md:rounded-[18px] m-0.5 md:m-1" />
         </div>
       </div>
     </div>
