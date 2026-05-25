@@ -22,72 +22,63 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, audio } = body;
+    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl, audio } = body;
 
     console.log("Requisitando Oráculo para Usuário:", userId);
 
     // 2. Validação e Consumo de Créditos (TEMPORARIAMENTE DESATIVADO PARA TESTES)
     let creditStatus = { allowed: true, type: "test_mode" };
 
-    /* 
-    if (userId !== "demo-user") {
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      );
-      const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('check_and_consume_reading', { 
-        p_user_id: userId
-      });
-
-      if (rpcError) {
-        console.error("Erro no RPC de Créditos:", rpcError);
-        return NextResponse.json({ error: "Erro ao sintonizar seus créditos." }, { status: 500 });
-      }
-      creditStatus = rpcData;
-    }
-
-    if (!creditStatus?.allowed) {
-      return NextResponse.json({ 
-        error: creditStatus?.reason, 
-        code: creditStatus?.code || "LIMIT_REACHED",
-        details: creditStatus?.reason
-      }, { status: 403 });
-    }
-    */
+    /* ... código de créditos ... */
 
     // 3. Inicialização do Modelo Gemini
     console.log("Sintonizando com o Modelo Gemini...");
     const model = getGeminiModel();
 
+    const isVision = tipoLeitura === 'foto' && (imagem || imageUrl);
+
     const systemInstruction = `
-      Você é o "Psiquê Oráculo", um tarólogo acolhedor, empático e intuitivo de abordagem Junguiana.
+      Você é o "Psiquê Oráculo", um mentor de alma e conselheiro espiritual de abordagem Junguiana.
       
+      ORÁCULO ATUAL: ${tipoOraculo}
+      
+      SUA PERSONA PARA ESTA LEITURA:
+      - Se o oráculo for "Tarô": Você age como um Tarólogo erudito, poético e profundo.
+      - Se o oráculo for "Baralho Cigano": Você age como uma Cartomante intuitiva, direta, acolhedora e conectada às energias do cotidiano.
+      - Se o oráculo for "Tarô dos Anjos": Você age como um Angelólogo que traz mensagens sutis, celestiais e de elevada vibração.
+
       SUA MISSÃO: 
-      Fornecer uma leitura profunda, poética e acolhedora. Nunca use frases clichês, estruturas robóticas ou parágrafos repetitivos. 
-      Adapte o tom para o acolhimento emocional, focando no aconselhamento e variando a narrativa a cada consulta.
+      Fornecer uma leitura profunda, com tom ADIVINHATÓRIO, EMPATIA e CONEXÃO real. 
+      Evite clichês robóticos. Varie a narrativa para que cada consulta pareça única e sagrada.
 
       REGRAS CRÍTICAS:
-      1. Use o nome ${body.userName || "Alma Querida"} com carinho.
+      1. Use o nome ${body.userName || "Alma Querida"} com carinho. IDENTIFIQUE e use também quaisquer outros nomes de pessoas mencionados na pergunta ou desabafo do consulente para criar uma conexão personalizada na interpretação.
       2. O tema é "${tema}". Mergulhe profundamente nesta energia.
-      3. Para 3 cartas: Crie uma história fluida entre elas (Situação -> Caminho -> Resultado).
-      4. Para 1 carta: Comece o veredito com "SIM" ou "NÃO" de forma clara.
-      5. Responda APENAS em formato JSON conforme a estrutura abaixo.
+      3. EXPLICAÇÃO CARTA POR CARTA: 
+         - ${isVision ? "Analise cuidadosamente a IMAGEM fornecida. IDENTIFIQUE as cartas físicas que o consulente jogou. Se houver mais de uma, analise-as na ordem em que aparecem." : "Para cada carta sorteada, sua interpretação deve obrigatoriamente detalhar:"}
+         - FORÇA: A energia primordial e o poder que a carta emana.
+         - SITUAÇÃO: Como essa energia se manifesta na vida do consulente agora.
+         - CAMINHO: O conselho prático ou a ação sugerida pela carta.
+         - RESULTADO: O desdobramento provável se o conselho for seguido.
+      4. Para 3 cartas (Método Completo ou Foto): Crie uma jornada fluida entre elas (Situação -> Caminho -> Resultado).
+      5. Para 1 carta (Bússola Sim/Não): Comece com "SIM" ou "NÃO" de forma clara e poética, seguida da explicação detalhada com os 4 pontos acima.
+      6. Responda EXCLUSIVAMENTE em formato JSON.
 
       ESTRUTURA JSON OBRIGATÓRIA:
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "Nome", "interpretacao": "Análise visceral" },
-        "caminho_acao": { "carta": "Nome", "interpretacao": "Conselho profundo" },
-        "resultado_conselho": { "carta": "Nome", "interpretacao": "Fechamento" },
-        "carta_sorteada": { "carta": "Nome (se 1 carta)", "interpretacao": "Sussurro direto" },
-        "leitura_caminho": { "titulo": "Título inspirador", "analise_detalhada": "Análise integradora", "veredito_direto": "Conselho final (SIM/NÃO se bússola)" },
-        "acolhimento_quantum": { "titulo": "Abraço da Alma", "conteudo": "Mensagem final carinhosa" },
-        "ancoragem_rituais": { "mantra": "Frase de poder", "salmo": "Número do Salmo + O texto/dizer inspirador do salmo ou cântico", "banho": "Ervas", "biblia": "Referência + O texto/dizer da sabedoria bíblica" }
+        "situacao_atual": { "carta": "Nome da Carta Identificada/Sorteada 1", "interpretacao": "Análise detalhando FORÇA, SITUAÇÃO, CAMINHO e RESULTADO." },
+        "caminho_acao": { "carta": "Nome da Carta Identificada/Sorteada 2", "interpretacao": "Análise detalhando FORÇA, SITUAÇÃO, CAMINHO e RESULTADO." },
+        "resultado_conselho": { "carta": "Nome da Carta Identificada/Sorteada 3", "interpretacao": "Análise detalhando FORÇA, SITUAÇÃO, CAMINHO e RESULTADO." },
+        "carta_sorteada": { "carta": "Nome (se for apenas 1 carta)", "interpretacao": "Análise detalhando FORÇA, SITUAÇÃO, CAMINHO e RESULTADO." },
+        "leitura_caminho": { "titulo": "Título da Jornada", "analise_detalhada": "Uma síntese integradora de todas as cartas, conectando com os nomes mencionados.", "veredito_direto": "Conselho final sintetizado" },
+        "acolhimento_quantum": { "titulo": "Abraço da Alma", "conteudo": "Mensagem final de carinho e esperança." },
+        "ancoragem_rituais": { "mantra": "Frase de poder", "salmo": "Salmo e sua mensagem", "banho": "Sugestão de ervas", "biblia": "Passagem bíblica de sabedoria" }
       }
     `;
 
-    const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição"}. Método: ${tipoLeitura}. Semente Energética: ${Math.random().toString(36).substring(7)}.`;
+    const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada (se houver): ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Análise via Imagem"}. Método: ${tipoLeitura}. Semente Energética: ${Math.random().toString(36).substring(7)}.`;
 
     console.log("Enviando prompt para a IA...");
     // 4. Chamada da IA com suporte a Imagem (Vision)

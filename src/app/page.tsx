@@ -41,15 +41,48 @@ const TEMAS = [
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
   const [imageError, setImageError] = useState(false);
   const [useLocalFallback, setUseLocalFallback] = useState(false);
+  const [useCustomFallback, setUseCustomFallback] = useState(true);
   
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[tipoOraculo] || 'taro';
   
-  // Prioridade 1: URL Dinâmica do Storage (Artes da Angela)
-  // Prioridade 2: Ativo Local (Fallback)
-  const imagePath = useLocalFallback 
-    ? `/assets/decks/${folder}/${data.card_slug}.jpg`
-    : (data.image_url || `/assets/decks/${folder}/${data.card_slug}.jpg`);
+  // Mapeamento de slugs para arquivos personalizados (Arcanos Maiores)
+  const customMap: Record<string, string> = {
+    'o_louco': '00_louco.png.jpeg',
+    'o_mago': '01_mago.png.jpeg',
+    'a_sacerdotisa': '02_sacerdotisa.png.jpeg',
+    'a_imperatriz': '03_imperatriz.png.jpeg',
+    'o_imperador': '04_imperador.png.jpeg',
+    'o_hierofante': '5_opapa.png.jpeg',
+    'os_amantes': '06_enamorados.png.jpeg',
+    'o_carro': '07_carro.png.jpeg',
+    'a_justica': '08_justiça.png.jpeg',
+    'o_eremita': '09_eremita.png (2).jpeg',
+    'roda_da_fortuna': '10_sol.png.jpeg', // Note: O arquivo 10 na pasta está como sol, mas mapeado aqui por número
+    'a_forca': '11_força.png.jpeg',
+    'o_pendurado': '12_enforcado.png.jpeg',
+    'a_morte': '13_morte.png.jpeg',
+    'a_temperanca': '14_temperança.png.jpeg',
+    'o_diabo': '15_diabo.png.jpeg',
+    'a_torre': '16_torre.png.jpeg',
+    'a_estrela': '18_estrela.png.jpeg',
+    'a_lua': '12_lua.png.jpeg', // Note: Conforme listagem (12_lua)
+    'o_sol': '19_sol.png.jpeg',
+    'o_julgamento': '20_julgamento.png.jpeg',
+    'o_mundo': '21_mundo.png.jpeg'
+  };
+
+  const customFile = customMap[data.card_slug];
+  
+  // Lógica de Imagem:
+  // 1. Se for Tarô e tiver mapeamento customizado, tenta primeiro a imagem da Angela
+  // 2. Fallback para URL dinâmica (Storage)
+  // 3. Fallback para Ativo Local padrão
+  let imagePath = (tipoOraculo === 'Tarô' && customFile && useCustomFallback)
+    ? `/assets/decks/taro/custom/${customFile}`
+    : (useLocalFallback 
+        ? `/assets/decks/${folder}/${data.card_slug}.jpg`
+        : (data.image_url || `/assets/decks/${folder}/${data.card_slug}.jpg`));
 
   return (
     <div className="flex flex-col items-center gap-1 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
@@ -62,7 +95,9 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
                alt={data.carta} 
                className="w-full h-full object-contain" 
                onError={() => {
-                 if (!useLocalFallback) {
+                 if (tipoOraculo === 'Tarô' && customFile && useCustomFallback) {
+                   setUseCustomFallback(false);
+                 } else if (!useLocalFallback) {
                    setUseLocalFallback(true);
                  } else {
                    setImageError(true);
@@ -71,7 +106,7 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
              />
            ) : (
              <div className="p-1 text-center">
-               <span className="text-gold font-bold text-[7px] md:text-xs uppercase tracking-widest block leading-tight">{data.carta}</span>
+               <span className="text-gold font-bold text-[7px] md:text-xs uppercase tracking_widest block leading-tight">{data.carta}</span>
              </div>
            )}
         </div>
@@ -247,8 +282,41 @@ export default function OraculoJornada() {
   const handleLeitura = async (tipo: string, imageData?: string) => {
     setLoading(true);
     try {
+      let finalImageUrl = imageData;
+
+      // Se for leitura por foto, faz upload para o Supabase Storage
+      if (tipo === 'foto' && imageData) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          const userId = session?.user?.id || 'anonymous';
+          const fileName = `${userId}_${Date.now()}.jpg`;
+          const base64Data = imageData.split('base64,')[1];
+          const blob = await fetch(imageData).then(res => res.blob());
+
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('cartas-usuarios')
+            .upload(fileName, blob, {
+              contentType: 'image/jpeg',
+              upsert: true
+            });
+
+          if (uploadError) {
+            console.error("Erro ao subir imagem para o Supabase:", uploadError);
+          } else if (uploadData) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('cartas-usuarios')
+              .getPublicUrl(fileName);
+            finalImageUrl = publicUrl;
+            console.log("Imagem disponível em:", finalImageUrl);
+          }
+        } catch (uploadErr) {
+          console.error("Falha no processo de upload:", uploadErr);
+        }
+      }
+
       // Foto e Caminho do Destino (completa) usam 3 cartas. Bússola (sim_nao) usa 1 carta.
-      const cartasSorteadas = (tipo === 'completa' || tipo === 'foto') ? await drawCards(tipoOraculo, 3) : await drawCards(tipoOraculo, 1);
+      // Se for foto, não sorteamos cartas, a IA deve ler a imagem.
+      const cartasSorteadas = tipo === 'foto' ? null : (tipo === 'completa' ? await drawCards(tipoOraculo, 3) : await drawCards(tipoOraculo, 1));
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       
@@ -261,8 +329,10 @@ export default function OraculoJornada() {
         },
         body: JSON.stringify({
           tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo,
-          cartas: tipo === 'foto' ? null : cartasSorteadas,
-          imagem: imageData || null, audio: audioBase64,
+          cartas: cartasSorteadas,
+          imagem: imageData || null, // Enviamos o base64 para o Gemini Vision
+          imageUrl: finalImageUrl,   // Enviamos a URL pública como backup/referência
+          audio: audioBase64,
           userName // Enviando o nome para personalização
         })
       });
@@ -430,6 +500,25 @@ export default function OraculoJornada() {
             {/* Conteúdo Holístico */}
             <div className="w-full max-w-xl space-y-6">
                
+               {/* Explicação das Cartas */}
+               <div className="space-y-4">
+                 {[
+                   { label: 'O Momento', data: resultado.situacao_atual },
+                   { label: 'O Caminho', data: resultado.caminho_acao },
+                   { label: 'O Desfecho', data: resultado.resultado_conselho },
+                   { label: 'A Revelação', data: resultado.carta_sorteada }
+                 ].map((item, i) => item.data && (
+                   <div key={i} className="bg-white/80 backdrop-blur-sm rounded-[24px] border border-gold/10 p-5 shadow-lg animate-in fade-in slide-in-from-left-4 duration-700" style={{ animationDelay: `${i * 200}ms` }}>
+                     <h4 className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                       <Sparkles size={12} className="opacity-50" /> {item.label}: <span className="text-foreground/80">{item.data.carta}</span>
+                     </h4>
+                     <p className="text-[13px] md:text-base leading-relaxed text-foreground/70 text-justify font-light">
+                       {item.data.interpretacao}
+                     </p>
+                   </div>
+                 ))}
+               </div>
+
                {/* 1. Leitura do Caminho */}
                <div className="bg-white/90 backdrop-blur-sm rounded-[28px] border border-gold/10 p-6 shadow-xl">
                   <h3 className="text-gold font-serif text-xl mb-3 flex items-center gap-2" style={{ fontFamily: 'var(--font-great-vibes)' }}>
