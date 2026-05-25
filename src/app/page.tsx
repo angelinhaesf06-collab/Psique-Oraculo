@@ -48,28 +48,28 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   
   // Mapeamento de slugs para arquivos personalizados (Arcanos Maiores)
   const customMap: Record<string, string> = {
-    'o_louco': '00_louco.png.jpeg',
-    'o_mago': '01_mago.png.jpeg',
-    'a_sacerdotisa': '02_sacerdotisa.png.jpeg',
-    'a_imperatriz': '03_imperatriz.png.jpeg',
-    'o_imperador': '04_imperador.png.jpeg',
-    'o_hierofante': '5_opapa.png.jpeg',
-    'os_amantes': '06_enamorados.png.jpeg',
-    'o_carro': '07_carro.png.jpeg',
-    'a_justica': '08_justiça.png.jpeg',
-    'o_eremita': '09_eremita.png (2).jpeg',
-    'roda_da_fortuna': '10_sol.png.jpeg', // Note: O arquivo 10 na pasta está como sol, mas mapeado aqui por número
-    'a_forca': '11_força.png.jpeg',
-    'o_pendurado': '12_enforcado.png.jpeg',
-    'a_morte': '13_morte.png.jpeg',
-    'a_temperanca': '14_temperança.png.jpeg',
-    'o_diabo': '15_diabo.png.jpeg',
-    'a_torre': '16_torre.png.jpeg',
-    'a_estrela': '18_estrela.png.jpeg',
-    'a_lua': '12_lua.png.jpeg', // Note: Conforme listagem (12_lua)
-    'o_sol': '19_sol.png.jpeg',
-    'o_julgamento': '20_julgamento.png.jpeg',
-    'o_mundo': '21_mundo.png.jpeg'
+    'o-louco': '00_louco.png.jpeg',
+    'o-mago': '01_mago.png.jpeg',
+    'a-sacerdotisa': '02_sacerdotisa.png.jpeg',
+    'a-imperatriz': '03_imperatriz.png.jpeg',
+    'o-imperador': '04_imperador.png.jpeg',
+    'o-hierofante': '5_opapa.png.jpeg',
+    'os-amantes': '06_enamorados.png.jpeg',
+    'o-carro': '07_carro.png.jpeg',
+    'a-justica': '08_justiça.png.jpeg',
+    'o-eremita': '09_eremita.jpeg',
+    'roda-da-fortuna': '10_sol.png.jpeg', 
+    'a-forca': '11_força.png.jpeg',
+    'o-pendurado': '12_enforcado.png.jpeg',
+    'a-morte': '13_morte.png.jpeg',
+    'a-temperanca': '14_temperança.png.jpeg',
+    'o-diabo': '15_diabo.png.jpeg',
+    'a-torre': '16_torre.png.jpeg',
+    'a-estrela': '18_estrela.png.jpeg',
+    'a-lua': '12_lua.png.jpeg', 
+    'o-sol': '19_sol.png.jpeg',
+    'o-julgamento': '20_julgamento.png.jpeg',
+    'o-mundo': '21_mundo.png.jpeg'
   };
 
   const customFile = customMap[data.card_slug];
