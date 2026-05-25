@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { drawCards } from '@/lib/cards';
+import { SpeechRecognition } from '@capacitor-community/speech-recognition';
+import { VoiceRecorder } from 'capacitor-voice-recorder';
 
 const FairyIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -38,9 +40,16 @@ const TEMAS = [
 
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
   const [imageError, setImageError] = useState(false);
+  const [useLocalFallback, setUseLocalFallback] = useState(false);
+  
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[tipoOraculo] || 'taro';
-  const imagePath = `/assets/decks/${folder}/${data.card_slug}.jpg`;
+  
+  // Prioridade 1: URL Dinâmica do Storage (Artes da Angela)
+  // Prioridade 2: Ativo Local (Fallback)
+  const imagePath = useLocalFallback 
+    ? `/assets/decks/${folder}/${data.card_slug}.jpg`
+    : (data.image_url || `/assets/decks/${folder}/${data.card_slug}.jpg`);
 
   return (
     <div className="flex flex-col items-center gap-1 md:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 150}ms` }}>
@@ -48,7 +57,18 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
       <div className="w-[85px] md:w-[180px] relative aspect-[3/4.5] bg-[#FDFBF7] rounded-[12px] md:rounded-[24px] border-[1px] md:border-[2px] border-[#D4B982]/30 p-1 md:p-2 shadow-lg">
         <div className="w-full h-full rounded-[10px] md:rounded-[18px] overflow-hidden bg-[#F5F2EA] flex items-center justify-center">
            {!imageError ? (
-             <img src={imagePath} alt={data.carta} className="w-full h-full object-contain" onError={() => setImageError(true)} />
+             <img 
+               src={imagePath} 
+               alt={data.carta} 
+               className="w-full h-full object-contain" 
+               onError={() => {
+                 if (!useLocalFallback) {
+                   setUseLocalFallback(true);
+                 } else {
+                   setImageError(true);
+                 }
+               }} 
+             />
            ) : (
              <div className="p-1 text-center">
                <span className="text-gold font-bold text-[7px] md:text-xs uppercase tracking-widest block leading-tight">{data.carta}</span>
@@ -77,13 +97,58 @@ export default function OraculoJornada() {
   const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | null>(null);
 
   useEffect(() => {
+    const requestPermissions = async () => {
+      try {
+        await SpeechRecognition.requestPermissions();
+        await VoiceRecorder.requestAudioRecordingPermission();
+      } catch (e) {
+        console.warn("Permissões de áudio não concedidas:", e);
+      }
+    };
+    requestPermissions();
+  }, []);
+
+  useEffect(() => {
     const checkUser = async () => {
       const isDemo = localStorage.getItem('psique_demo_mode') === 'true';
       const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session && !isDemo) {
         router.push('/login');
-      } else if (session) {
+        return;
+      } 
+      
+      if (session) {
         setUser(session.user);
+
+        // Checagem de Assinatura Anual (Supabase)
+        try {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('subscription_status, subscription_end_date')
+            .eq('id', session.user.id)
+            .single();
+
+          if (!error && profile) {
+            const now = new Date();
+            const endDate = profile.subscription_end_date ? new Date(profile.subscription_end_date) : null;
+            const isActive = profile.subscription_status === 'active' && endDate && endDate >= now;
+
+            if (!isActive && !isDemo) {
+              setModalAberto('assinatura');
+              toast.info('Sua assinatura expirou ou é inexistente. Renove seu portal!');
+            }
+          }
+        } catch (e) {
+          console.error("Erro ao verificar assinatura:", e);
+        }
+
+        // Se houver biometria pendente de ativação (vinda do login)
+        if (localStorage.getItem('psique_pending_biometric') === 'true') {
+           // Em um app real, aqui pediríamos uma senha para salvar no cofre seguro
+           // Para este MVP, vamos apenas marcar como 'ativo' se o usuário confirmar em algum lugar
+           // ou podemos disparar o NativeBiometric.setCredentials aqui se tivermos os dados.
+        }
       }
     };
     checkUser();
@@ -100,53 +165,49 @@ export default function OraculoJornada() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = recorder;
-      audioChunksRef.current = [];
+      const isAvailable = await SpeechRecognition.available();
+      if (isAvailable) {
+        setIsGravando(true);
+        setDesabafo(""); 
+        
+        SpeechRecognition.start({
+          language: "pt-BR",
+          maxResults: 1,
+          prompt: "Sintonizando sua voz...",
+          partialResults: true,
+        });
 
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'pt-BR';
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.onresult = (event: any) => {
-          let transcript = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) transcript += event.results[i][0].transcript;
-          setDesabafo(transcript);
-        };
-        recognition.start();
-        (window as any).recognition = recognition;
+        SpeechRecognition.addListener('partialResults', (data: any) => {
+          if (data.matches && data.matches.length > 0) {
+            setDesabafo(data.matches[0]);
+          }
+        });
+
+        await VoiceRecorder.startRecording();
+      } else {
+        toast.error("Reconhecimento de voz não disponível.");
       }
-
-      recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
-      recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const reader = new FileReader();
-        reader.readAsDataURL(audioBlob);
-        reader.onloadend = () => {
-          setAudioBase64(reader.result as string);
-          toast.success('Sintonizado.');
-        };
-      };
-
-      recorder.start();
-      setIsGravando(true);
-    } catch (err) {
-      toast.error('Verifique o microfone.');
+    } catch (err: any) {
+      toast.error('Erro ao acessar microfone.');
+      setIsGravando(false);
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isGravando) {
-      mediaRecorderRef.current.stop();
+  const stopRecording = async () => {
+    if (!isGravando) return;
+    
+    try {
       setIsGravando(false);
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
-      if ((window as any).recognition) {
-        (window as any).recognition.stop();
-        delete (window as any).recognition;
+      await SpeechRecognition.stop();
+      SpeechRecognition.removeAllListeners();
+
+      const result = await VoiceRecorder.stopRecording();
+      if (result.value && result.value.recordDataBase64) {
+        setAudioBase64(`data:${result.value.mimeType};base64,${result.value.recordDataBase64}`);
+        toast.success('Sintonizado.');
       }
+    } catch (err) {
+      console.error("Erro ao parar gravação:", err);
     }
   };
 
@@ -154,7 +215,31 @@ export default function OraculoJornada() {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => handleLeitura('foto', reader.result as string);
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1200;
+
+          if (width > height && width > maxDim) {
+            height *= maxDim / width;
+            width = maxDim;
+          } else if (height > maxDim) {
+            width *= maxDim / height;
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          handleLeitura('foto', compressedBase64);
+        };
+        img.src = reader.result as string;
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -167,7 +252,8 @@ export default function OraculoJornada() {
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       
-      const res = await fetch('/api/oracle/read', {
+      const API_URL = process.env.NEXT_PUBLIC_SITE_URL || '';
+      const res = await fetch(`${API_URL}/api/oracle/read`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -212,7 +298,7 @@ export default function OraculoJornada() {
   };
 
   return (
-    <div className={`h-[100dvh] w-full text-foreground font-sans p-2 md:p-12 flex flex-col items-center relative bg-[#F5F2EA] ${passo === 4 ? "overflow-y-auto" : "overflow-hidden justify-center"}`}>
+    <div className={`h-[100dvh] w-full text-foreground font-sans p-2 md:p-12 flex flex-col items-center relative bg-[#F5F2EA] overflow-hidden`}>
       
       {/* Background Mandala */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -232,26 +318,26 @@ export default function OraculoJornada() {
         </div>
       </div>
 
-      <div className="relative z-10 w-full max-w-2xl flex-1 flex flex-col items-center justify-between pt-4 md:pt-48">
+      <div className={`relative z-10 w-full max-w-2xl flex-1 flex flex-col items-center ${passo === 4 ? "overflow-y-auto pt-24 md:pt-48 pb-12" : "justify-center py-8"}`}>
         
         {/* PASSO 0: ESCOLHA */}
         {passo === 0 && (
-          <div className="flex flex-col items-center justify-between w-full h-full py-4">
+          <div className="flex flex-col items-center gap-6 w-full">
             <h2 className="text-2xl md:text-5xl font-serif text-gold leading-tight text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Qual arcano você escolhe hoje?</h2>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-8 w-full px-4">
+            <div className="flex flex-row items-center justify-center gap-2 md:gap-8 w-full px-2">
               {[
                 { id: 'Tarô', title: 'TARÔ', img: '/assets/decks/covers/taro.jpg', borderColor: 'border-[#E5D9C3]' },
                 { id: 'Baralho Cigano', title: 'CIGANO', img: '/assets/decks/covers/cigano.jpg', borderColor: 'border-[#D4B982]' },
                 { id: 'Tarô dos Anjos', title: 'ANJOS', img: '/assets/decks/covers/anjos.jpg', borderColor: 'border-[#E5D9C3]' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className={`w-full max-w-[90px] md:max-w-[200px] flex flex-col items-center bg-[#FDFBF7] rounded-[14px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-1 md:p-4 shadow-xl transition-all hover:scale-105 active:scale-95`}>
-                  <h3 className="text-[8px] md:text-sm font-bold text-foreground/80 tracking-widest mb-0.5 md:mb-4 font-sans uppercase">{o.title}</h3>
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className={`w-full max-w-[100px] md:max-w-[180px] flex flex-col items-center bg-[#FDFBF7] rounded-[14px] md:rounded-[32px] border-2 md:border-4 ${o.borderColor} p-1 md:p-3 shadow-xl transition-all hover:scale-105 active:scale-95`}>
+                  <h3 className="text-[7px] md:text-sm font-bold text-foreground/80 tracking-widest mb-0.5 md:mb-3 font-sans uppercase">{o.title}</h3>
                   <div className="w-full aspect-[3/4.5] rounded-[6px] md:rounded-[16px] overflow-hidden bg-white flex items-center justify-center"><img src={o.img} alt={o.title} className="w-full h-full object-cover" /></div>
                 </button>
               ))}
             </div>
-            <div className="flex flex-col items-center gap-2 pb-2">
-               <h2 className="text-2xl md:text-4xl font-serif text-[#A08149]/30 tracking-tight text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
+            <div className="flex flex-col items-center gap-2">
+               <h2 className="text-2xl md:text-3xl font-serif text-[#A08149]/30 tracking-tight text-center" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
                <div className="flex flex-col items-center gap-3">
                   <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 px-6 py-1.5 rounded-full bg-gold/10 border border-gold/20 shadow-sm"><Crown className="w-4 h-4 text-gold" /><span className="text-[10px] font-bold text-gold uppercase tracking-widest">Premium</span></button>
                   <div className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-gold/30">
@@ -266,26 +352,26 @@ export default function OraculoJornada() {
 
         {/* PASSO 1: TEMA */}
         {passo === 1 && (
-          <div className="flex flex-col items-center justify-between w-full h-full py-20">
-            <h2 className="text-2xl md:text-5xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Onde sua alma busca luz?</h2>
-            <div className="flex flex-col gap-2 w-full max-w-[280px]">
+          <div className="flex flex-col items-center gap-6 w-full">
+            <h2 className="text-3xl md:text-6xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Onde sua alma busca luz?</h2>
+            <div className="flex flex-col gap-2.5 w-full max-w-[280px]">
               {TEMAS.map((t) => (
                 <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-12 md:h-16 rounded-[16px] bg-gradient-to-r ${t.color} p-[1px] shadow-lg hover:scale-[1.02] transition-all`}>
                   <div className="w-full h-full bg-black/30 backdrop-blur-md rounded-[15px] flex items-center justify-between px-6">
-                    <div className="flex items-center gap-4"><t.icon className={`w-5 h-5 ${t.textColor}`} /><span className={`text-[15px] md:text-xl font-medium ${t.textColor} tracking-wide font-sans`}>{t.label}</span></div>
+                    <div className="flex items-center gap-4"><t.icon className={`w-5 h-5 ${t.textColor}`} /><span className={`text-sm md:text-xl font-medium ${t.textColor} tracking-wide font-sans`}>{t.label}</span></div>
                     <ChevronLeft className="w-4 h-4 rotate-180 opacity-30 text-white" />
                   </div>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-4 bg-white/50 px-8 rounded-full border border-gold/10">‹ Mudar Oráculo</button>
+            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-3 bg-white/50 px-8 rounded-full border border-gold/10 mt-4">‹ Mudar Oráculo</button>
           </div>
         )}
 
         {/* PASSO 2: PERGUNTA */}
         {passo === 2 && (
-          <div className="flex flex-col items-center justify-between w-full h-full py-20">
-            <h2 className="text-2xl md:text-4xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Abra o seu coração</h2>
+          <div className="flex flex-col items-center gap-6 w-full">
+            <h2 className="text-3xl md:text-5xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Abra o seu coração</h2>
             <div className="relative bg-white rounded-[28px] border border-gold/10 p-4 shadow-2xl w-full max-w-[340px]">
               <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base font-light text-foreground/70" />
               <div className="space-y-3 pt-3 border-t border-gold/5">
@@ -293,34 +379,34 @@ export default function OraculoJornada() {
                 <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-gold text-white py-3 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg disabled:opacity-20">Prosseguir</button>
               </div>
             </div>
-            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-4 bg-white/50 px-8 rounded-full border border-gold/10">‹ Trocar Foco ({tema})</button>
+            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-3 bg-white/50 px-8 rounded-full border border-gold/10 mt-4">‹ Trocar Foco ({tema})</button>
           </div>
         )}
 
         {/* PASSO 3: MÉTODO */}
         {passo === 3 && (
-          <div className="flex flex-col items-center justify-between w-full h-full py-20">
-            <h2 className="text-2xl md:text-5xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
-            <div className="flex flex-col md:flex-row gap-3 w-full max-w-[320px] md:max-w-xl">
+          <div className="flex flex-col items-center gap-6 w-full">
+            <h2 className="text-3xl md:text-6xl font-serif text-gold text-center px-4" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
+            <div className="flex flex-col md:flex-row gap-3 w-full max-w-[280px] md:max-w-xl">
               {[
                 { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-emerald-600', action: () => fileInputRef.current?.click() },
                 { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-ruby', action: () => handleLeitura('completa') },
                 { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-amber-500', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
-                <button key={m.id} onClick={m.action} className="w-full flex flex-col items-center gap-1.5 bg-white border border-gold/10 p-2 rounded-[20px] shadow-lg active:scale-95 transition-all">
+                <button key={m.id} onClick={m.action} className="w-full flex flex-col items-center gap-2 bg-white border border-gold/10 p-3 rounded-[24px] shadow-lg active:scale-95 transition-all">
                   <div className={`w-12 h-12 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-lg`}><m.icon size={24} /></div>
-                  <h4 className="font-bold text-[8px] md:text-xs text-foreground/80 uppercase tracking-widest text-center leading-tight">{m.title}</h4>
+                  <h4 className="font-bold text-[9px] md:text-xs text-foreground/80 uppercase tracking-widest text-center leading-tight px-2">{m.title}</h4>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-4 bg-white/50 px-8 rounded-full border border-gold/10">‹ Refazer Pergunta</button>
+            <button onClick={prevPasso} className="text-[10px] font-black uppercase tracking-[0.3em] text-[#A08149] py-3 bg-white/50 px-8 rounded-full border border-gold/10 mt-4">‹ Refazer Pergunta</button>
             <input type="file" accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleCaptureImage} />
           </div>
         )}
 
         {/* PASSO 4: RESULTADO */}
         {passo === 4 && resultado && (
-          <div className="flex flex-col items-center gap-6 w-full py-12 animate-in fade-in zoom-in-95 duration-1000 px-4">
+          <div className="flex flex-col items-center gap-6 w-full animate-in fade-in zoom-in-95 duration-1000 px-4 pb-20">
             <div className="space-y-1 text-center">
               <div className="inline-block px-4 py-1 bg-gold/5 rounded-full text-[8px] font-bold text-gold uppercase tracking-widest border border-gold/10">{resultado.tema}</div>
               <h2 className="text-3xl md:text-6xl font-serif text-gold leading-none" style={{ fontFamily: 'var(--font-great-vibes)' }}>Sua Revelação</h2>

@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { Fingerprint, Mail, LogIn, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
+
 export default function LoginPage() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -24,26 +26,66 @@ export default function LoginPage() {
   };
 
   const handleBiometricLogin = async () => {
-    if (!nome) {
-      toast.error('Preencha seu nome.');
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      handleDemoAccess();
+    try {
+      const result = await NativeBiometric.isAvailable();
+      if (!result.isAvailable) {
+        toast.error('Biometria não disponível neste aparelho.');
+        return;
+      }
+
+      setLoading(true);
+      await NativeBiometric.verifyIdentity({
+        reason: "Acesse seu Oráculo Particular",
+        title: "Autenticação Biométrica",
+        subtitle: "Sintonize sua identidade",
+        description: "Use sua digital ou reconhecimento facial",
+      });
+
+      // Se não lançou erro, a identidade foi verificada
+      // Obter credenciais salvas (email/senha simplificados ou token)
+      const credentials = await NativeBiometric.getCredentials({
+        server: "com.angela.psiqueoraculo",
+      });
+
+      if (credentials) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: credentials.username,
+          password: credentials.password,
+        });
+
+        if (!error) {
+          toast.success('Portal aberto via Biometria!');
+          router.push('/');
+          return;
+        }
+      }
+      
+      // Se não houver credenciais salvas mas a biometria deu OK, 
+      // podemos tentar o modo demo se o nome estiver preenchido
+      if (nome) {
+        handleDemoAccess();
+      } else {
+        toast.info('Biometria ok. Por favor, entre com e-mail uma vez para vincular.');
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error('Falha na Biometria.');
+    } finally {
       setLoading(false);
-    }, 1200);
+    }
   };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      handleDemoAccess(); // Fallback para demo se não houver email
+      handleDemoAccess();
       return;
     }
 
     setLoading(true);
     try {
+      // Nota: Para biometria funcionar com Supabase, geralmente precisamos de senha.
+      // Aqui usaremos Magic Link como solicitado originalmente, mas avisaremos sobre vínculo.
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -53,6 +95,11 @@ export default function LoginPage() {
 
       if (error) throw error;
       toast.success('Portal solicitado! Verifique seu e-mail.');
+      
+      // Salvar flag para sugerir biometria no próximo acesso
+      localStorage.setItem('psique_pending_biometric', 'true');
+      localStorage.setItem('psique_user_email', email);
+
     } catch (error: any) {
       toast.error(`Falha: ${error.message}`);
     } finally {

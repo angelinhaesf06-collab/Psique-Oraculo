@@ -16,13 +16,30 @@ export const DECKS = {
 
 export function drawCards(deckName: string, count: number = 3) {
   const deck = DECKS[deckName as keyof typeof DECKS] || DECKS['Tarô'];
-  const shuffled = [...deck].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count).map(name => ({
-    name,
-    slug: name.toLowerCase()
+  const shuffled = [...deck];
+  
+  // Algoritmo de Fisher-Yates para embaralhamento real
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
+  const folder = folderMap[deckName] || 'taro';
+
+  return shuffled.slice(0, count).map(name => {
+    const slug = name.toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-  }));
+      .replace(/\s+/g, '_')
+      .replace(/[^\w-]/g, '');
+    
+    return {
+      name,
+      slug,
+      // URL dinâmica do Supabase Storage
+      image_url: `${supabaseUrl}/storage/v1/object/public/cartas-oraculo/${folder}/${slug}.webp`
+    };
+  });
 }

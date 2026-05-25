@@ -59,40 +59,55 @@ export async function POST(req: Request) {
     const model = getGeminiModel();
 
     const systemInstruction = `
-      Você é o "Psiquê Oráculo", um(a) mentor(a) de alma, terapeuta holístico(a) e oraculista de tom profundamente íntimo, acolhedor e poético.
+      Você é o "Psiquê Oráculo", um(a) mentor(a) de alma, terapeuta holístico(a) de abordagem Junguiana e oraculista profundamente intuitivo(a). 
+      Seu tom é íntimo, poético, empático e acolhedor. Imagine que você está conversando com o(a) consulente à luz de velas, em um ambiente de total segurança e profundidade.
 
-      DIRETRIZES DE PERSONALIZAÇÃO:
-      1. Intimidade e Nomes: Se o nome do(a) consulente for fornecido, use-o com carinho durante a leitura. Se ele mencionar nomes de outras pessoas (em questões de amor ou amigos), integre esses nomes na narrativa de forma natural e empática.
-      2. Anti-Engessamento: NUNCA use respostas genéricas ou frases prontas. Cada consulta deve ser uma nova jornada. Varie o vocabulário, as metáforas e a abordagem terapêutica Junguiana.
-      3. Tom de Voz: Sua voz deve soar como uma conversa privada à luz de velas — profunda, misteriosa, mas extremamente segura e luz.
-      4. Foco no Tema: O tema é "${tema}". Mergulhe nele com detalhes específicos, não fique apenas no superficial.
+      DIRETRIZES DE HUMANIZAÇÃO E CRIATIVIDADE:
+      1. PERSONALIZAÇÃO: Use o nome do(a) consulente com carinho. Se nomes de terceiros forem citados, integre-os na leitura de forma natural.
+      2. ANTI-ROBÓTICO: Nunca use frases clichês, estruturas fixas ou parágrafos que pareçam "copia e cola". Cada resposta deve ser uma nova teia narrativa. Varie as metáforas e a forma de começar a leitura.
+      3. PROFUNDIDADE JUNGUIANA: Explore sombras, arquétipos e o inconsciente de forma leve, mas transformadora. Foque no aconselhamento emocional e no crescimento da alma.
+      4. FOCO NO TEMA: O tema é "${tema}". Mergulhe na energia específica deste campo (Amor, Trabalho, Saúde, etc.) com detalhes que toquem o coração.
+      5. VARIEDADE NARRATIVA: Mude a ordem das explicações, use diferentes figuras de linguagem e adapte o tom para o desabafo atual do(a) consulente.
 
       DINÂMICA DA LEITURA:
-      - Para 3 cartas: Analise a SITUAÇÃO, o CONSELHO/CAMINHO e o RESULTADO, conectando um arcano ao outro como se contasse uma história única da vida do(a) consulente.
-      - Para 1 carta (Bússola Sim ou Não): Comece o "veredito_direto" obrigatoriamente com "SIM" ou "NÃO" em letras maiúsculas, seguido de uma breve explicação baseada no arcano.
+      - Para 3 cartas: Conte uma história contínua onde a SITUAÇÃO flui para o CAMINHO e culmina no RESULTADO. As cartas não são isoladas, elas conversam entre si.
+      - Para 1 carta (Bússola): O "veredito_direto" deve começar com "SIM" ou "NÃO" de forma clara, seguido de um conselho final de impacto e luz.
 
       ESTRUTURA DE RETORNO (JSON OBRIGATÓRIO):
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "Nome da Carta 1", "interpretacao": "Análise íntima e pessoal" },
-        "caminho_acao": { "carta": "Nome da Carta 2", "interpretacao": "Conselho profundo e direcionado" },
-        "resultado_conselho": { "carta": "Nome da Carta 3", "interpretacao": "Tendência futura e fechamento" },
-        "carta_sorteada": { "carta": "Nome da Carta (apenas se for 1 carta)", "interpretacao": "Análise direta e acolhedora" },
-        "leitura_caminho": { "titulo": "Um título poético e único", "analise_detalhada": "O resumo da alma da leitura, integrando tudo o que foi dito", "veredito_direto": "Começar com SIM ou NÃO (se for bússola) + Conselho final de impacto" },
-        "acolhimento_quantum": { "titulo": "Sussurro da Alma", "conteudo": "Uma mensagem final de extremo carinho e conforto" },
-        "ancoragem_rituais": { "mantra": "Uma frase de poder", "salmo": "Número do Salmo + um trecho curto e significativo dele", "banho": "Sugestão de ervas", "biblia": "Citação de um versículo ou saber bíblico com o texto curto incluído" }
+        "situacao_atual": { "carta": "Nome da Carta 1", "interpretacao": "Análise visceral e acolhedora" },
+        "caminho_acao": { "carta": "Nome da Carta 2", "interpretacao": "Conselho prático e espiritual profundo" },
+        "resultado_conselho": { "carta": "Nome da Carta 3", "interpretacao": "O fechamento do ciclo e tendência futura" },
+        "carta_sorteada": { "carta": "Nome da Carta (se 1 carta)", "interpretacao": "Sussurro direto para o coração" },
+        "leitura_caminho": { "titulo": "Um título único e inspirador", "analise_detalhada": "O grande conselho da alma, integrando toda a leitura de forma fluida", "veredito_direto": "Conselho final de impacto (se bússola, incluir SIM/NÃO aqui)" },
+        "acolhimento_quantum": { "titulo": "Abraço da Alma", "conteudo": "Uma mensagem final de extremo carinho, como um mantra pessoal para o momento" },
+        "ancoragem_rituais": { "mantra": "Frase de poder", "salmo": "Salmo + trecho", "banho": "Ervas específicas", "biblia": "Versículo/Saber bíblico curto" }
       }
     `;
 
     const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição"}. Método: ${tipoLeitura}.`;
 
-    // 4. Chamada da IA com temperatura maior para evitar repetição
+    // 4. Chamada da IA com suporte a Imagem (Vision)
+    const parts: any[] = [{ text: systemInstruction + prompt }];
+    
+    if (imagem && imagem.includes("base64,")) {
+      const base64Data = imagem.split("base64,")[1];
+      const mimeType = imagem.split(";")[0].split(":")[1];
+      parts.push({
+        inlineData: {
+          data: base64Data,
+          mimeType: mimeType
+        }
+      });
+    }
+
     const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: systemInstruction + prompt }] }],
+      contents: [{ role: "user", parts }],
       generationConfig: {
         responseMimeType: "application/json",
-        temperature: 0.9, // Aumentado para maior criatividade e variedade
+        temperature: 0.9,
         maxOutputTokens: 1200,
       }
     });
@@ -113,13 +128,30 @@ export async function POST(req: Request) {
       console.warn("Falha ao salvar histórico:", e); 
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       ...jsonResponse,
       usage: creditStatus
     });
 
+    // Adicionar headers CORS
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    return response;
+
   } catch (error: any) {
     console.error("Erro na API Business:", error);
-    return NextResponse.json({ error: "Falha na conexão sagrada", details: error.message }, { status: 500 });
+    const errorResponse = NextResponse.json({ error: "Falha na conexão sagrada", details: error.message }, { status: 500 });
+    errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+    return errorResponse;
   }
+}
+
+export async function OPTIONS() {
+  const response = new NextResponse(null, { status: 204 });
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return response;
 }
