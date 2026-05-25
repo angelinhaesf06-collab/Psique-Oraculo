@@ -219,6 +219,12 @@ export default function OraculoJornada() {
     try {
       const isAvailable = await SpeechRecognition.available();
       if (isAvailable) {
+        // Verificar permissões novamente antes de começar
+        const permissionStatus = await SpeechRecognition.checkPermissions();
+        if (permissionStatus.speechRecognition !== 'granted') {
+          await SpeechRecognition.requestPermissions();
+        }
+
         setIsGravando(true);
         setDesabafo(""); 
         
@@ -227,6 +233,7 @@ export default function OraculoJornada() {
           maxResults: 1,
           prompt: "Sintonizando sua voz...",
           partialResults: true,
+          popup: true, // Adiciona o popup nativo do Google se disponível
         });
 
         SpeechRecognition.addListener('partialResults', (data: any) => {
@@ -235,12 +242,18 @@ export default function OraculoJornada() {
           }
         });
 
-        await VoiceRecorder.startRecording();
+        // Tentar gravar o áudio em paralelo para a IA (se necessário)
+        try {
+          await VoiceRecorder.startRecording();
+        } catch (e) {
+          console.warn("VoiceRecorder não pôde iniciar, mas o Reconhecimento seguirá.");
+        }
       } else {
-        toast.error("Reconhecimento de voz não disponível.");
+        toast.error("Reconhecimento de voz não disponível no aparelho.");
       }
     } catch (err: any) {
-      toast.error('Erro ao acessar microfone.');
+      console.error("Erro detalhado do microfone:", err);
+      toast.error('O portal de voz não pôde ser aberto. Verifique as permissões.');
       setIsGravando(false);
     }
   };
