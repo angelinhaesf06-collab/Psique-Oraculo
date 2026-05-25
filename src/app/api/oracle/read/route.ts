@@ -83,7 +83,7 @@ export async function POST(req: Request) {
         "carta_sorteada": { "carta": "Nome (se 1 carta)", "interpretacao": "Sussurro direto" },
         "leitura_caminho": { "titulo": "Título inspirador", "analise_detalhada": "Análise integradora", "veredito_direto": "Conselho final (SIM/NÃO se bússola)" },
         "acolhimento_quantum": { "titulo": "Abraço da Alma", "conteudo": "Mensagem final carinhosa" },
-        "ancoragem_rituais": { "mantra": "Frase de poder", "salmo": "Salmo", "banho": "Ervas", "biblia": "Versículo" }
+        "ancoragem_rituais": { "mantra": "Frase de poder", "salmo": "Número do Salmo + O texto/dizer inspirador do salmo ou cântico", "banho": "Ervas", "biblia": "Referência + O texto/dizer da sabedoria bíblica" }
       }
     `;
 
