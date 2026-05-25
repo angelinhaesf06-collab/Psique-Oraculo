@@ -52,27 +52,26 @@ export async function POST(req: Request) {
       Evite clichês robóticos. Varie a narrativa para que cada consulta pareça única e sagrada.
 
       REGRAS CRÍTICAS:
-      1. Use o nome ${body.userName || "Alma Querida"} com carinho. IDENTIFIQUE e use também quaisquer outros nomes de pessoas mencionados na pergunta ou desabafo do consulente para criar uma conexão personalizada na interpretação.
-      2. O tema é "${tema}". Mergulhe profundamente nesta energia.
-      3. EXPLICAÇÃO CARTA POR CARTA: 
-         - ${isVision ? "Analise cuidadosamente a IMAGEM fornecida. IDENTIFIQUE as cartas físicas que o consulente jogou. Se houver mais de uma, analise-as na ordem em que aparecem." : "Para cada carta sorteada, sua interpretação deve obrigatoriamente detalhar:"}
-         - FORÇA: A energia primordial e o poder que a carta emana.
-         - SITUAÇÃO: Como essa energia se manifesta na vida do consulente agora.
-         - CAMINHO: O conselho prático ou a ação sugerida pela carta.
-         - RESULTADO: O desdobramento provável se o conselho for seguido.
-      4. Para 3 cartas (Método Completo ou Foto): Crie uma jornada fluida entre elas (Situação -> Caminho -> Resultado).
-      5. Para 1 carta (Bússola Sim/Não): Comece com "SIM" ou "NÃO" de forma clara e poética, seguida da explicação detalhada com os 4 pontos acima.
-      6. Responda EXCLUSIVAMENTE em formato JSON.
+      1. Use o nome ${body.userName || "Alma Querida"} com carinho. IDENTIFIQUE e use também quaisquer outros nomes de pessoas mencionados para criar conexão.
+      2. O tema é "${tema}". 
+      3. EXPLICAÇÃO CARTA POR CARTA (Distribuição de Papéis OBRIGATÓRIA): 
+         - Se houver 3 cartas (Método Completo ou Foto):
+            - CARTA 1: Representa EXCLUSIVAMENTE a SITUAÇÃO ATUAL. Foque na energia do presente e na FORÇA da carta.
+            - CARTA 2: Representa EXCLUSIVAMENTE o CAMINHO (Ação). Foque no conselho prático e na FORÇA da carta.
+            - CARTA 3: Representa EXCLUSIVAMENTE o RESULTADO (Desfecho). Foque no futuro provável e na FORÇA da carta.
+         - Se houver 1 carta (Bússola): Detalhe FORÇA, SITUAÇÃO, CAMINHO e RESULTADO condensados nesta única revelação.
+      4. Tom ADIVINHATÓRIO, EMPATIA e CONEXÃO real. Nunca use frases clichês.
+      5. Responda EXCLUSIVAMENTE em formato JSON.
 
       ESTRUTURA JSON OBRIGATÓRIA:
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "Nome da Carta Identificada/Sorteada 1", "interpretacao": "Análise detalhando FORÇA, SITUAÇÃO, CAMINHO e RESULTADO." },
-        "caminho_acao": { "carta": "Nome da Carta Identificada/Sorteada 2", "interpretacao": "Análise detalhando FORÇA, SITUAÇÃO, CAMINHO e RESULTADO." },
-        "resultado_conselho": { "carta": "Nome da Carta Identificada/Sorteada 3", "interpretacao": "Análise detalhando FORÇA, SITUAÇÃO, CAMINHO e RESULTADO." },
+        "situacao_atual": { "carta": "Nome da Carta 1", "interpretacao": "Análise da FORÇA e da SITUAÇÃO atual com base nesta carta." },
+        "caminho_acao": { "carta": "Nome da Carta 2", "interpretacao": "Análise da FORÇA e do CAMINHO/Ação com base nesta carta." },
+        "resultado_conselho": { "carta": "Nome da Carta 3", "interpretacao": "Análise da FORÇA e do RESULTADO final com base nesta carta." },
         "carta_sorteada": { "carta": "Nome (se for apenas 1 carta)", "interpretacao": "Análise detalhando FORÇA, SITUAÇÃO, CAMINHO e RESULTADO." },
-        "leitura_caminho": { "titulo": "Título da Jornada", "analise_detalhada": "Uma síntese integradora de todas as cartas, conectando com os nomes mencionados.", "veredito_direto": "Conselho final sintetizado" },
+        "leitura_caminho": { "titulo": "Título da Jornada", "analise_detalhada": "Uma síntese integradora unindo as 3 cartas e conectando com os nomes mencionados.", "veredito_direto": "Conselho final sintetizado" },
         "acolhimento_quantum": { "titulo": "Abraço da Alma", "conteudo": "Mensagem final de carinho e esperança." },
         "ancoragem_rituais": { "mantra": "Frase de poder", "salmo": "Salmo e sua mensagem", "banho": "Sugestão de ervas", "biblia": "Passagem bíblica de sabedoria" }
       }

@@ -68,7 +68,7 @@ export async function drawCards(deckName: string, count: number = 3) {
     const slug = name.toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, '-')
+      .replace(/[\s_]+/g, '-') // Troca espaços e sublinhados por hífens
       .replace(/[^\w-]/g, '');
     
     return {
