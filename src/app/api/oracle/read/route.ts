@@ -56,6 +56,7 @@ export async function POST(req: Request) {
     */
 
     // 3. Inicialização do Modelo Gemini
+    console.log("Sintonizando com o Modelo Gemini...");
     const model = getGeminiModel();
 
     const systemInstruction = `
@@ -89,10 +90,12 @@ export async function POST(req: Request) {
 
     const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas: ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Intuição"}. Método: ${tipoLeitura}.`;
 
+    console.log("Enviando prompt para a IA...");
     // 4. Chamada da IA com suporte a Imagem (Vision)
     const parts: any[] = [{ text: systemInstruction + prompt }];
     
     if (imagem && imagem.includes("base64,")) {
+      console.log("Adicionando imagem ao prompt...");
       const base64Data = imagem.split("base64,")[1];
       const mimeType = imagem.split(";")[0].split(":")[1];
       parts.push({
@@ -112,11 +115,14 @@ export async function POST(req: Request) {
       }
     });
 
+    console.log("Resposta recebida da IA.");
     const responseText = result.response.text();
+    console.log("Conteúdo da Resposta:", responseText);
     const jsonResponse = JSON.parse(responseText);
 
     // 5. Salvando no Histórico
     try {
+        console.log("Salvando leitura no histórico...");
         await supabaseAdmin.from("historico_leituras").insert({
             user_id: userId,
             tipo_oraculo: tipoOraculo,
@@ -124,6 +130,7 @@ export async function POST(req: Request) {
             pergunta_tema: tema + (pergunta ? ": " + pergunta : ""),
             resposta_ia: jsonResponse
         });
+        console.log("Histórico salvo com sucesso.");
     } catch (e) { 
       console.warn("Falha ao salvar histórico:", e); 
     }
