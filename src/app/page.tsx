@@ -248,7 +248,7 @@ export default function OraculoJornada() {
     setLoading(true);
     try {
       // Foto e Caminho do Destino (completa) usam 3 cartas. Bússola (sim_nao) usa 1 carta.
-      const cartasSorteadas = (tipo === 'completa' || tipo === 'foto') ? drawCards(tipoOraculo, 3) : drawCards(tipoOraculo, 1);
+      const cartasSorteadas = (tipo === 'completa' || tipo === 'foto') ? await drawCards(tipoOraculo, 3) : await drawCards(tipoOraculo, 1);
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       

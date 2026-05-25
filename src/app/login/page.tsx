@@ -77,31 +77,47 @@ export default function LoginPage() {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      handleDemoAccess();
-      return;
-    }
-
     setLoading(true);
+
     try {
-      // Nota: Para biometria funcionar com Supabase, geralmente precisamos de senha.
-      // Aqui usaremos Magic Link como solicitado originalmente, mas avisaremos sobre vínculo.
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: window.location.origin,
-        },
-      });
+      if (email) {
+        const password = 'psique-oraculo-guest';
+        
+        // 1. Garantir que o usuário exista e esteja confirmado via API Admin
+        const quickRes = await fetch('/api/auth/quick-access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, nome })
+        });
 
-      if (error) throw error;
-      toast.success('Portal solicitado! Verifique seu e-mail.');
-      
-      // Salvar flag para sugerir biometria no próximo acesso
-      localStorage.setItem('psique_pending_biometric', 'true');
-      localStorage.setItem('psique_user_email', email);
+        if (!quickRes.ok) {
+          const quickErr = await quickRes.json();
+          throw new Error(quickErr.error || "Falha na sintonização inicial.");
+        }
 
+        // 2. Agora faz o login normal, que sempre funcionará pois o usuário está confirmado
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) throw signInError;
+
+        toast.success('Portal Aberto!');
+        router.push('/');
+      } else {
+        // Login Anônimo
+        const { error } = await supabase.auth.signInAnonymously({
+          options: { data: { full_name: nome || "Consulente" } }
+        });
+        if (error) throw error;
+        
+        toast.success('Entrando como Convidado...');
+        router.push('/');
+      }
     } catch (error: any) {
-      toast.error(`Falha: ${error.message}`);
+      console.error(error);
+      toast.error(`Falha no Portal: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -177,6 +193,14 @@ export default function LoginPage() {
               {loading ? 'Sintonizando...' : 'Abrir Portal'}
             </button>
           </form>
+
+          <button
+            onClick={() => { setNome('Consulente de Teste'); setEmail('teste@psique.com'); setTimeout(() => { const form = document.querySelector('form'); form?.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true })); }, 100); }}
+            disabled={loading}
+            className="text-[8px] font-bold text-gold/40 uppercase tracking-[0.2em] hover:text-gold/60 transition-colors"
+          >
+            Acesso de Teste ✨
+          </button>
         </div>
 
         <div className="pt-6">

@@ -1,3 +1,5 @@
+import { supabase } from './supabase';
+
 export const DECKS = {
   'Tarô': [
     'O Louco', 'O Mago', 'A Sacerdotisa', 'A Imperatriz', 'O Imperador', 'O Hierofante', 'Os Amantes', 'O Carro', 'A Força', 'O Eremita', 'Roda da Fortuna', 'A Justiça', 'O Pendurado', 'A Morte', 'A Temperança', 'O Diabo', 'A Torre', 'A Estrela', 'A Lua', 'O Sol', 'O Julgamento', 'O Mundo',
@@ -14,11 +16,36 @@ export const DECKS = {
   ]
 };
 
-export function drawCards(deckName: string, count: number = 3) {
+/**
+ * Sorteia cartas usando aleatoriedade real do Supabase (RANDOM())
+ * Se falhar, usa o fallback local com Fisher-Yates.
+ */
+export async function drawCards(deckName: string, count: number = 3) {
+  try {
+    // 1. Tentar sortear via RPC no Supabase (Aleatoriedade Real no Postgres)
+    const { data, error } = await supabase.rpc('draw_random_cards', {
+      p_deck_name: deckName,
+      p_count: count
+    });
+
+    if (error) throw error;
+    if (data && data.length > 0) {
+      return data.map((card: any) => ({
+        name: card.card_name,
+        slug: card.card_slug,
+        image_url: card.image_url.startsWith('http') 
+          ? card.image_url 
+          : `${process.env.NEXT_PUBLIC_SUPABASE_URL}${card.image_url}`
+      }));
+    }
+  } catch (err) {
+    console.warn("Falha ao sortear do Supabase, usando fallback local:", err);
+  }
+
+  // 2. Fallback: Sorteio Local (Fisher-Yates)
   const deck = DECKS[deckName as keyof typeof DECKS] || DECKS['Tarô'];
   const shuffled = [...deck];
   
-  // Algoritmo de Fisher-Yates para embaralhamento real
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -38,7 +65,6 @@ export function drawCards(deckName: string, count: number = 3) {
     return {
       name,
       slug,
-      // URL dinâmica do Supabase Storage
       image_url: `${supabaseUrl}/storage/v1/object/public/cartas-oraculo/${folder}/${slug}.webp`
     };
   });
