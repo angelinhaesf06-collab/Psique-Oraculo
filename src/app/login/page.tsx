@@ -133,22 +133,20 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Header com Ícone Protagonista */}
-      <div className="fixed top-8 md:top-12 left-0 right-0 flex justify-center items-center z-50 pointer-events-none">
-        <div className="w-32 h-32 md:w-56 md:h-56 bg-white rounded-full flex items-center justify-center shadow-[0_20px_60px_rgba(0,0,0,0.2)] overflow-hidden border-2 border-gold/30 pointer-events-auto animate-in zoom-in duration-1000">
+      <div className="w-full max-w-[320px] space-y-4 md:space-y-6 text-center z-10 flex flex-col items-center overflow-y-auto max-h-screen py-8">
+        
+        {/* Ícone Protagonista (Agora dentro do fluxo para não cortar o nome) */}
+        <div className="w-32 h-32 md:w-48 md:h-48 bg-white rounded-full flex items-center justify-center shadow-[0_15px_45px_rgba(0,0,0,0.15)] overflow-hidden border-2 border-gold/30 animate-in zoom-in duration-1000 shrink-0">
           <img src="/assets/brand/icon-512.png" alt="Icon" className="w-full h-full object-cover scale-110" />
         </div>
-      </div>
 
-      <div className="w-full max-w-[320px] space-y-4 md:space-y-10 text-center z-10 pt-32 md:pt-48 flex flex-col items-center">
-        
-        <div className="space-y-1 pt-8 md:pt-16">
-          <h2 className="text-5xl md:text-8xl font-serif text-[#A08149] leading-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
+        <div className="space-y-1">
+          <h2 className="text-5xl md:text-7xl font-serif text-[#A08149] leading-tight" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h2>
           <p className="text-[#2C2420]/60 text-[10px] tracking-[0.4em] font-bold uppercase">Seu oráculo de bolso</p>
           <p className="text-[#2C2420]/20 text-[8px] tracking-[0.2em] font-medium uppercase mt-1">Sintonize sua Essência</p>
         </div>
 
-        <div className="w-full space-y-4 md:space-y-8">
+        <div className="w-full space-y-4">
            <input
               type="text"
               placeholder="SEU NOME"
@@ -168,7 +166,7 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-3 py-1">
             <div className="h-[1px] flex-1 bg-gold/10" />
-            <span className="text-[7px] font-bold text-gold/30 uppercase tracking-widest leading-none">Acesso Rápido</span>
+            <span className="text-[7px] font-bold text-gold/30 uppercase tracking-widest leading-none">Entrada</span>
             <div className="h-[1px] flex-1 bg-gold/10" />
           </div>
 
@@ -179,7 +177,6 @@ export default function LoginPage() {
               setNome(testName);
               setEmail(testEmail);
               
-              // Simula o envio do formulário diretamente
               const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
               handleEmailLogin(fakeEvent);
             }}
@@ -187,12 +184,12 @@ export default function LoginPage() {
             className="w-full py-4 bg-gradient-to-r from-[#A08149] to-[#2C2420] text-white rounded-2xl font-bold text-[10px] uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex flex-col items-center justify-center gap-1"
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-            <span>{loading ? 'Sintonizando...' : 'Abrir Portal ✨'}</span>
+            <span>{loading ? 'Sintonizando...' : 'ACESSO TESTE ✨'}</span>
           </button>
 
           <div className="space-y-2">
             <p className="text-[7px] text-gold/40 uppercase tracking-widest">Ou use seu e-mail para salvar histórico</p>
-            <div className="relative max-w-[240px] mx-auto">
+            <div className="relative max-w-[200px] mx-auto">
               <input
                 type="email"
                 placeholder="SEU E-MAIL (OPCIONAL)"
@@ -204,7 +201,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="pt-6">
+        <div className="pt-4">
             <p className="text-[7px] font-medium text-gold/20 tracking-[0.4em] uppercase leading-none">Luxo • Misticismo • Psicologia</p>
         </div>
       </div>
