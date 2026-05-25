@@ -27,12 +27,16 @@ export async function drawCards(deckName: string, count: number = 3) {
     const { data, error } = await supabase.rpc('draw_random_cards', {
       p_deck_name: deckName,
       p_count: count,
-      p_random_seed: Math.random().toString(36).substring(2)
+      p_random_seed: `${Date.now()}-${Math.random().toString(36).substring(2)}-${Math.random().toString(36).substring(2)}`
     });
 
     if (!error && data && data.length > 0) {
-      console.log("Cartas sorteadas do Supabase:", data.map((c: any) => c.card_name));
-      return data.map((card: any) => ({
+      console.log("Cartas sorteadas do Supabase (bruto):", data.map((c: any) => c.card_name));
+      
+      // Re-embaralhar localmente para garantir entropia máxima
+      const shuffledData = [...data].sort(() => Math.random() - 0.5);
+      
+      return shuffledData.map((card: any) => ({
         name: card.card_name,
         slug: card.card_slug,
         image_url: card.image_url.startsWith('http') 

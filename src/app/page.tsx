@@ -47,7 +47,7 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[tipoOraculo] || 'taro';
   
-  const normalizedSlug = (data.card_slug || '').replace(/_/g, '-');
+  const normalizedSlug = (data.card_slug || '').replace(/_/g, '-').toLowerCase().trim();
 
   const customMap: Record<string, string> = {
     'o-louco': '00_louco.png.jpeg',
@@ -81,6 +81,13 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
     : (useLocalFallback 
         ? `/assets/decks/${folder}/${normalizedSlug}.jpg`
         : (data.image_url || `/assets/decks/${folder}/${normalizedSlug}.jpg`));
+
+  // Log de Depuração Premium
+  useEffect(() => {
+    if (data.carta) {
+      console.log(`[Oráculo Debug] Carta: ${data.carta} | Slug: ${normalizedSlug} | Path: ${imagePath}`);
+    }
+  }, [data.carta, normalizedSlug, imagePath]);
 
   return (
     <div className="flex flex-col items-center gap-1 md:gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out" style={{ animationDelay: `${index * 200}ms` }}>
