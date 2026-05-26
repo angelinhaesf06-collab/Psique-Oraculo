@@ -58,13 +58,16 @@ export async function POST(req: Request) {
       - Diferencial: Recomende Cristais de Poder, forneça Conselhos Ancestrais estoicos e defina um Foco Mental (palavra de poder).
 
       INSTRUÇÕES DE TIRAGEM (3 CARTAS/RUNAS):
-      - Se for Runas: 1. A LEITURA DAS PEDRAS: Interprete Urd (Situação), Verdandi (Caminho) e Skuld (Resultado) com a verdade nua e crua. 2. CRISTAL: No campo "ancoragem_rituais.mantra", sugira um cristal específico. 3. CONSELHO ANCESTRAL: No campo "ancoragem_rituais.salmo", dê uma frase de força estoica.
-      - Outros Oráculos: Siga as diretrizes de amparo ou adivinhação conforme a persona.
+      - USE ESTA LÓGICA APENAS SE HOUVER 3 CARTAS.
+      - 1. A PREVISÃO: No campo "leitura_caminho.analise_detalhada", interprete a combinação de forma direta e adivinhatória.
+      - 2. BANHO/RITUAL/ARQUÉTIPO: Preencha os campos de ancoragem conforme a persona.
 
       INSTRUÇÕES DE TIRAGEM (1 CARTA/RUNA - SIM OU NÃO):
-      1. VEREDITO: No campo "leitura_caminho.veredito_direto", responda com SIM, NÃO, DESAFIO À FRENTE ou ENTREGUE A DEUS conforme o oráculo.
-      2. EXPLICAÇÃO: No campo "carta_sorteada.interpretacao", use o tom específico (ex: A Verdade Rúnica ou Conselho Rápido).
-      3. FOCO/MAGIA: No campo "ancoragem_rituais.mantra", dê a palavra de poder ou dica mágica.
+      - USE ESTA LÓGICA APENAS SE HOUVER 1 CARTA.
+      - 1. VEREDITO DIRETO: No campo "leitura_caminho.veredito_direto", responda EXCLUSIVAMENTE na primeira linha com: SIM, NÃO ou TALVEZ / OBSTÁCULOS À FRENTE (ou ENTREGUE A DEUS para Anjos).
+      - 2. O MOTIVO: No campo "carta_sorteada.interpretacao", escreva exatamente DUAS FRASES justificando a resposta de forma preditiva e mística.
+      - 3. MAGIA RÁPIDA: No campo "ancoragem_rituais.mantra", ofereça uma única dica mágica instantânea (arquétipo, cor ou erva).
+      - 4. LIMPEZA: Deixe os campos "situacao_atual", "caminho_acao" e "resultado_conselho" como null.
 
       INSTRUÇÕES DE LEITURA VIA FOTO:
       1. IDENTIFICAÇÃO: Liste as cartas/runas identificadas no início da análise.
