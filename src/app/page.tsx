@@ -579,7 +579,11 @@ export default function OraculoJornada() {
           <div className="absolute inset-0 bg-[#2C2420]/70 backdrop-blur-md" onClick={() => setModalAberto(null)} />
           <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
             <div className="p-6 border-b border-[#E5D9C3]/30 flex justify-between items-center bg-white/50">
-              <h3 className="text-2xl font-serif text-[#C4A484] italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>{modalAberto === 'assinatura' ? 'Portal da Abundância' : modalAberto}</h3>
+              <h3 className="text-2xl font-serif text-[#C4A484] italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+                {modalAberto === 'assinatura' ? 'Portal da Abundância' : 
+                 modalAberto === 'mensagem_ampliada' ? 'Sintonização de Hoje' : 
+                 modalAberto}
+              </h3>
               <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-[#C4A484]/10 rounded-full"><X className="w-6 h-6 text-[#C4A484]" /></button>
             </div>
             <div className="p-8 overflow-y-auto text-center">
@@ -595,8 +599,8 @@ export default function OraculoJornada() {
 
               {modalAberto === 'mensagem_ampliada' && mensagemDia && (
                 <div className="space-y-8 py-4">
-                  <div className="w-24 h-24 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto animate-bounce-slow">
-                    <Sparkles className="w-12 h-12 text-[#C4A484]" />
+                  <div className="w-24 h-24 relative mx-auto">
+                    <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
                   </div>
                   <div className="space-y-6">
                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização e Bem-estar</span>
