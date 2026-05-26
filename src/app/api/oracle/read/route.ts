@@ -61,7 +61,8 @@ export async function POST(req: Request) {
       REGRAS DE ESTRUTURA:
       1. Use o nome ${body.userName || "Alma Querida"} com carinho.
       2. O tema é "${tema}". 
-      3. EXPLICAÇÃO CARTA POR CARTA (Distribuição de Papéis OBRIGATÓRIA): 
+      3. SE O TIPO DE LEITURA FOR "mensagem_dia": Gere uma mensagem motivadora, extremamente acolhedora e pessoal para ${body.userName || "Alma Querida"}. Inclua obrigatoriamente sugestões de bem-estar para o dia (ex: caminhar, praticar um esporte, cozinhar algo especial, meditar). A mensagem deve fazer o consulente se sentir visto e cuidado.
+      4. EXPLICAÇÃO CARTA POR CARTA (Distribuição de Papéis OBRIGATÓRIA): 
          - Se houver 3 cartas (Método Completo ou Foto):
             - CARTA 1: Representa EXCLUSIVAMENTE a SITUAÇÃO ATUAL.
             - CARTA 2: Representa EXCLUSIVAMENTE o CAMINHO (Ação).

@@ -138,16 +138,24 @@ export default function OraculoJornada() {
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
-  const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | null>(null);
+  const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | 'mensagem_ampliada' | null>(null);
   const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
 
   useEffect(() => {
     const fetchMensagemDia = async () => {
       try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
+        
         const res = await fetch('/api/oracle/read', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação' })
+          body: JSON.stringify({ 
+            tipoOraculo: 'Geral', 
+            tipoLeitura: 'mensagem_dia', 
+            tema: 'Motivação e Bem-estar',
+            userName: userName
+          })
         });
         const data = await res.json();
         if (data.acolhimento_quantum) {
@@ -339,15 +347,20 @@ export default function OraculoJornada() {
             </h2>
 
             {mensagemDia && (
-              <div className="w-full mb-10 p-6 bg-white/40 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] shadow-sm animate-in fade-in zoom-in-95 duration-1000 relative overflow-hidden group">
+              <div 
+                onClick={() => setModalAberto('mensagem_ampliada')}
+                className="w-full mb-10 p-6 bg-white/40 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] shadow-sm animate-in fade-in zoom-in-95 duration-1000 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all"
+              >
                 <div className="absolute -top-2 -right-2 opacity-10 group-hover:rotate-12 transition-transform duration-700">
                   <Sparkles size={48} className="text-[#C4A484]" />
                 </div>
                 <div className="flex flex-col items-center text-center space-y-3">
                   <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#C4A484]/60">Sintonização do Dia</span>
-                  <p className="text-sm md:text-base italic text-[#5C4D3C] font-serif leading-relaxed">"{mensagemDia.texto}"</p>
+                  <p className="text-sm md:text-base italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3">"{mensagemDia.texto}"</p>
                   <div className="w-10 h-[1px] bg-[#C4A484]/20" />
-                  <span className="text-[10px] font-bold text-[#C4A484] tracking-widest">{mensagemDia.autor}</span>
+                  <span className="text-[10px] font-bold text-[#C4A484] tracking-widest flex items-center gap-2">
+                    {mensagemDia.autor} <Info size={10} className="opacity-40" />
+                  </span>
                 </div>
               </div>
             )}
@@ -577,6 +590,30 @@ export default function OraculoJornada() {
                   <p className="text-xs leading-relaxed opacity-70">A energia dos oráculos se conectou com o seu caminho. Para ter acesso a consultas ilimitadas, rituais e banhos, assine o plano anual.</p>
                   <div className="bg-[#C4A484]/5 p-5 rounded-3xl border border-[#C4A484]/20"><div className="text-3xl font-black text-[#C4A484]">R$ 89,00<span className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">/ano</span></div></div>
                   <button className="w-full py-5 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-2xl font-bold uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all text-xs">Desbloquear Acesso</button>
+                </div>
+              )}
+
+              {modalAberto === 'mensagem_ampliada' && mensagemDia && (
+                <div className="space-y-8 py-4">
+                  <div className="w-24 h-24 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto animate-bounce-slow">
+                    <Sparkles className="w-12 h-12 text-[#C4A484]" />
+                  </div>
+                  <div className="space-y-6">
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização e Bem-estar</span>
+                    <p className="text-xl md:text-2xl italic font-serif text-[#5C4D3C] leading-relaxed px-2">
+                      "{mensagemDia.texto}"
+                    </p>
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-[2px] bg-[#C4A484]/20 rounded-full" />
+                      <span className="text-xs font-bold text-[#C4A484] tracking-[0.2em]">{mensagemDia.autor}</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setModalAberto(null)}
+                    className="mt-8 px-10 py-4 bg-[#C4A484] text-white rounded-full text-[10px] font-black uppercase tracking-[0.3em] shadow-lg active:scale-95 transition-all"
+                  >
+                    Receber com Gratidão ✨
+                  </button>
                 </div>
               )}
             </div>
