@@ -306,10 +306,10 @@ export default function OraculoJornada() {
         <img src="/assets/brand/mandala-login.png" alt="" className="w-[150%] max-w-none animate-spin-slow" />
       </div>
 
-      <div className="relative z-10 w-full max-w-md flex-1 flex flex-col items-center px-6 pt-12 pb-24">
+      <div className="relative z-10 w-full max-w-md flex-1 flex flex-col items-center px-6 pt-6 pb-24">
         
-        <div className={`transition-all duration-1000 flex flex-col items-center mb-8 ${passo === 0 ? "mt-4" : "mt-0"}`}>
-           <div className="w-24 h-24 md:w-32 md:h-32 relative mb-4">
+        <div className={`transition-all duration-1000 flex flex-col items-center mb-6 ${passo === 0 ? "mt-2" : "mt-0"}`}>
+           <div className="w-20 h-20 md:w-32 md:h-32 relative mb-4">
               <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
            </div>
         </div>
@@ -320,14 +320,14 @@ export default function OraculoJornada() {
               Qual arcano você escolhe hoje?
             </h2>
             
-            <div className="grid grid-cols-3 gap-3 w-full mb-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full mb-12">
               {[
                 { id: 'Tarô', title: 'TARÔ', img: '/assets/decks/covers/taro.jpg' },
                 { id: 'Baralho Cigano', title: 'CIGANO', img: '/assets/decks/covers/cigano.jpg' },
                 { id: 'Tarô dos Anjos', title: 'ANJOS', img: '/assets/decks/covers/anjos.jpg' }
               ].map((o) => (
                 <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex flex-col items-center group">
-                  <div className="w-full aspect-[3/5.2] bg-white rounded-2xl border-2 border-[#E5D9C3] p-1.5 shadow-md group-active:scale-95 transition-all mb-2 overflow-hidden">
+                  <div className="w-full aspect-[3/5.2] bg-white rounded-2xl border-2 border-[#E5D9C3] p-1 shadow-md group-active:scale-95 transition-all mb-2 overflow-hidden">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-xl" />
                   </div>
                   <span className="text-[10px] font-bold tracking-[0.2em] text-[#8B735B]">{o.title}</span>
@@ -396,20 +396,20 @@ export default function OraculoJornada() {
 
         {passo === 3 && (
           <div className="flex flex-col items-center w-full animate-in fade-in slide-in-from-right-4 duration-700">
-            <h2 className="text-4xl md:text-5xl font-serif text-[#C4A484] text-center mb-12 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
-            <div className="flex flex-col gap-4 w-full max-w-[300px]">
+            <h2 className="text-4xl md:text-5xl font-serif text-[#C4A484] text-center mb-10 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
+            <div className="flex flex-col gap-3 w-full max-w-[300px]">
               {[
                 { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]', action: () => fileInputRef.current?.click() },
                 { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]', action: () => handleLeitura('completa') },
                 { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]', action: () => handleLeitura('sim_nao') }
               ].map((m) => (
-                <button key={m.id} onClick={m.action} className="w-full h-20 flex items-center gap-5 bg-white border border-[#E5D9C3] px-6 rounded-[24px] shadow-lg active:scale-[0.98] transition-all group">
-                  <div className={`w-12 h-12 ${m.color} rounded-2xl flex items-center justify-center text-white shadow-md group-hover:rotate-6 transition-transform`}><m.icon size={24} /></div>
-                  <h4 className="font-bold text-xs text-[#5C4D3C] uppercase tracking-[0.1em] text-left leading-tight">{m.title}</h4>
+                <button key={m.id} onClick={m.action} className="w-full h-16 flex items-center gap-4 bg-white border border-[#E5D9C3] px-5 rounded-[20px] shadow-lg active:scale-[0.98] transition-all group">
+                  <div className={`w-10 h-10 ${m.color} rounded-xl flex items-center justify-center text-white shadow-md group-hover:rotate-6 transition-transform`}><m.icon size={20} /></div>
+                  <h4 className="font-bold text-[10px] md:text-xs text-[#5C4D3C] uppercase tracking-[0.1em] text-left leading-tight">{m.title}</h4>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="mt-16 text-[10px] font-bold uppercase tracking-[0.3em] text-[#C4A484]">‹ Refazer Pergunta</button>
+            <button onClick={prevPasso} className="mt-12 text-[10px] font-bold uppercase tracking-[0.3em] text-[#C4A484]">‹ Refazer Pergunta</button>
             <input type="file" accept="image/*" capture="environment" className="hidden" ref={fileInputRef} onChange={handleCaptureImage} />
           </div>
         )}
@@ -453,6 +453,62 @@ export default function OraculoJornada() {
                     <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-xs tracking-[0.3em]">{resultado.leitura_caminho.veredito_direto}</div>
                   )}
                </div>
+
+               {resultado.ancoragem_rituais && (
+                 <div className="bg-white/90 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-8">
+                   <h3 className="text-[#C4A484] font-serif text-3xl text-center italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Ancoragem e Rituais</h3>
+                   
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                     {resultado.ancoragem_rituais.mantra && (
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2 text-[#C4A484]">
+                           <Sparkles size={16} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Mantra de Poder</span>
+                         </div>
+                         <p className="text-sm italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p>
+                       </div>
+                     )}
+                     
+                     {resultado.ancoragem_rituais.salmo && (
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2 text-[#C4A484]">
+                           <ShieldCheck size={16} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Salmo Protetor</span>
+                         </div>
+                         <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p>
+                       </div>
+                     )}
+
+                     {resultado.ancoragem_rituais.biblia && (
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2 text-[#C4A484]">
+                           <Star size={16} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Sabedoria Bíblica</span>
+                         </div>
+                         <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.biblia}</p>
+                       </div>
+                     )}
+
+                     {resultado.ancoragem_rituais.banho && (
+                       <div className="space-y-2">
+                         <div className="flex items-center gap-2 text-[#C4A484]">
+                           <Activity size={16} />
+                           <span className="text-[10px] font-black uppercase tracking-widest">Banho de Ervas</span>
+                         </div>
+                         <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.banho}</p>
+                       </div>
+                     )}
+                   </div>
+                 </div>
+               )}
+
+               {resultado.acolhimento_quantum && (
+                 <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic">
+                   <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} className="animate-pulse" /></div>
+                   <h4 className="text-[#C4A484] font-serif text-2xl mb-2" style={{ fontFamily: 'var(--font-great-vibes)' }}>{resultado.acolhimento_quantum.titulo}</h4>
+                   <p className="text-sm text-[#5C4D3C]/70 leading-relaxed">{resultado.acolhimento_quantum.conteudo}</p>
+                 </div>
+               )}
 
                <div className="pt-10 pb-16 flex justify-center">
                   <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[11px] font-black uppercase tracking-[0.4em] text-[#C4A484] py-5 bg-white shadow-xl px-16 rounded-full border-2 border-[#E5D9C3] hover:bg-[#C4A484] hover:text-white transition-all active:scale-95">Novo Ciclo ✨</button>
