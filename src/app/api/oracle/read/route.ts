@@ -113,15 +113,10 @@ export async function POST(req: Request) {
     try {
       const result = await model.generateContent({
         contents: [{ role: "user", parts }],
-        tools: [{ googleSearch: {} }] as any,
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.9,
           maxOutputTokens: 1200,
-          // @ts-ignore - suporte para modelos 3.1/thinking
-          thinkingConfig: {
-            includeThoughts: true
-          }
         }
       });
 
@@ -130,7 +125,7 @@ export async function POST(req: Request) {
       console.log("Conteúdo da Resposta:", responseText);
     } catch (aiError: any) {
       console.error("ERRO CRÍTICO NA IA:", aiError);
-      throw new Error(`Erro na IA (${aiError.status || '404?'}): ${aiError.message}`);
+      throw new Error(`Erro na IA (${aiError.status || 'IA-Error'}): ${aiError.message}`);
     }
 
     const jsonResponse = JSON.parse(responseText);
