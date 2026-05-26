@@ -223,13 +223,6 @@ export default function OraculoJornada() {
             setDesabafo(data.matches[0]);
           }
         });
-
-        // Garantir que temos um listener para o resultado final
-        SpeechRecognition.addListener("results", (data: any) => {
-           if (data.matches && data.results.length > 0) {
-             setDesabafo(data.matches[0]);
-           }
-        });
       } else {
         toast.error("Reconhecimento de voz não disponível neste aparelho.");
       }
