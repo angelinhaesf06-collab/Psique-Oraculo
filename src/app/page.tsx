@@ -613,7 +613,7 @@ export default function OraculoJornada() {
                 <div className="space-y-6">
                   <div className="w-20 h-20 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto"><Crown className="w-10 h-10 text-[#C4A484]" /></div>
                   <h4 className="text-xl font-bold text-[#2C2420]">✨ Sua jornada de conexão começou...</h4>
-                  <p className="text-xs leading-relaxed opacity-70">A energia dos oráculos se conectou com o seu caminho. Para ter acesso a consultas ilimitadas, rituais e banhos, assine o plano anual.</p>
+                  <p className="text-xs leading-relaxed opacity-70">A energia dos oráculos se conectou com o seu caminho. No plano gratuito, você tem direito a **5 tiragens por dia**. Para ter acesso a consultas ilimitadas, rituais e banhos, assine o plano anual.</p>
                   <div className="bg-[#C4A484]/5 p-5 rounded-3xl border border-[#C4A484]/20"><div className="text-3xl font-black text-[#C4A484]">R$ 89,00<span className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-1">/ano</span></div></div>
                   <button className="w-full py-5 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-2xl font-bold uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all text-xs">Desbloquear Acesso</button>
                 </div>
