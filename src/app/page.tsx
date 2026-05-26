@@ -144,6 +144,17 @@ export default function OraculoJornada() {
   useEffect(() => {
     const fetchMensagemDia = async () => {
       try {
+        const today = new Date().toLocaleDateString('pt-BR');
+        const savedData = localStorage.getItem('psique_mensagem_dia');
+        
+        if (savedData) {
+          const { texto, autor, data } = JSON.parse(savedData);
+          if (data === today) {
+            setMensagemDia({ texto, autor });
+            return;
+          }
+        }
+
         const { data: { session } } = await supabase.auth.getSession();
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
         
@@ -157,9 +168,15 @@ export default function OraculoJornada() {
             userName: userName
           })
         });
-        const data = await res.json();
-        if (data.acolhimento_quantum) {
-          setMensagemDia({ texto: data.acolhimento_quantum.conteudo, autor: data.acolhimento_quantum.titulo });
+        const dataRes = await res.json();
+        if (dataRes.acolhimento_quantum) {
+          const novaMensagem = { 
+            texto: dataRes.acolhimento_quantum.conteudo, 
+            autor: dataRes.acolhimento_quantum.titulo,
+            data: today
+          };
+          setMensagemDia({ texto: novaMensagem.texto, autor: novaMensagem.autor });
+          localStorage.setItem('psique_mensagem_dia', JSON.stringify(novaMensagem));
         }
       } catch (e) { console.error("Erro ao carregar mensagem do dia:", e); }
     };
