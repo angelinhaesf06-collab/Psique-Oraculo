@@ -98,9 +98,15 @@ export default function OraculoJornada() {
         }
         const { data: { session } } = await supabase.auth.getSession();
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
-        const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-        const API_BASE_URL = isNative ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br') : ''; 
-        const res = await fetch(`${API_BASE_URL}/api/oracle/read`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) });
+        
+        // Melhoria: Forçar URL absoluta no APK para evitar 404
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+        const res = await fetch(`${baseUrl}/api/oracle/read`, { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) 
+        });
+
         if (res.ok) {
           const dataRes = await res.json();
           if (dataRes.acolhimento_quantum) {
@@ -109,7 +115,7 @@ export default function OraculoJornada() {
             localStorage.setItem('psique_mensagem_dia', JSON.stringify(novaMensagem));
           }
         }
-      } catch (e) { console.error(e); }
+      } catch (e) { console.error("Erro Mensagem Dia:", e); }
     };
     fetchMensagemDia();
   }, []);
@@ -124,13 +130,25 @@ export default function OraculoJornada() {
       const cartasSorteadas = tipo === 'foto' ? null : (tipo === 'completa' ? await drawCards(tipoOraculo, 3) : await drawCards(tipoOraculo, 1));
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
-      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      const API_BASE_URL = isNative ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br') : ''; 
-      const res = await fetch(`${API_BASE_URL}/api/oracle/read`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
+      
+      // Melhoria: Forçar URL absoluta no APK para evitar Silêncio no Portal
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+      const apiUrl = `${baseUrl}/api/oracle/read`;
+
+      const res = await fetch(apiUrl, {
+        method: 'POST', 
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' 
+        },
         body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
       });
-      if (!res.ok) throw new Error("Silêncio no Portal.");
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Silêncio no Portal.");
+      }
+      
       const data = await res.json();
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
         if (data.situacao_atual) data.situacao_atual.card_slug = cartasSorteadas[0]?.slug;
