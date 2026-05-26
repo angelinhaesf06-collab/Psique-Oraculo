@@ -496,15 +496,73 @@ export default function OraculoJornada() {
       {modalAberto && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-[#2C2420]/70 backdrop-blur-md" onClick={() => setModalAberto(null)} />
-          <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden max-h-[80vh] flex flex-col">
-            <div className="p-5 border-b border-[#E5D9C3]/30 flex justify-between items-center bg-white/50">
-              <h3 className="text-xl font-serif text-[#C4A484]">{modalAberto === 'assinatura' ? 'Portal da Abundância' : modalAberto === 'mensagem_ampliada' ? 'Sintonização' : modalAberto}</h3>
-              <button onClick={() => setModalAberto(null)} className="p-2"><X className="w-5 h-5 text-[#C4A484]" /></button>
-            </div>
-            <div className="p-6 overflow-y-auto text-center">
-              {modalAberto === 'assinatura' && <div className="space-y-5"><div className="w-16 h-16 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto"><Crown className="w-8 h-8 text-[#C4A484]" /></div><h4 className="text-lg font-bold">Jornada de Conexão</h4><p className="text-[10px] leading-relaxed opacity-70">Acesse consultas ilimitadas, rituais e banhos exclusivos.</p><div className="bg-[#C4A484]/5 p-4 rounded-2xl border border-[#C4A484]/20"><div className="text-2xl font-black text-[#C4A484]">R$ 89,00<span className="text-[8px] opacity-40 ml-1">/ano</span></div></div><button className="w-full py-4 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-xl font-bold uppercase tracking-widest text-[9px]">Desbloquear Acesso</button></div>}
-              {modalAberto === 'mensagem_ampliada' && mensagemDia && <div className="space-y-6"><div className="w-20 h-20 mx-auto"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full animate-spin-slow" /></div><p className="text-lg italic font-serif text-[#5C4D3C] leading-relaxed">"{mensagemDia.texto}"</p><span className="text-[10px] font-bold text-[#C4A484] tracking-widest">{mensagemDia.autor}</span><button onClick={() => setModalAberto(null)} className="w-full py-4 bg-[#C4A484] text-white rounded-full text-[9px] font-black uppercase tracking-widest shadow-md">Receber ✨</button></div>}
-            </div>
+          <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden h-[85vh] max-h-[85vh] flex flex-col">
+            
+            {modalAberto === 'mensagem_ampliada' && mensagemDia && (
+              <div className="flex flex-col h-full bg-[#FDFBF7]">
+                {/* Cabeçalho do Print */}
+                <div className="w-full flex justify-between items-center px-6 py-4 shrink-0 bg-white/20">
+                  <span className="text-2xl italic font-serif text-[#C4A484] lowercase tracking-tight opacity-70">mensagem_ampliada</span>
+                  <button onClick={() => setModalAberto(null)} className="p-2 text-[#C4A484] hover:opacity-50 transition-opacity"><X size={28} strokeWidth={1} /></button>
+                </div>
+
+                <div className="flex-1 w-full overflow-y-auto px-8 flex flex-col items-center justify-center text-center py-6">
+                  {/* Ícone Circular Estelar */}
+                  <div className="w-28 h-24 rounded-full bg-[#F5F2EA] flex items-center justify-center shrink-0 mb-10">
+                    <Sparkles size={56} className="text-[#C4A484]" strokeWidth={0.8} />
+                  </div>
+
+                  <div className="space-y-8 max-w-[320px]">
+                    <h4 className="text-[11px] font-sans font-black tracking-[0.4em] text-[#C4A484] uppercase opacity-80">
+                      Sintonização e Bem-estar
+                    </h4>
+                    
+                    <p className="text-2xl italic font-serif text-[#5C4D3C] leading-relaxed">
+                      "{mensagemDia.texto}"
+                    </p>
+
+                    <div className="flex flex-col items-center gap-6 pt-6">
+                      <div className="w-20 h-[0.5px] bg-[#C4A484]/20" />
+                      <span className="text-xs font-sans font-bold tracking-[0.2em] text-[#C4A484] uppercase">
+                        {mensagemDia.autor || "Abraço da Alma"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botão Inferior do Print */}
+                <div className="w-full px-10 pb-10 pt-4 shrink-0">
+                  <button 
+                    onClick={() => setModalAberto(null)} 
+                    className="w-full py-5 bg-[#C4A484] text-white rounded-[45px] font-sans font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl active:scale-95 transition-all hover:bg-[#B39373]"
+                  >
+                    Receber com Gratidão ✨
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {modalAberto !== 'mensagem_ampliada' && (
+              <>
+                <div className="p-5 border-b border-[#E5D9C3]/30 flex justify-between items-center bg-white/50">
+                  <h3 className="text-xl font-serif text-[#C4A484]">{modalAberto === 'assinatura' ? 'Portal da Abundância' : modalAberto}</h3>
+                  <button onClick={() => setModalAberto(null)} className="p-2"><X className="w-5 h-5 text-[#C4A484]" /></button>
+                </div>
+                <div className="p-6 overflow-y-auto text-center">
+                  {modalAberto === 'assinatura' && (
+                    <div className="space-y-5">
+                      <div className="w-16 h-16 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto"><Crown className="w-8 h-8 text-[#C4A484]" /></div>
+                      <h4 className="text-lg font-bold">Jornada de Conexão</h4>
+                      <p className="text-[10px] leading-relaxed opacity-70">Acesse consultas ilimitadas, rituais e banhos exclusivos.</p>
+                      <div className="bg-[#C4A484]/5 p-4 rounded-2xl border border-[#C4A484]/20">
+                        <div className="text-2xl font-black text-[#C4A484]">R$ 89,00<span className="text-[8px] opacity-40 ml-1">/ano</span></div>
+                      </div>
+                      <button className="w-full py-4 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-xl font-bold uppercase tracking-widest text-[9px]">Desbloquear Acesso</button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
