@@ -174,16 +174,21 @@ export default function OraculoJornada() {
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-4 gap-2 w-full px-2">
-              {[{ id: 'Tarô', title: 'TARÔ', img: '/assets/decks/covers/taro.jpg' }, { id: 'Baralho Cigano', title: 'CIGANO', img: '/assets/decks/covers/cigano.jpg' }, { id: 'Tarô dos Anjos', title: 'ANJOS', img: '/assets/decks/covers/anjos.jpg' }, { id: 'Runas', title: 'RUNAS', img: '/assets/decks/covers/runas.jpg' }].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex flex-col items-center group">
-                  <div className="w-full aspect-[3/5] bg-white rounded-xl border border-[#E5D9C3] p-0.5 shadow-sm group-active:scale-95 transition-all mb-1 overflow-hidden">
+            <div className="flex flex-col gap-4 w-full max-w-[240px] px-4">
+              {[
+                { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg' },
+                { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
+                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg' }
+              ].map((o) => (
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 group w-full bg-white/40 backdrop-blur-sm border border-[#E5D9C3] p-2 rounded-2xl shadow-sm active:scale-95 transition-all">
+                  <div className="w-16 h-24 bg-white rounded-xl border border-[#E5D9C3] p-0.5 overflow-hidden shrink-0">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-lg" />
                   </div>
-                  <span className="text-[7px] font-bold tracking-[0.1em] text-[#8B735B]">{o.title}</span>
+                  <span className="text-xs font-bold tracking-[0.2em] text-[#8B735B] uppercase text-left">{o.title}</span>
                 </button>
               ))}
             </div>
+
             <div className="flex flex-col items-center gap-4 w-full">
                <h1 className="text-2xl font-serif text-[#C4A484] tracking-tight opacity-40">Psiquê Oráculo</h1>
                <button onClick={() => setModalAberto('assinatura')} className="w-full max-w-[160px] h-10 flex items-center justify-center gap-2 rounded-full border border-[#E5D9C3] bg-white/50 shadow-sm active:scale-95 transition-all"><Crown className="w-3 h-3 text-[#C4A484]" /><span className="text-[8px] font-bold text-[#8B735B] uppercase tracking-widest">Premium</span></button>
