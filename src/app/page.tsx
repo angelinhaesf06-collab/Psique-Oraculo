@@ -272,7 +272,17 @@ export default function OraculoJornada() {
                    </div>
                  )}
 
-                 {resultado.acolhimento_quantum && <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic"><h4 className="text-[#C4A484] font-serif text-lg mb-2">{resultado.acolhimento_quantum.titulo}</h4><p className="text-xs text-[#5C4D3C]/70 leading-relaxed">{resultado.acolhimento_quantum.conteudo}</p></div>}
+                 {resultado.acolhimento_quantum && (
+                   <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic">
+                     <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} className={tipoOraculo === 'Tarô' ? 'animate-pulse' : ''} /></div>
+                     <h4 className="text-[#C4A484] font-serif text-lg mb-2">
+                       {tipoOraculo === 'Tarô' ? 'Mantra da Alma' : resultado.acolhimento_quantum.titulo}
+                     </h4>
+                     <p className={`text-xs text-[#5C4D3C]/70 leading-relaxed ${tipoOraculo === 'Tarô' ? 'animate-pulse font-bold text-[#C4A484]' : ''}`}>
+                       {tipoOraculo === 'Tarô' ? resultado.ancoragem_rituais?.mantra || resultado.acolhimento_quantum.conteudo : resultado.acolhimento_quantum.conteudo}
+                     </p>
+                   </div>
+                 )}
               </div>
             </div>
 
