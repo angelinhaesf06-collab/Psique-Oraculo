@@ -153,26 +153,28 @@ export default function LoginPage() {
         <img src="/assets/brand/mandala-login.png" alt="" className="w-[150%] max-w-none animate-spin-slow" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[340px] flex-1 flex flex-col items-center justify-center px-6 py-12 text-center">
+      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-between px-6 py-10 text-center">
         
         {/* Logo/Mandala Superior */}
-        <div className="w-32 h-32 md:w-40 md:h-40 mb-8 animate-in zoom-in duration-1000">
+        <div className="w-24 h-24 md:w-32 md:h-32 animate-in zoom-in duration-1000">
           <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
         </div>
 
-        <div className="mb-10">
-          <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484] mb-4">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484]">
             Psiquê Oráculo
           </h1>
-          <h2 className="text-[10px] md:text-xs font-bold tracking-[0.4em] text-[#8B735B] uppercase mb-1">
-            Seu oráculo de bolso
-          </h2>
-          <p className="text-[8px] font-medium tracking-[0.2em] text-[#C4A484]/60 uppercase">
-            Sintonize sua Essência
-          </p>
+          <div className="space-y-1">
+            <h2 className="text-[10px] md:text-xs font-bold tracking-[0.4em] text-[#8B735B] uppercase">
+              Seu oráculo de bolso
+            </h2>
+            <p className="text-[8px] font-medium tracking-[0.2em] text-[#C4A484]/60 uppercase">
+              Sintonize sua Essência
+            </p>
+          </div>
         </div>
 
-        <div className="w-full space-y-4 mb-12">
+        <div className="w-full space-y-4">
           <input
             type="text"
             placeholder="SEU NOME"
@@ -184,13 +186,13 @@ export default function LoginPage() {
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
-            className="w-full h-20 bg-white border-2 border-[#E5D9C3] rounded-[24px] flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all disabled:opacity-50"
+            className="w-full h-16 bg-white border-2 border-[#E5D9C3] rounded-[24px] flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all disabled:opacity-50"
           >
-            <Fingerprint className="w-7 h-7 text-[#C4A484]" strokeWidth={1.5} />
+            <Fingerprint className="w-6 h-6 text-[#C4A484]" strokeWidth={1.5} />
             <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#8B735B]/60">Entrar com Digital</span>
           </button>
 
-          <div className="flex items-center gap-4 py-2 opacity-30">
+          <div className="flex items-center gap-4 py-1 opacity-30">
             <div className="h-[0.5px] flex-1 bg-[#8B735B]" />
             <span className="text-[8px] font-bold uppercase tracking-widest">Entrada</span>
             <div className="h-[0.5px] flex-1 bg-[#8B735B]" />
@@ -206,15 +208,14 @@ export default function LoginPage() {
               handleEmailLogin(fakeEvent);
             }}
             disabled={loading}
-            className="w-full h-20 bg-gradient-to-br from-[#4A3B28] via-[#2C2420] to-[#1A1614] text-white rounded-[28px] shadow-2xl active:scale-95 transition-all flex flex-col items-center justify-center gap-1 group overflow-hidden relative"
+            className="w-full h-16 bg-gradient-to-br from-[#4A3B28] via-[#2C2420] to-[#1A1614] text-white rounded-[28px] shadow-2xl active:scale-95 transition-all flex flex-col items-center justify-center gap-1 group overflow-hidden relative"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
-            <Sparkles className="w-6 h-6 text-[#C4A484] group-hover:rotate-12 transition-transform" />
-            <span className="text-[11px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Acesso Teste ✨</span>
+            <Sparkles className="w-5 h-5 text-[#C4A484] group-hover:rotate-12 transition-transform" />
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Acesso Teste ✨</span>
           </button>
 
-          <div className="pt-4 space-y-4">
-             <p className="text-[8px] font-bold text-[#8B735B]/40 uppercase tracking-widest">Ou use seu e-mail para salvar histórico</p>
+          <div className="pt-2">
              <input
                 type="email"
                 placeholder="SEU E-MAIL (OPCIONAL)"
@@ -225,7 +226,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="mt-auto">
+        <div className="mt-4">
           <p className="text-[8px] font-bold text-[#C4A484]/30 tracking-[0.5em] uppercase">
             Luxo • Misticismo • Psicologia
           </p>
