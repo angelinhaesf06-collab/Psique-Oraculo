@@ -142,9 +142,74 @@ export default function OraculoJornada() {
     } catch (error: any) { toast.error(error.message); } finally { setLoading(false); }
   };
 
-  const handleCaptureImage = (e: React.ChangeEvent<HTMLInputElement>) => { /* ... */ };
-  const startRecording = () => { /* ... */ };
-  const stopRecording = () => { /* ... */ };
+  useEffect(() => {
+    const requestPermissions = async () => {
+      try {
+        const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+        if (isNative) {
+          await SpeechRecognition.requestPermissions();
+          await VoiceRecorder.requestAudioRecordingPermission();
+        }
+      } catch (e) {
+        console.warn("Permissões de áudio não concedidas ou não suportadas:", e);
+      }
+    };
+    requestPermissions();
+  }, []);
+
+  const startRecording = async () => {
+    try {
+      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      
+      if (!isNative) {
+        // Fallback para Web (opcional ou apenas aviso)
+        const recognition = new (window as any).webkitSpeechRecognition();
+        recognition.lang = 'pt-BR';
+        recognition.onresult = (event: any) => {
+          const text = event.results[0][0].transcript;
+          setDesabafo(prev => prev + (prev ? ' ' : '') + text);
+        };
+        recognition.start();
+        setIsGravando(true);
+        return;
+      }
+
+      // Lógica Nativa Capacitor
+      const { available } = await SpeechRecognition.available();
+      if (available) {
+        setIsGravando(true);
+        SpeechRecognition.start({
+          language: "pt-BR",
+          partialResults: true,
+          popup: false,
+        });
+
+        SpeechRecognition.addListener("partialResults", (data: any) => {
+          if (data.matches && data.results.length > 0) {
+            setDesabafo(data.matches[0]);
+          }
+        });
+      } else {
+        toast.error("Reconhecimento de voz não disponível neste aparelho.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setIsGravando(false);
+    }
+  };
+
+  const stopRecording = async () => {
+    try {
+      setIsGravando(false);
+      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      if (isNative) {
+        await SpeechRecognition.stop();
+        SpeechRecognition.removeAllListeners();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div className="h-[100dvh] w-full text-[#5C4D3C] font-sans flex flex-col items-center relative bg-[#FDFBF7] overflow-hidden">
