@@ -109,18 +109,25 @@ export async function POST(req: Request) {
       });
     }
 
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        temperature: 0.9,
-        maxOutputTokens: 1200,
-      }
-    });
+    let responseText = "";
+    try {
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.9,
+          maxOutputTokens: 1200,
+        }
+      });
 
-    console.log("Resposta recebida da IA.");
-    const responseText = result.response.text();
-    console.log("Conteúdo da Resposta:", responseText);
+      console.log("Resposta recebida da IA.");
+      responseText = result.response.text();
+      console.log("Conteúdo da Resposta:", responseText);
+    } catch (aiError: any) {
+      console.error("ERRO CRÍTICO NA IA:", aiError);
+      throw new Error(`Erro na IA (${aiError.status || '404?'}): ${aiError.message}`);
+    }
+
     const jsonResponse = JSON.parse(responseText);
 
     // 5. Salvando no Histórico
