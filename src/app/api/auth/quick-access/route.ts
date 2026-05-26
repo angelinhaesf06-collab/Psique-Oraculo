@@ -34,9 +34,26 @@ export async function POST(req: Request) {
       if (createError) throw createError;
     }
 
-    return NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true });
+    
+    // Adicionar headers CORS
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    return response;
   } catch (error: any) {
     console.error("Erro no Quick Access:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const errorResponse = NextResponse.json({ error: error.message }, { status: 500 });
+    errorResponse.headers.set('Access-Control-Allow-Origin', '*');
+    return errorResponse;
   }
+}
+
+export async function OPTIONS() {
+  const response = new NextResponse(null, { status: 204 });
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  return response;
 }

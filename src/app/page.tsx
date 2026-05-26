@@ -168,7 +168,11 @@ export default function OraculoJornada() {
         const { data: { session } } = await supabase.auth.getSession();
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
         
-        const res = await fetch('/api/oracle/read', {
+        const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+        const API_BASE_URL = isNative ? (process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br') : ''; 
+        const fetchUrl = `${API_BASE_URL}/api/oracle/read`;
+
+        const res = await fetch(fetchUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -178,6 +182,9 @@ export default function OraculoJornada() {
             userName: userName
           })
         });
+
+        if (!res.ok) throw new Error("Falha na sintonização");
+        
         const dataRes = await res.json();
         if (dataRes.acolhimento_quantum) {
           const novaMensagem = { 

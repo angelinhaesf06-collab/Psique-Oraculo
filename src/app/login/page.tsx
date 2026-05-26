@@ -85,22 +85,34 @@ export default function LoginPage() {
       
       if (email) {
         // 1. Garantir que o usuário exista e esteja confirmado via API Admin
-        const quickRes = await fetch('/api/auth/quick-access', {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
+        const apiUrl = `${baseUrl}/api/auth/quick-access`;
+        
+        console.log("Chamando Portal em:", apiUrl);
+
+        const quickRes = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, nome: nome || "Consulente" })
         });
 
         if (!quickRes.ok) {
-          const quickErr = await quickRes.json();
-          console.error("Erro na API Quick Access:", quickErr);
+          let errorMsg = "Falha na sintonização inicial.";
+          try {
+            const quickErr = await quickRes.json();
+            errorMsg = quickErr.error || errorMsg;
+          } catch (e) {
+            console.error("Resposta não é JSON:", e);
+          }
+          
+          console.error("Erro na API Quick Access:", errorMsg);
           // Se a API falhar, tentamos o modo demo como último recurso para não travar o usuário
           if (email === 'visitante@psique.com' || email === 'teste@psique.com') {
             console.warn("API falhou, entrando em modo Demo.");
             handleDemoAccess();
             return;
           }
-          throw new Error(quickErr.error || "Falha na sintonização inicial.");
+          throw new Error(errorMsg);
         }
 
         // 2. Agora faz o login normal
