@@ -288,8 +288,16 @@ export default function OraculoJornada() {
               <div className="bg-white/80 backdrop-blur-md rounded-[32px] border border-[#E5D9C3] p-6 shadow-xl w-full">
                 <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base font-light text-[#5C4D3C] resize-none" />
                 <div className="space-y-3 pt-4 border-t border-[#E5D9C3]/30">
-                  <button onMouseDown={startRecording} className="w-full py-3 rounded-full flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-widest bg-[#C4A484]/10 text-[#C4A484] border border-[#C4A484]/20 active:scale-95"><Mic size={16} /> Segure para Falar</button>
-                  <button onClick={nextPasso} disabled={!desabafo} className="w-full bg-[#C4A484] text-white py-4 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg disabled:opacity-20 active:scale-95">Prosseguir</button>
+                  <button 
+                    onMouseDown={startRecording} 
+                    onMouseUp={stopRecording}
+                    onTouchStart={startRecording}
+                    onTouchEnd={stopRecording}
+                    className={`w-full py-3 rounded-full flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-widest transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse' : 'bg-[#C4A484]/10 text-[#C4A484] border border-[#C4A484]/20'} active:scale-95`}
+                  >
+                    <Mic size={16} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
+                  </button>
+                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#C4A484] text-white py-4 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg disabled:opacity-20 active:scale-95">Prosseguir</button>
                 </div>
               </div>
             </div>
