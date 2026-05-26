@@ -38,7 +38,7 @@ const TEMAS = [
   { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#2e1065] via-[#4c1d95] to-[#2e1065]', textColor: 'text-purple-200' },
 ];
 
-function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
+function CardResult({ title, data, index, tipoOraculo, veredito }: { title: string, data: any, index: number, tipoOraculo: string, veredito?: string }) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [useLocalFallback, setUseLocalFallback] = useState(false);
@@ -50,6 +50,10 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const normalizedSlug = (data.card_slug || '').replace(/_/g, '-').toLowerCase().trim();
 
   const customMap: Record<string, string> = {
+    'o-louco': '00_louco.png.jpeg',
+    'o-mago': '01_mago.png.jpeg',
+    'a-sacerdotisa': '02_sacerdotisa.png.jpeg',
+    'a-imperatriz': '03_imperatriz.png.jpeg',
     'o-louco': '00_louco.png.jpeg',
     'o-mago': '01_mago.png.jpeg',
     'a-sacerdotisa': '02_sacerdotisa.png.jpeg',
@@ -89,7 +93,7 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   }, [data.carta, normalizedSlug, imagePath]);
 
   return (
-    <div className="flex flex-col items-center gap-1 md:gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out" style={{ animationDelay: `${index * 200}ms` }}>
+    <div className="flex flex-col items-center gap-2 md:gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out" style={{ animationDelay: `${index * 200}ms` }}>
       <h5 className="text-[7px] md:text-[10px] font-bold uppercase tracking-[0.3em] text-gold/60 text-center leading-none mb-1">{title}</h5>
       <div className="w-[85px] md:w-[180px] relative aspect-[3/4.5] bg-white rounded-[12px] md:rounded-[24px] border border-gold/20 p-1 md:p-2 shadow-[0_10px_30px_rgba(212,185,130,0.15)] group overflow-hidden">
         {imageLoading && !imageError && (
@@ -122,6 +126,16 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
            <div className="absolute inset-0 pointer-events-none border-[0.5px] border-gold/10 rounded-[10px] md:rounded-[18px] m-0.5 md:m-1" />
         </div>
       </div>
+      {veredito && (
+        <div className="mt-2 text-center animate-in fade-in zoom-in duration-1000 delay-500">
+          <span className={`text-xs md:text-lg font-black tracking-[0.2em] uppercase ${
+            veredito.startsWith('SIM') ? 'text-emerald-600' : 
+            veredito.startsWith('NÃO') ? 'text-rose-600' : 'text-amber-600'
+          }`}>
+            {veredito.split(' ')[0]}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -493,7 +507,15 @@ export default function OraculoJornada() {
               {resultado.situacao_atual && <CardResult title="Situação" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />}
               {resultado.caminho_acao && <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />}
               {resultado.resultado_conselho && <CardResult title="Resultado" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />}
-              {!resultado.situacao_atual && resultado.carta_sorteada && <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}
+              {!resultado.situacao_atual && resultado.carta_sorteada && (
+                <CardResult 
+                  title="O Arcano" 
+                  data={resultado.carta_sorteada} 
+                  index={0} 
+                  tipoOraculo={tipoOraculo} 
+                  veredito={resultado.leitura_caminho?.veredito_direto}
+                />
+              )}
             </div>
 
             <div className="w-full space-y-6">
@@ -503,7 +525,7 @@ export default function OraculoJornada() {
                   <p className="text-sm md:text-base leading-relaxed text-white/80 font-light text-justify italic font-serif">
                     {resultado.leitura_caminho?.analise_detalhada}
                   </p>
-                  {resultado.leitura_caminho?.veredito_direto && (
+                  {resultado.leitura_caminho?.veredito_direto && !(!resultado.situacao_atual && resultado.carta_sorteada) && (
                     <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-[10px] tracking-[0.3em]">{resultado.leitura_caminho.veredito_direto}</div>
                   )}
                </div>
