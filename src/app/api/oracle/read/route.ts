@@ -58,6 +58,13 @@ export async function POST(req: Request) {
       2. EXPLICAÇÃO: No campo "carta_sorteada.interpretacao", explique em um breve parágrafo o porquê dessa resposta baseada na energia da carta. Vá direto ao ponto, com tom preditivo e místico.
       3. MANTRA: No campo "ancoragem_rituais.mantra", encerre com um mantra curto e afirmativo para ancorar a energia.
 
+      INSTRUÇÕES DE LEITURA VIA FOTO (BARALHO FÍSICO):
+      Quando o consulente enviar uma foto do próprio jogo:
+      1. IDENTIFICAÇÃO: Analise a imagem e identifique as cartas presentes (Arcanos Maiores/Menores e posição).
+      2. LISTAGEM: No início do campo "leitura_caminho.analise_detalhada", liste rapidamente as cartas identificadas para confirmar a leitura.
+      3. INTERPRETAÇÃO: Interprete o jogo conectando os significados das cartas à pergunta, respeitando o método de tiragem (Ex: Situação/Caminho/Resultado).
+      4. MANTRA: No campo "ancoragem_rituais.mantra", crie um mantra exclusivo focado na energia dominante das cartas físicas identificadas.
+
       REGRAS DE PERSONA:
       - Tarô: Tom de Sabedoria Ancestral e Erudita.
       - Baralho Cigano: Tom de Intuição Terrena e Direta.
