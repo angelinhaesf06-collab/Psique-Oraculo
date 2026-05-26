@@ -320,11 +320,12 @@ export default function OraculoJornada() {
               Qual arcano você escolhe hoje?
             </h2>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full mb-12">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mb-12">
               {[
                 { id: 'Tarô', title: 'TARÔ', img: '/assets/decks/covers/taro.jpg' },
                 { id: 'Baralho Cigano', title: 'CIGANO', img: '/assets/decks/covers/cigano.jpg' },
-                { id: 'Tarô dos Anjos', title: 'ANJOS', img: '/assets/decks/covers/anjos.jpg' }
+                { id: 'Tarô dos Anjos', title: 'ANJOS', img: '/assets/decks/covers/anjos.jpg' },
+                { id: 'Runas', title: 'RUNAS', img: '/assets/decks/covers/runas.jpg' }
               ].map((o) => (
                 <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex flex-col items-center group">
                   <div className="w-full aspect-[3/5.2] bg-white rounded-2xl border-2 border-[#E5D9C3] p-1 shadow-md group-active:scale-95 transition-all mb-2 overflow-hidden">
