@@ -170,7 +170,7 @@ export default function OraculoJornada() {
                 <div className="flex flex-col items-center text-center space-y-2">
                   <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Sintonização do Dia</span>
                   <p className="text-xs italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2">"{mensagemDia.texto}"</p>
-                  <span className="text-[7px] font-medium uppercase tracking-widest text-[#C4A484]/40 animate-pulse">Toque para ampliar ✨</span>
+                  <span className="text-[7px] font-medium uppercase tracking-widest text-[#8B735B] animate-pulse">Toque para ampliar ✨</span>
                 </div>
               </div>
             )}
