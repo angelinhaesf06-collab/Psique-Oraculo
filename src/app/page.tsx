@@ -484,41 +484,27 @@ export default function OraculoJornada() {
 
         {passo === 4 && resultado && (
           <div className="flex flex-col items-center w-full animate-in fade-in zoom-in-95 duration-1000 pb-20">
-            <div className="mb-10 text-center">
+            <div className="mb-6 text-center">
               <div className="inline-block px-5 py-1.5 bg-[#C4A484]/10 rounded-full text-[10px] font-bold text-[#C4A484] uppercase tracking-[0.2em] border border-[#C4A484]/20 mb-3">{resultado.tema}</div>
-              <h2 className="text-5xl md:text-6xl font-serif text-[#C4A484] leading-none italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Sua Revelação</h2>
+              <h2 className="text-4xl md:text-5xl font-serif text-[#C4A484] leading-none italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Sua Revelação</h2>
             </div>
             
-            <div className="flex flex-row flex-wrap justify-center gap-4 mb-12">
+            <div className="flex flex-row justify-center gap-2 md:gap-4 mb-8 w-full overflow-x-auto py-2 px-1">
               {resultado.situacao_atual && <CardResult title="Situação" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />}
               {resultado.caminho_acao && <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />}
               {resultado.resultado_conselho && <CardResult title="Resultado" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />}
-              {!resultado.situacao_atual && resultado.carta_sorteada && <CardResult title="Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}
+              {!resultado.situacao_atual && resultado.carta_sorteada && <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />}
             </div>
 
             <div className="w-full space-y-6">
-               <div className="space-y-4">
-                 {[
-                   { label: 'O Momento', data: resultado.situacao_atual },
-                   { label: 'O Caminho', data: resultado.caminho_acao },
-                   { label: 'O Desfecho', data: resultado.resultado_conselho },
-                   { label: 'A Revelação', data: resultado.carta_sorteada }
-                 ].map((item, i) => item.data && (
-                   <div key={i} className="bg-white/90 backdrop-blur-sm rounded-[28px] border border-[#E5D9C3]/50 p-6 shadow-xl animate-in fade-in slide-in-from-left-4 duration-700" style={{ animationDelay: `${i * 200}ms` }}>
-                     <h4 className="text-[11px] font-black text-[#C4A484] uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
-                       <Sparkles size={14} className="opacity-40" /> {item.label}: <span className="text-[#5C4D3C] font-bold">{item.data.carta}</span>
-                     </h4>
-                     <p className="text-sm md:text-base leading-relaxed text-[#5C4D3C]/80 text-justify font-light">{item.data.interpretacao}</p>
-                   </div>
-                 ))}
-               </div>
-
                <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 opacity-10 -translate-y-1/2 translate-x-1/2"><img src="/assets/brand/mandala-login.png" alt="" className="animate-spin-slow" /></div>
-                  <h3 className="text-[#C4A484] font-serif text-3xl mb-6 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>{resultado.leitura_caminho?.titulo || "A Leitura do seu Caminho"}</h3>
-                  <p className="text-sm md:text-base leading-relaxed text-white/70 font-light text-justify">{resultado.leitura_caminho?.analise_detalhada}</p>
+                  <h3 className="text-[#C4A484] font-serif text-3xl mb-6 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
+                  <p className="text-sm md:text-base leading-relaxed text-white/80 font-light text-justify italic font-serif">
+                    {resultado.leitura_caminho?.analise_detalhada}
+                  </p>
                   {resultado.leitura_caminho?.veredito_direto && (
-                    <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-xs tracking-[0.3em]">{resultado.leitura_caminho.veredito_direto}</div>
+                    <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-[10px] tracking-[0.3em]">{resultado.leitura_caminho.veredito_direto}</div>
                   )}
                </div>
 
@@ -526,44 +512,44 @@ export default function OraculoJornada() {
                  <div className="bg-white/90 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-8">
                    <h3 className="text-[#C4A484] font-serif text-3xl text-center italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Ancoragem e Rituais</h3>
                    
-                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                   <div className="grid grid-cols-1 gap-6">
                      {resultado.ancoragem_rituais.mantra && (
-                       <div className="space-y-2">
-                         <div className="flex items-center gap-2 text-[#C4A484]">
-                           <Sparkles size={16} />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Mantra de Poder</span>
+                       <div className="flex items-start gap-4">
+                         <div className="w-8 h-8 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><Sparkles size={16} /></div>
+                         <div className="space-y-1">
+                           <span className="text-[9px] font-black uppercase tracking-widest text-[#C4A484]/60">Sintonização</span>
+                           <p className="text-sm italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p>
                          </div>
-                         <p className="text-sm italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p>
                        </div>
                      )}
                      
                      {resultado.ancoragem_rituais.salmo && (
-                       <div className="space-y-2">
-                         <div className="flex items-center gap-2 text-[#C4A484]">
-                           <ShieldCheck size={16} />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Salmo Protetor</span>
+                       <div className="flex items-start gap-4">
+                         <div className="w-8 h-8 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><ShieldCheck size={16} /></div>
+                         <div className="space-y-1">
+                           <span className="text-[9px] font-black uppercase tracking-widest text-[#C4A484]/60">Salmo Protetor</span>
+                           <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p>
                          </div>
-                         <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p>
                        </div>
                      )}
 
                      {resultado.ancoragem_rituais.biblia && (
-                       <div className="space-y-2">
-                         <div className="flex items-center gap-2 text-[#C4A484]">
-                           <Star size={16} />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Sabedoria Bíblica</span>
+                       <div className="flex items-start gap-4">
+                         <div className="w-8 h-8 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><Star size={16} /></div>
+                         <div className="space-y-1">
+                           <span className="text-[9px] font-black uppercase tracking-widest text-[#C4A484]/60">Sabedoria Bíblica</span>
+                           <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.biblia}</p>
                          </div>
-                         <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.biblia}</p>
                        </div>
                      )}
 
                      {resultado.ancoragem_rituais.banho && (
-                       <div className="space-y-2">
-                         <div className="flex items-center gap-2 text-[#C4A484]">
-                           <Activity size={16} />
-                           <span className="text-[10px] font-black uppercase tracking-widest">Banho de Ervas</span>
+                       <div className="flex items-start gap-4">
+                         <div className="w-8 h-8 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><Activity size={16} /></div>
+                         <div className="space-y-1">
+                           <span className="text-[9px] font-black uppercase tracking-widest text-[#C4A484]/60">Ritual Sagrado</span>
+                           <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.banho}</p>
                          </div>
-                         <p className="text-sm text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.banho}</p>
                        </div>
                      )}
                    </div>
