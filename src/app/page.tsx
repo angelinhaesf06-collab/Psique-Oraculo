@@ -44,7 +44,7 @@ function CardResult({ title, data, index, tipoOraculo, veredito }: { title: stri
   const [useLocalFallback, setUseLocalFallback] = useState(false);
   const [useCustomFallback, setUseCustomFallback] = useState(true);
   
-  const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos', 'Runas': 'runas' };
+  const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[tipoOraculo] || 'taro';
   
   const normalizedSlug = (data.card_slug || '').replace(/_/g, '-').toLowerCase().trim();
@@ -59,7 +59,7 @@ function CardResult({ title, data, index, tipoOraculo, veredito }: { title: stri
   return (
     <div className="flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-4 duration-700 shrink-0" style={{ animationDelay: `${index * 150}ms` }}>
       <h5 className="text-[7px] font-bold uppercase tracking-widest text-gold/60">{title}</h5>
-      <div className="w-[70px] md:w-[100px] aspect-[3/5] bg-white rounded-lg border border-gold/20 p-0.5 shadow-sm overflow-hidden relative">
+      <div className="w-[80px] md:w-[110px] aspect-[3/5] bg-white rounded-lg border border-gold/20 p-0.5 shadow-sm overflow-hidden relative">
         <div className="w-full h-full rounded-md overflow-hidden bg-[#FDFBF7] flex items-center justify-center">
            {!imageError ? (
              <img src={imagePath} alt={data.carta} className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`} onLoad={() => setImageLoading(false)} onError={() => { if (tipoOraculo === 'Tarô' && customFile && useCustomFallback) setUseCustomFallback(false); else if (!useLocalFallback) setUseLocalFallback(true); else setImageError(true); }} />
@@ -68,7 +68,6 @@ function CardResult({ title, data, index, tipoOraculo, veredito }: { title: stri
            )}
         </div>
       </div>
-      {veredito && <span className="text-[8px] font-black text-gold/80">{veredito.split(' ')[0]}</span>}
     </div>
   );
 }
@@ -143,7 +142,7 @@ export default function OraculoJornada() {
     } catch (error: any) { toast.error(error.message); } finally { setLoading(false); }
   };
 
-  const handleCaptureImage = (e: React.ChangeEvent<HTMLInputElement>) => { /* ... lógica simplificada para brevidade ... */ };
+  const handleCaptureImage = (e: React.ChangeEvent<HTMLInputElement>) => { /* ... */ };
   const startRecording = () => { /* ... */ };
   const stopRecording = () => { /* ... */ };
 
@@ -174,14 +173,14 @@ export default function OraculoJornada() {
                 </div>
               </div>
             )}
-            <div className="flex flex-col gap-4 w-full max-w-[240px] px-4">
+            <div className="flex flex-col gap-3 w-full max-w-[240px] px-4">
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg' }
               ].map((o) => (
                 <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 group w-full bg-white/40 backdrop-blur-sm border border-[#E5D9C3] p-2 rounded-2xl shadow-sm active:scale-95 transition-all">
-                  <div className="w-16 h-24 bg-white rounded-xl border border-[#E5D9C3] p-0.5 overflow-hidden shrink-0">
+                  <div className="w-12 h-18 bg-white rounded-xl border border-[#E5D9C3] p-0.5 overflow-hidden shrink-0">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-lg" />
                   </div>
                   <span className="text-xs font-bold tracking-[0.2em] text-[#8B735B] uppercase text-left">{o.title}</span>
@@ -189,13 +188,17 @@ export default function OraculoJornada() {
               ))}
             </div>
 
-            <div className="flex flex-col items-center gap-4 w-full">
-               <h1 className="text-2xl font-serif text-[#C4A484] tracking-tight opacity-40">Psiquê Oráculo</h1>
-               <button onClick={() => setModalAberto('assinatura')} className="w-full max-w-[160px] h-10 flex items-center justify-center gap-2 rounded-full border border-[#E5D9C3] bg-white/50 shadow-sm active:scale-95 transition-all"><Crown className="w-3 h-3 text-[#C4A484]" /><span className="text-[8px] font-bold text-[#8B735B] uppercase tracking-widest">Premium</span></button>
-               <div className="flex items-center gap-4 text-[7px] font-bold uppercase tracking-widest text-[#C4A484]/40">
-                  <button onClick={() => setModalAberto('ajuda')}>Ajuda</button>
-                  <button onClick={() => setModalAberto('politicas')}>Políticas</button>
-                  <button onClick={handleLogout} className="text-[#991b1b]/40">Sair</button>
+            <div className="flex flex-col items-center gap-3 w-full shrink-0">
+               <h1 className="text-xl font-serif text-[#C4A484] tracking-tight opacity-40">Psiquê Oráculo</h1>
+               
+               <div className="flex items-center gap-2 w-full justify-center flex-wrap">
+                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 rounded-full border border-[#E5D9C3] bg-white/50 px-4 py-2 shadow-sm active:scale-95 transition-all">
+                    <Crown className="w-3 h-3 text-[#C4A484]" />
+                    <span className="text-[8px] font-bold text-[#8B735B] uppercase tracking-widest">Premium</span>
+                  </button>
+                  <button onClick={() => setModalAberto('ajuda')} className="text-[7px] font-bold uppercase tracking-widest text-[#C4A484]/60 bg-white/30 px-3 py-2 rounded-full border border-[#E5D9C3]/50">Ajuda</button>
+                  <button onClick={() => setModalAberto('politicas')} className="text-[7px] font-bold uppercase tracking-widest text-[#C4A484]/60 bg-white/30 px-3 py-2 rounded-full border border-[#E5D9C3]/50">Políticas</button>
+                  <button onClick={handleLogout} className="text-[7px] font-bold uppercase tracking-widest text-[#991b1b]/50 bg-white/30 px-3 py-2 rounded-full border border-[#E5D9C3]/50">Sair</button>
                </div>
             </div>
           </div>
@@ -253,20 +256,33 @@ export default function OraculoJornada() {
                 {resultado.situacao_atual && <CardResult title="Situação" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />}
                 {resultado.caminho_acao && <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />}
                 {resultado.resultado_conselho && <CardResult title="Resultado" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />}
-                {!resultado.situacao_atual && resultado.carta_sorteada && <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} veredito={resultado.leitura_caminho?.veredito_direto} />}
+                {!resultado.situacao_atual && resultado.carta_sorteada && (
+                   <div className="flex flex-col items-center gap-4">
+                      <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />
+                      {tipoOraculo === 'Tarô' && resultado.leitura_caminho?.veredito_direto && (
+                        <div className="bg-[#C4A484]/20 px-8 py-3 rounded-2xl border-2 border-[#C4A484]/30 animate-bounce shadow-lg">
+                          <span className="text-2xl font-black text-[#C4A484] uppercase tracking-[0.3em]">
+                            {resultado.leitura_caminho.veredito_direto.split(' ')[0]}
+                          </span>
+                        </div>
+                      )}
+                   </div>
+                )}
               </div>
 
               <div className="w-full space-y-6 pb-6">
                  {/* Card de Leitura - Único que Rola Conteúdo Longo */}
                  <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden">
-                    <h3 className="text-[#C4A484] font-serif text-2xl md:text-3xl mb-4">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
-                    <p className="text-sm md:text-base leading-relaxed text-white/80 font-sans font-light text-justify">
+                    <h3 className="text-[#C4A484] font-serif text-xl mb-4">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
+                    <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-justify">
                       {resultado.leitura_caminho?.analise_detalhada}
                     </p>
-                    {resultado.leitura_caminho?.veredito_direto && <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-[9px] tracking-widest">{resultado.leitura_caminho.veredito_direto}</div>}
+                    {resultado.leitura_caminho?.veredito_direto && !(tipoOraculo === 'Tarô' && !resultado.situacao_atual) && (
+                      <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-[9px] tracking-widest">{resultado.leitura_caminho.veredito_direto}</div>
+                    )}
                  </div>
 
-                 {resultado.ancoragem_rituais && (
+                 {resultado.ancoragem_rituais && !(tipoOraculo === 'Tarô' && !resultado.situacao_atual) && (
                    <div className="bg-white/90 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-6">
                      <h3 className="text-[#C4A484] font-serif text-xl text-center">Ancoragem e Rituais</h3>
                      <div className="grid grid-cols-1 gap-5">
