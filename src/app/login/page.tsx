@@ -80,12 +80,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      console.log("Iniciando login para:", email);
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+      console.log("Iniciando login para:", email, "em", baseUrl);
       const password = 'psique-oraculo-guest';
       
       if (email) {
         // 1. Garantir que o usuário exista e esteja confirmado via API Admin
-        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || '';
         const apiUrl = `${baseUrl}/api/auth/quick-access`;
         
         console.log("Chamando Portal em:", apiUrl);
@@ -94,15 +94,21 @@ export default function LoginPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, nome: nome || "Consulente" })
+        }).catch(err => {
+          console.error("Erro de rede no fetch do Login:", err);
+          throw new Error("Erro de conexão com o servidor. Verifique sua internet.");
         });
 
         if (!quickRes.ok) {
+          const quickText = await quickRes.text();
+          console.error("Erro na API Quick Access (Texto):", quickText);
+          
           let errorMsg = "Falha na sintonização inicial.";
           try {
-            const quickErr = await quickRes.json();
+            const quickErr = JSON.parse(quickText);
             errorMsg = quickErr.error || errorMsg;
           } catch (e) {
-            console.error("Resposta não é JSON:", e);
+            console.error("Resposta não é JSON válida:", quickText);
           }
           
           console.error("Erro na API Quick Access:", errorMsg);
@@ -139,7 +145,12 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       console.error("Erro Geral no Login:", error);
-      toast.error(`Falha no Portal: ${error.message}`);
+      const detail = error.message || "Erro desconhecido";
+      toast.error(`Falha no Portal: ${detail}`);
+      // Alerta extra para APK depuração
+      if (typeof window !== 'undefined' && (window as any).Capacitor?.isNative) {
+        alert("Erro de Conexão: " + detail);
+      }
     } finally {
       setLoading(false);
     }

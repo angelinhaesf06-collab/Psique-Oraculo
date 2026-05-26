@@ -101,13 +101,18 @@ export default function OraculoJornada() {
         
         // Melhoria: Forçar URL absoluta no APK para evitar 404
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+        console.log("Buscando Mensagem do Dia em:", baseUrl);
+        
         const res = await fetch(`${baseUrl}/api/oracle/read`, { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) 
+        }).catch(err => {
+          console.error("Erro de rede na Mensagem do Dia:", err);
+          return null;
         });
 
-        if (res.ok) {
+        if (res && res.ok) {
           const dataRes = await res.json();
           if (dataRes.acolhimento_quantum) {
             const novaMensagem = { texto: dataRes.acolhimento_quantum.conteudo, autor: dataRes.acolhimento_quantum.titulo, data: today };
@@ -135,6 +140,8 @@ export default function OraculoJornada() {
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
       const apiUrl = `${baseUrl}/api/oracle/read`;
 
+      console.log("Chamando Portal IA em:", apiUrl);
+
       const res = await fetch(apiUrl, {
         method: 'POST', 
         headers: { 
@@ -142,11 +149,20 @@ export default function OraculoJornada() {
           'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' 
         },
         body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
+      }).catch(err => {
+        console.error("Erro de rede CRÍTICO na IA:", err);
+        throw new Error("Erro de conexão com o Portal. Verifique sua internet.");
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Silêncio no Portal.");
+        const errorText = await res.text();
+        console.error("Erro na Resposta da IA (Texto):", errorText);
+        let errorMsg = "Silêncio no Portal.";
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMsg = errorData.error || errorMsg;
+        } catch (e) {}
+        throw new Error(errorMsg);
       }
       
       const data = await res.json();
@@ -199,13 +215,20 @@ export default function OraculoJornada() {
         SpeechRecognition.start({
           language: "pt-BR",
           partialResults: true,
-          popup: false,
+          popup: true, // Melhor para compatibilidade visual no Android
         });
 
-        SpeechRecognition.addListener("partialResults", (data: any) => {
+        const partialListener = SpeechRecognition.addListener("partialResults", (data: any) => {
           if (data.matches && data.results.length > 0) {
             setDesabafo(data.matches[0]);
           }
+        });
+
+        // Garantir que temos um listener para o resultado final
+        SpeechRecognition.addListener("results", (data: any) => {
+           if (data.matches && data.results.length > 0) {
+             setDesabafo(data.matches[0]);
+           }
         });
       } else {
         toast.error("Reconhecimento de voz não disponível neste aparelho.");
@@ -222,7 +245,10 @@ export default function OraculoJornada() {
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
       if (isNative) {
         await SpeechRecognition.stop();
-        SpeechRecognition.removeAllListeners();
+        // Pequeno atraso antes de remover ouvintes para garantir que o último resultado chegue
+        setTimeout(() => {
+          SpeechRecognition.removeAllListeners();
+        }, 500);
       }
     } catch (e) {
       console.error(e);
@@ -230,7 +256,7 @@ export default function OraculoJornada() {
   };
 
   return (
-    <div className="h-[100dvh] w-full text-[#5C4D3C] font-sans flex flex-col items-center relative bg-[#FDFBF7] overflow-hidden">
+    <div className="h-[100dvh] w-full text-[#5C4D3C] font-sans flex flex-col items-center relative bg-[#FDFBF7] overflow-hidden p-safe">
       <div className="fixed inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] z-0">
         <img src="/assets/brand/mandala-login.png" alt="" className="w-[150%] max-w-none animate-spin-slow" />
       </div>
