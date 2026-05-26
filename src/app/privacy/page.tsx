@@ -17,9 +17,10 @@ export default function PrivacyPolicy() {
         </button>
 
         <header className="space-y-2 border-b border-gold/10 pb-6">
-          <h1 className="text-4xl md:text-6xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>
-            Política de Privacidade
+          <h1 className="text-4xl md:text-6xl font-serif text-gold">
+            Privacidade da Alma
           </h1>
+
           <p className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-40">Psiquê Oráculo • Proteção e Luz</p>
         </header>
 

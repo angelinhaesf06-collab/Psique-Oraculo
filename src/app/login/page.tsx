@@ -161,14 +161,14 @@ export default function LoginPage() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484]">
+          <h1 className="text-4xl md:text-6xl font-serif text-[#C4A484] leading-tight">
             Psiquê Oráculo
           </h1>
           <div className="space-y-1">
-            <h2 className="text-[10px] md:text-xs font-bold tracking-[0.4em] text-[#8B735B] uppercase">
+            <h2 className="text-[10px] md:text-xs font-sans font-bold tracking-[0.4em] text-[#8B735B] uppercase">
               Seu oráculo de bolso
             </h2>
-            <p className="text-[8px] font-medium tracking-[0.2em] text-[#C4A484]/60 uppercase">
+            <p className="text-[8px] font-sans font-medium tracking-[0.2em] text-[#C4A484]/60 uppercase">
               Sintonize sua Essência
             </p>
           </div>

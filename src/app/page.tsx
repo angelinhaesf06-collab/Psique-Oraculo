@@ -254,8 +254,8 @@ export default function OraculoJornada() {
               <div className="w-full space-y-6 pb-6">
                  {/* Card de Leitura - Único que Rola Conteúdo Longo */}
                  <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden">
-                    <h3 className="text-[#C4A484] font-serif text-xl mb-4">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
-                    <p className="text-sm leading-relaxed text-white/80 font-light text-justify font-lora">
+                    <h3 className="text-[#C4A484] font-serif text-2xl md:text-3xl mb-4">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
+                    <p className="text-sm md:text-base leading-relaxed text-white/80 font-sans font-light text-justify">
                       {resultado.leitura_caminho?.analise_detalhada}
                     </p>
                     {resultado.leitura_caminho?.veredito_direto && <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-[9px] tracking-widest">{resultado.leitura_caminho.veredito_direto}</div>}

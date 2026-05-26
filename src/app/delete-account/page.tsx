@@ -28,9 +28,10 @@ export default function DeleteAccount() {
           <div className="w-16 h-16 bg-ruby/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <Trash2 className="w-8 h-8 text-ruby" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-serif text-gold" style={{ fontFamily: 'var(--font-great-vibes)' }}>
-            Exclusão de Conta e Dados
+          <h1 className="text-4xl md:text-5xl font-serif text-gold">
+            Excluir Conta
           </h1>
+
           <p className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-40">Psiquê Oráculo • Respeito à sua Jornada</p>
         </header>
 
