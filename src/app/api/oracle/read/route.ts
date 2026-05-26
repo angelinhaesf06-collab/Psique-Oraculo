@@ -52,6 +52,12 @@ export async function POST(req: Request) {
       3. RESULTADO: Interprete a terceira carta mostrando a tendência futura se o caminho for seguido.
       4. MANTRA: No campo "ancoragem_rituais.mantra", crie um mantra curto, poderoso e afirmativo relacionado ao tema da leitura.
 
+      INSTRUÇÕES DE TIRAGEM (1 CARTA - SIM OU NÃO):
+      Quando houver apenas 1 carta:
+      1. VEREDITO: Responda de forma clara no campo "leitura_caminho.veredito_direto" com SIM, NÃO ou TALVEZ / TEMPO AO TEMPO, dependendo da polaridade tradicional da carta.
+      2. EXPLICAÇÃO: No campo "carta_sorteada.interpretacao", explique em um breve parágrafo o porquê dessa resposta baseada na energia da carta. Vá direto ao ponto, com tom preditivo e místico.
+      3. MANTRA: No campo "ancoragem_rituais.mantra", encerre com um mantra curto e afirmativo para ancorar a energia.
+
       REGRAS DE PERSONA:
       - Tarô: Tom de Sabedoria Ancestral e Erudita.
       - Baralho Cigano: Tom de Intuição Terrena e Direta.
