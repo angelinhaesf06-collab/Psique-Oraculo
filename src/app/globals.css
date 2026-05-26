@@ -15,7 +15,8 @@
   --color-ruby: var(--oracle-red);
   --color-cream: var(--oracle-cream);
   --font-sans: var(--font-montserrat);
-  --font-serif: var(--font-great-vibes);
+  --font-serif: var(--font-cinzel);
+  --font-lora: var(--font-lora);
 }
 
 body {

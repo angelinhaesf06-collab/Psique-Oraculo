@@ -376,7 +376,7 @@ export default function OraculoJornada() {
 
         {passo === 0 && (
           <div className="flex flex-col items-center w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h2 className="text-3xl md:text-4xl font-serif text-[#C4A484] text-center mb-10 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+            <h2 className="text-3xl md:text-4xl font-serif text-[#C4A484] text-center mb-10">
               Qual arcano você escolhe hoje?
             </h2>
 
@@ -421,7 +421,7 @@ export default function OraculoJornada() {
             </div>
 
             <div className="flex flex-col items-center gap-6 w-full">
-               <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484] tracking-tight text-center opacity-40 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Psiquê Oráculo</h1>
+               <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484] tracking-tight text-center opacity-40">Psiquê Oráculo</h1>
                
                <button onClick={() => setModalAberto('assinatura')} className="w-full max-w-[220px] h-14 flex items-center justify-center gap-3 rounded-full border-2 border-[#E5D9C3] bg-white/50 backdrop-blur-sm shadow-sm active:scale-95 transition-all">
                   <Crown className="w-5 h-5 text-[#C4A484]" />
@@ -467,7 +467,7 @@ export default function OraculoJornada() {
 
         {passo === 2 && (
           <div className="flex flex-col items-center w-full animate-in fade-in slide-in-from-right-4 duration-700">
-            <h2 className="text-4xl md:text-5xl font-serif text-[#C4A484] text-center mb-10 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Abra o seu coração</h2>
+            <h2 className="text-4xl md:text-5xl font-serif text-[#C4A484] text-center mb-10">Abra o seu coração</h2>
             <div className="relative bg-white/80 backdrop-blur-md rounded-[32px] border border-[#E5D9C3] p-6 shadow-2xl w-full max-w-[340px]">
               <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-40 bg-transparent border-none focus:outline-none text-base font-light text-[#5C4D3C]" />
               <div className="space-y-4 pt-4 border-t border-[#E5D9C3]/30">
@@ -481,7 +481,7 @@ export default function OraculoJornada() {
 
         {passo === 3 && (
           <div className="flex flex-col items-center w-full animate-in fade-in slide-in-from-right-4 duration-700">
-            <h2 className="text-4xl md:text-5xl font-serif text-[#C4A484] text-center mb-10 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Consulte o Invisível</h2>
+            <h2 className="text-4xl md:text-5xl font-serif text-[#C4A484] text-center mb-10">Consulte o Invisível</h2>
             <div className="flex flex-col gap-3 w-full max-w-[300px]">
               {[
                 { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]', action: () => fileInputRef.current?.click() },
@@ -524,8 +524,8 @@ export default function OraculoJornada() {
             <div className="w-full space-y-6">
                <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 opacity-10 -translate-y-1/2 translate-x-1/2"><img src="/assets/brand/mandala-login.png" alt="" className="animate-spin-slow" /></div>
-                  <h3 className="text-[#C4A484] font-serif text-3xl mb-6 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
-                  <p className="text-sm md:text-base leading-relaxed text-white/80 font-light text-justify italic font-serif">
+                  <h3 className="text-[#C4A484] font-serif text-3xl mb-6">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
+                  <p className="text-sm md:text-base leading-relaxed text-white/80 font-light text-justify font-lora">
                     {resultado.leitura_caminho?.analise_detalhada}
                   </p>
                   {resultado.leitura_caminho?.veredito_direto && !(!resultado.situacao_atual && resultado.carta_sorteada) && (
@@ -535,7 +535,7 @@ export default function OraculoJornada() {
 
                {resultado.ancoragem_rituais && (
                  <div className="bg-white/90 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-8">
-                   <h3 className="text-[#C4A484] font-serif text-3xl text-center italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>Ancoragem e Rituais</h3>
+                   <h3 className="text-[#C4A484] font-serif text-3xl text-center">Ancoragem e Rituais</h3>
                    
                    <div className="grid grid-cols-1 gap-6">
                      {resultado.ancoragem_rituais.mantra && (
@@ -584,7 +584,7 @@ export default function OraculoJornada() {
                {resultado.acolhimento_quantum && (
                  <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic">
                    <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} className="animate-pulse" /></div>
-                   <h4 className="text-[#C4A484] font-serif text-2xl mb-2" style={{ fontFamily: 'var(--font-great-vibes)' }}>{resultado.acolhimento_quantum.titulo}</h4>
+                   <h4 className="text-[#C4A484] font-serif text-2xl mb-2">{resultado.acolhimento_quantum.titulo}</h4>
                    <p className="text-sm text-[#5C4D3C]/70 leading-relaxed">{resultado.acolhimento_quantum.conteudo}</p>
                  </div>
                )}

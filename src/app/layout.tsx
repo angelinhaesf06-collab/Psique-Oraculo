@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Montserrat, Great_Vibes } from "next/font/google";
+import { Montserrat, Cinzel, Lora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import DecorationOverlay from "./DecorationOverlay";
@@ -9,10 +9,14 @@ const montserrat = Montserrat({
   variable: "--font-montserrat",
 });
 
-const greatVibes = Great_Vibes({
-  weight: "400",
+const cinzel = Cinzel({
   subsets: ["latin"],
-  variable: "--font-great-vibes",
+  variable: "--font-cinzel",
+});
+
+const lora = Lora({
+  subsets: ["latin"],
+  variable: "--font-lora",
 });
 
 export const metadata: Metadata = {
@@ -43,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${montserrat.variable} ${greatVibes.variable} antialiased font-sans text-foreground relative min-h-[100dvh] overflow-x-hidden`}>
+      <body className={`${montserrat.variable} ${cinzel.variable} ${lora.variable} antialiased font-sans text-foreground relative min-h-[100dvh] overflow-x-hidden`}>
         <DecorationOverlay />
         <Toaster position="top-center" richColors />
         <div className="relative z-10">

@@ -161,7 +161,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mb-10">
-          <h1 className="text-5xl md:text-7xl font-serif text-[#C4A484] italic mb-2" style={{ fontFamily: 'var(--font-great-vibes)' }}>
+          <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484] mb-4">
             Psiquê Oráculo
           </h1>
           <h2 className="text-[10px] md:text-xs font-bold tracking-[0.4em] text-[#8B735B] uppercase mb-1">
