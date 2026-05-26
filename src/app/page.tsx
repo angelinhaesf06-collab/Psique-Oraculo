@@ -349,7 +349,7 @@ export default function OraculoJornada() {
             {mensagemDia && (
               <div 
                 onClick={() => setModalAberto('mensagem_ampliada')}
-                className="w-full mb-10 p-6 bg-white/40 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] shadow-sm animate-in fade-in zoom-in-95 duration-1000 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all"
+                className="w-full mb-10 p-6 bg-white/40 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] shadow-sm animate-in fade-in zoom-in-95 duration-1000 relative overflow-hidden group cursor-pointer active:scale-[0.98] transition-all hover:shadow-md animate-pulse-subtle"
               >
                 <div className="absolute -top-2 -right-2 opacity-10 group-hover:rotate-12 transition-transform duration-700">
                   <Sparkles size={48} className="text-[#C4A484]" />
@@ -358,9 +358,14 @@ export default function OraculoJornada() {
                   <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#C4A484]/60">Sintonização do Dia</span>
                   <p className="text-sm md:text-base italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3">"{mensagemDia.texto}"</p>
                   <div className="w-10 h-[1px] bg-[#C4A484]/20" />
-                  <span className="text-[10px] font-bold text-[#C4A484] tracking-widest flex items-center gap-2">
-                    {mensagemDia.autor} <Info size={10} className="opacity-40" />
-                  </span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[10px] font-bold text-[#C4A484] tracking-widest flex items-center gap-2">
+                      {mensagemDia.autor}
+                    </span>
+                    <span className="text-[8px] font-medium uppercase tracking-[0.2em] text-[#C4A484]/40 flex items-center gap-1 animate-pulse">
+                      Toque para ampliar ✨
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
