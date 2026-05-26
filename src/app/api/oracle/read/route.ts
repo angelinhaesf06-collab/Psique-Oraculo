@@ -45,47 +45,50 @@ export async function POST(req: Request) {
       ESPECIALIZAÇÃO DOS ORÁCULOS (Siga RIGOROSAMENTE):
       
       1. TARÔ:
-         - Foco: Arquetípico e Filosófico.
-         - Entrega Obrigatória: Apenas um "Mantra da Alma" curto e poderoso no campo "ancoragem_rituais.mantra".
-         - Outros campos de rituais devem ser null.
+         - Foco: Arquetípico, Filosófico e Vibracional.
+         - Entrega Obrigatória: Mencione explicitamente o nome de cada ARCANO no início da interpretação. Use um "Mantra da Alma" piscante ao final.
 
       2. BARALHO CIGANO:
          - Foco: Preditivo, Direto e Prático.
-         - Entrega Obrigatória: "Banho de Ervas" (campo banho), "Cristal de Poder" (campo mantra) e "Dica de Erva" (campo biblia).
-         - O tom deve ser "Quiet Luxury" adivinhatório.
+         - Entrega Obrigatória: Identifique o nome da carta e seu número. Entregue "Banho", "Cristal" e "Erva".
 
       3. TARÔ DOS ANJOS:
-         - Foco: Amparo, Paz e Conexão Celestial.
-         - Entrega Obrigatória: "Salmo ou Versículo" (campo salmo), "Arcanjo Protetor" (campo mantra) e "Sinal Angelical" (campo banho).
-         - O tom deve ser amoroso e protetor.
+         - Foco: Amparo, Paz e Frequência Angelical.
+         - Entrega Obrigatória: Nomeie a carta do Anjo. Entregue "Salmo", "Arcanjo" e "Sinal".
 
-      INSTRUÇÕES DE TIRAGEM (3 CARTAS - Situação/Caminho/Resultado):
-      - Interprete a combinação de forma direta. Preencha os campos de ancoragem conforme a especialização acima.
+      INSTRUÇÕES DE TIRAGEM (3 CARTAS - Situação/Conselho/Resultado):
+      - PROFUNDIDADE: Esta é uma leitura densa e narrativa. Não seja objetivo aqui. Explore os símbolos, as cores e as conexões entre as cartas. Cada parágrafo deve ter pelo menos 4 a 5 frases ricas. 
+      - IDENTIFICAÇÃO: Inicie cada interpretação com: "[NOME DO ARCANO]: [Sua análise profunda...]".
 
       INSTRUÇÕES DE TIRAGEM (1 CARTA - SIM OU NÃO):
-      - 1. VEREDITO DIRETO: No campo "leitura_caminho.veredito_direto", responda com SIM, NÃO ou TALVEZ.
-      - 2. MOTIVO: No campo "carta_sorteada.interpretacao", escreva 2 frases preditivas.
-      - 3. ANCORAGEM: Preencha apenas o campo de mantra conforme a especialização do oráculo.
+      - OBJETIVIDADE: Esta sim deve ser direta e rápida. 
+      - VEREDITO: Responda SIM, NÃO ou TALVEZ na primeira linha.
+      - MOTIVO: 2 frases preditivas mencionando o nome da carta.
+
+      CONSELHO DO PSICÓLOGO (TOM QUÂNTICO):
+      - Transforme a análise em um "Acolhimento Psicofísico-Quântico".
+      - Fale sobre saltos quânticos, frequências vibracionais, colapso de função de onda (escolhas) e o campo das infinitas possibilidades. 
+      - Una a psicologia clínica com a espiritualidade de vanguarda. Use termos como "Sintonização de Realidade", "Frequência da Cura" e "Expansão de Consciência".
 
       ESTRUTURA JSON OBRIGATÓRIA:
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "Nome", "interpretacao": "Análise" },
-        "caminho_acao": { "carta": "Nome", "interpretacao": "Ação" },
-        "resultado_conselho": { "carta": "Nome", "interpretacao": "Desfecho" },
-        "carta_sorteada": { "carta": "Nome", "interpretacao": "Motivo" },
+        "situacao_atual": { "carta": "NOME DO ARCANO", "interpretacao": "ANÁLISE PROFUNDA E EXTENSA" },
+        "caminho_acao": { "carta": "NOME DO ARCANO", "interpretacao": "CONSELHO PRÁTICO E PROFUNDO" },
+        "resultado_conselho": { "carta": "NOME DO ARCANO", "interpretacao": "DESDOBRAMENTO NARRATIVO E RICO" },
+        "carta_sorteada": { "carta": "NOME DO ARCANO", "interpretacao": "MOTIVO DIRETO" },
         "leitura_caminho": { 
           "titulo": "Título", 
-          "analise_detalhada": "Previsão", 
+          "analise_detalhada": "SÍNTESE NARRATIVA RICA E CONECTADA DAS 3 CARTAS", 
           "veredito_direto": "VEREDITO" 
         },
         "acolhimento_quantum": { "titulo": "Sabedoria", "conteudo": "Reflexão" },
         "acolhimento_psicologico": {
-          "titulo": "Reflexão Profunda do Psicoterapeuta",
-          "conteudo": "Análise com tom de psicólogo renomado, acolhedor e técnico sobre a questão do consulente."
+          "titulo": "Sintonização Psicofísica-Quântica",
+          "conteudo": "Análise profunda com tom de psicólogo renomado de abordagem quântica (vibracional e técnica)."
         },
-        "ancoragem_rituais": { "mantra": "Conteúdo", "salmo": "Conteúdo", "banho": "Conteúdo", "biblia": "Conteúdo" }
+        "ancoragem_rituais": { "mantra": "Mantra ou Cristal", "salmo": "Ritual ou Salmo", "banho": "Banho ou Sinal", "biblia": "Nota" }
       }
     `;
 
