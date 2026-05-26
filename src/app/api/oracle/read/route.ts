@@ -65,10 +65,13 @@ export async function POST(req: Request) {
       - VEREDITO: Responda SIM, NÃO ou TALVEZ na primeira linha.
       - MOTIVO: 2 frases preditivas mencionando o nome da carta.
 
-      CONSELHO DO PSICÓLOGO (TOM QUÂNTICO):
-      - Transforme a análise em um "Acolhimento Psicofísico-Quântico".
-      - Fale sobre saltos quânticos, frequências vibracionais, colapso de função de onda (escolhas) e o campo das infinitas possibilidades. 
-      - Una a psicologia clínica com a espiritualidade de vanguarda. Use termos como "Sintonização de Realidade", "Frequência da Cura" e "Expansão de Consciência".
+      CONSELHO DO PSICÓLOGO (TOM HUMANISTA E ACOLHEDOR):
+      - Imagine um psicólogo de renome que é, acima de tudo, um ser humano profundamente empático e gentil.
+      - O tom deve ser um "Abraço em Palavras". Use uma linguagem suave, acolhedora e validadora. 
+      - Fale diretamente ao coração do consulente sobre sua questão ("Abra o seu Coração").
+      - Use conceitos de "possibilidades" e "vibração" de forma sutil e poética, sem ser excessivamente técnico ou frio.
+      - O objetivo principal é fazer a pessoa se sentir ouvida, compreendida e amparada emocionalmente. 
+      - Evite termos complexos da física; foque na jornada da alma, no autocuidado e na paz interior.
 
       ESTRUTURA JSON OBRIGATÓRIA:
       {
@@ -85,8 +88,8 @@ export async function POST(req: Request) {
         },
         "acolhimento_quantum": { "titulo": "Sabedoria", "conteudo": "Reflexão" },
         "acolhimento_psicologico": {
-          "titulo": "Sintonização Psicofísica-Quântica",
-          "conteudo": "Análise profunda com tom de psicólogo renomado de abordagem quântica (vibracional e técnica)."
+          "titulo": "Um Espaço de Escuta e Acolhimento",
+          "conteudo": "Análise profunda com tom de psicólogo renomado, extremamente empático, humano e gentil. Um texto que acalma e valida as emoções do consulente."
         },
         "ancoragem_rituais": { "mantra": "Mantra ou Cristal", "salmo": "Ritual ou Salmo", "banho": "Banho ou Sinal", "biblia": "Nota" }
       }
