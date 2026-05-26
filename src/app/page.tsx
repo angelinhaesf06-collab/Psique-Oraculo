@@ -328,8 +328,54 @@ export default function OraculoJornada() {
               </div>
             </div>
 
-            <div className="w-full pt-4 pb-2 flex justify-center shrink-0">
+            <div className="w-full pt-4 pb-2 flex flex-col items-center gap-4 shrink-0">
+               {resultado.acolhimento_psicologico && (
+                 <button 
+                   onClick={() => setPasso(5)} 
+                   className="text-[10px] font-bold uppercase tracking-[0.2em] text-white py-3 px-8 bg-[#2C2420] rounded-full shadow-lg border border-[#C4A484]/30 animate-pulse hover:bg-[#4A3B28] transition-all"
+                 >
+                   Quer um conselho do Psico? 👨‍⚕️
+                 </button>
+               )}
                <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[9px] font-black uppercase tracking-widest text-[#C4A484] py-4 bg-white shadow-md px-10 rounded-full border border-[#E5D9C3] active:scale-95 transition-all">Novo Ciclo ✨</button>
+            </div>
+          </div>
+        )}
+
+        {passo === 5 && resultado && (
+          <div className="flex-1 flex flex-col items-center w-full animate-in fade-in slide-in-from-right-4 duration-700 overflow-hidden">
+            <div className="mb-6 text-center shrink-0">
+               <h2 className="text-3xl font-serif text-[#C4A484] leading-tight">O Olhar Clínico</h2>
+               <p className="text-[9px] font-bold uppercase tracking-widest text-[#8B735B]/60">Sua jornada emocional</p>
+            </div>
+
+            <div className="flex-1 w-full overflow-y-auto px-1 custom-scrollbar pb-10">
+               <div className="bg-white/80 backdrop-blur-md rounded-[40px] border border-[#E5D9C3] p-8 shadow-2xl space-y-6 relative overflow-hidden">
+                  <div className="absolute -top-10 -left-10 opacity-[0.03] rotate-12">
+                     <Users size={200} className="text-[#C4A484]" />
+                  </div>
+                  
+                  <h3 className="text-xl font-serif text-[#5C4D3C] text-center border-b border-[#E5D9C3]/30 pb-4">
+                     {resultado.acolhimento_psicologico.titulo}
+                  </h3>
+
+                  <div className="space-y-4">
+                    <p className="text-sm md:text-base leading-relaxed text-[#5C4D3C]/90 font-sans font-light text-justify first-letter:text-3xl first-letter:font-serif first-letter:text-[#C4A484] first-letter:mr-2">
+                       {resultado.acolhimento_psicologico.conteudo}
+                    </p>
+                  </div>
+
+                  <div className="pt-6 border-t border-[#E5D9C3]/30">
+                    <p className="text-[10px] text-center italic text-[#8B735B]/80 font-serif">
+                       "O autoconhecimento é o portal para a cura da alma."
+                    </p>
+                  </div>
+               </div>
+            </div>
+
+            <div className="w-full pt-4 pb-2 flex justify-center shrink-0 gap-4">
+               <button onClick={() => setPasso(4)} className="text-[9px] font-bold uppercase tracking-widest text-[#C4A484] py-4 bg-white/50 px-8 rounded-full border border-[#E5D9C3] active:scale-95 transition-all">‹ Voltar ao Oráculo</button>
+               <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[9px] font-black uppercase tracking-widest text-white py-4 bg-[#C4A484] shadow-md px-10 rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
             </div>
           </div>
         )}

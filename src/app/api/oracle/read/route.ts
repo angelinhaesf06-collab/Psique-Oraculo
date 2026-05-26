@@ -81,6 +81,10 @@ export async function POST(req: Request) {
           "veredito_direto": "VEREDITO" 
         },
         "acolhimento_quantum": { "titulo": "Sabedoria", "conteudo": "Reflexão" },
+        "acolhimento_psicologico": {
+          "titulo": "Reflexão Profunda do Psicoterapeuta",
+          "conteudo": "Análise com tom de psicólogo renomado, acolhedor e técnico sobre a questão do consulente."
+        },
         "ancoragem_rituais": { "mantra": "Conteúdo", "salmo": "Conteúdo", "banho": "Conteúdo", "biblia": "Conteúdo" }
       }
     `;
