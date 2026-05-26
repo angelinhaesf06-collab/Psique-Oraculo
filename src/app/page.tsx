@@ -44,7 +44,7 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const [useLocalFallback, setUseLocalFallback] = useState(false);
   const [useCustomFallback, setUseCustomFallback] = useState(true);
   
-  const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
+  const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos', 'Runas': 'runas' };
   const folder = folderMap[tipoOraculo] || 'taro';
   
   const normalizedSlug = (data.card_slug || '').replace(/_/g, '-').toLowerCase().trim();
@@ -139,6 +139,24 @@ export default function OraculoJornada() {
   const [resultado, setResultado] = useState<any>(null);
   const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | null>(null);
+  const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
+
+  useEffect(() => {
+    const fetchMensagemDia = async () => {
+      try {
+        const res = await fetch('/api/oracle/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação' })
+        });
+        const data = await res.json();
+        if (data.acolhimento_quantum) {
+          setMensagemDia({ texto: data.acolhimento_quantum.conteudo, autor: data.acolhimento_quantum.titulo });
+        }
+      } catch (e) { console.error("Erro ao carregar mensagem do dia:", e); }
+    };
+    fetchMensagemDia();
+  }, []);
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -319,6 +337,20 @@ export default function OraculoJornada() {
             <h2 className="text-3xl md:text-4xl font-serif text-[#C4A484] text-center mb-10 italic" style={{ fontFamily: 'var(--font-great-vibes)' }}>
               Qual arcano você escolhe hoje?
             </h2>
+
+            {mensagemDia && (
+              <div className="w-full mb-10 p-6 bg-white/40 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] shadow-sm animate-in fade-in zoom-in-95 duration-1000 relative overflow-hidden group">
+                <div className="absolute -top-2 -right-2 opacity-10 group-hover:rotate-12 transition-transform duration-700">
+                  <Sparkles size={48} className="text-[#C4A484]" />
+                </div>
+                <div className="flex flex-col items-center text-center space-y-3">
+                  <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#C4A484]/60">Sintonização do Dia</span>
+                  <p className="text-sm md:text-base italic text-[#5C4D3C] font-serif leading-relaxed">"{mensagemDia.texto}"</p>
+                  <div className="w-10 h-[1px] bg-[#C4A484]/20" />
+                  <span className="text-[10px] font-bold text-[#C4A484] tracking-widest">{mensagemDia.autor}</span>
+                </div>
+              </div>
+            )}
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mb-12">
               {[

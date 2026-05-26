@@ -30,14 +30,12 @@ export async function drawCards(deckName: string, count: number = 3) {
     const { data, error } = await supabase.rpc('draw_random_cards', {
       p_deck_name: deckName,
       p_count: count,
-      p_random_seed: `${Date.now()}-${Math.random().toString(36).substring(2)}-${Math.random().toString(36).substring(2)}`
+      p_random_seed: `${Date.now()}-${Math.random()}-${Math.random().toString(36)}`
     });
 
     if (!error && data && data.length > 0) {
-      console.log("Cartas sorteadas do Supabase (bruto):", data.map((c: any) => c.card_name));
-      
-      // Re-embaralhar localmente para garantir entropia máxima
-      const shuffledData = [...data].sort(() => Math.random() - 0.5);
+      // Re-embaralhar localmente com maior entropia
+      const shuffledData = [...data].sort(() => 0.5 - Math.random());
       
       return shuffledData.map((card: any) => ({
         name: card.card_name,
@@ -52,15 +50,17 @@ export async function drawCards(deckName: string, count: number = 3) {
     console.warn("Falha ao sortear do Supabase, usando fallback local:", err);
   }
 
-  // Fallback Local Robusto
+  // Fallback Local Ultra-Robusto
   console.log("Usando fallback local para sorteio...");
   const deck = DECKS[deckName as keyof typeof DECKS] || DECKS['Tarô'];
-  const shuffled = [...deck].sort(() => Math.random() - 0.5); // Shuffle simples adicional
   
-  // Algoritmo Fisher-Yates
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  // Criar cópia e embaralhar múltiplas vezes para garantir aleatoriedade
+  let shuffled = [...deck];
+  for (let cycle = 0; cycle < 3; cycle++) {
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
