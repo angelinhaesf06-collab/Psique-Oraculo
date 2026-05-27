@@ -146,6 +146,7 @@ export default function OraculoJornada() {
       const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
 
       console.log("Chamando Portal IA em:", apiUrl);
+      console.log("Payload enviado:", { tipoOraculo, tipoLeitura: tipo, tema });
 
       const res = await fetch(apiUrl, {
         method: 'POST', 
@@ -155,9 +156,16 @@ export default function OraculoJornada() {
         },
         body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
       }).catch(err => {
-        console.error("Erro de rede CRÍTICO na IA:", err);
-        // Exibir o erro real no toast para ajudar no diagnóstico
-        throw new Error(`Erro de conexão: ${err.message || 'Verifique sua internet ou a URL do servidor'}`);
+        console.error("ERRO DE REDE DETECTADO:");
+        console.error("- Mensagem:", err.message);
+        console.error("- Causa:", err.cause);
+        console.error("- Stack:", err.stack);
+        
+        if (isNative) {
+          alert(`Erro de Conexão Mobile: ${err.message}\nURL: ${apiUrl}`);
+        }
+        
+        throw new Error(`Falha de conexão: ${err.message}. Verifique se o servidor está online.`);
       });
 
       if (!res.ok) {
