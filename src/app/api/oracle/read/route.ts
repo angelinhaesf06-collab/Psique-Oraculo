@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getGeminiModel } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
 
+export async function GET() {
+  return NextResponse.json({ status: "online", message: "Portal Oráculo está pronto para sintonização." });
+}
+
 export async function POST(req: Request) {
   try {
     const supabaseAdmin = createClient(
