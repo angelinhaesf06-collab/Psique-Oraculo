@@ -223,7 +223,7 @@ export default function OraculoJornada() {
         });
 
         const partialListener = SpeechRecognition.addListener("partialResults", (data: any) => {
-          if (data.matches && data.results.length > 0) {
+          if (data.matches && data.matches.length > 0) {
             setDesabafo(data.matches[0]);
           }
         });
