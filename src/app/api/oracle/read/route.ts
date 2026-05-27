@@ -44,9 +44,14 @@ export async function POST(req: Request) {
     }
 
     // Customizar instruções baseado no tipo de leitura
-    const instrucaoEspecifica = tipoLeitura === 'sim_nao' 
-      ? `FOCO SIM OU NÃO: Responda de forma objetiva se SIM, NÃO ou TALVEZ. Use o campo 'carta_sorteada' e 'leitura_caminho.veredito_direto'.`
-      : `FOCO LEITURA COMPLETA: Analise profundamente as 3 cartas enviadas. Use os campos 'situacao_atual', 'caminho_acao' e 'resultado_conselho'.`;
+    let instrucaoEspecifica = "";
+    if (tipoLeitura === 'sim_nao') {
+      instrucaoEspecifica = `FOCO SIM OU NÃO: Responda de forma objetiva se SIM, NÃO ou TALVEZ. Use o campo 'carta_sorteada' e 'leitura_caminho.veredito_direto'.`;
+    } else if (tipoLeitura === 'mensagem_dia') {
+      instrucaoEspecifica = `FOCO MENSAGEM DO DIA: Gere uma mensagem curta, inspiradora e poética para o início do dia. Use APENAS o campo 'acolhimento_quantum' (titulo e conteudo). Os outros campos de cartas podem vir vazios ou com textos genéricos.`;
+    } else {
+      instrucaoEspecifica = `FOCO LEITURA COMPLETA: Analise profundamente as 3 cartas enviadas. Use os campos 'situacao_atual', 'caminho_acao' e 'resultado_conselho'.`;
+    }
 
     const systemInstruction = `
       Você é o "Psiquê Oráculo", um mentor de alma e autoridade mística.
