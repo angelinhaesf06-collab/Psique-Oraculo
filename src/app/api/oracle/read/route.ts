@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
     // 1. Verificar Autenticação (Bearer Token)
     const authHeader = req.headers.get("Authorization");
-    let userId = null; // null permite salvar histórico sem vínculo se o DB permitir, ou evitamos salvar
+    let userId = null;
 
     if (authHeader && authHeader.startsWith("Bearer ") && authHeader !== "Bearer undefined" && authHeader !== "Bearer null") {
       const token = authHeader.split(" ")[1];
@@ -22,25 +22,38 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl, audio } = body;
+    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl } = body;
 
-    console.log("Requisitando Oráculo para Usuário:", userId);
+    console.log("--- INÍCIO DA REQUISIÇÃO ORÁCULO ---");
+    console.log("Usuário ID:", userId);
+    console.log("Tipo Oráculo:", tipoOraculo);
+    console.log("Tipo Leitura:", tipoLeitura);
+    console.log("Tema:", tema);
 
     // 2. Validação e Consumo de Créditos (TEMPORARIAMENTE DESATIVADO PARA TESTES)
     let creditStatus = { allowed: true, type: "test_mode" };
 
-    /* ... código de créditos ... */
-
     // 3. Inicialização do Modelo Gemini
     console.log("Sintonizando com o Modelo Gemini...");
-    const model = getGeminiModel();
+    let model;
+    try {
+      model = getGeminiModel();
+    } catch (e: any) {
+      console.error("Erro ao obter modelo Gemini:", e.message);
+      throw new Error("Configuração da IA inválida.");
+    }
 
-    const isVision = tipoLeitura === 'foto' && (imagem || imageUrl);
+    // Customizar instruções baseado no tipo de leitura
+    const instrucaoEspecifica = tipoLeitura === 'sim_nao' 
+      ? `FOCO SIM OU NÃO: Responda de forma objetiva se SIM, NÃO ou TALVEZ. Use o campo 'carta_sorteada' e 'leitura_caminho.veredito_direto'.`
+      : `FOCO LEITURA COMPLETA: Analise profundamente as 3 cartas enviadas. Use os campos 'situacao_atual', 'caminho_acao' e 'resultado_conselho'.`;
 
     const systemInstruction = `
       Você é o "Psiquê Oráculo", um mentor de alma e autoridade mística.
       
       ORÁCULO ATUAL: ${tipoOraculo}
+      TIPO DE LEITURA: ${tipoLeitura}
+      ${instrucaoEspecifica}
       
       ESPECIALIZAÇÃO DOS ORÁCULOS (Siga RIGOROSAMENTE):
       
@@ -98,7 +111,6 @@ export async function POST(req: Request) {
     const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada (se houver): ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Análise via Imagem"}. Método: ${tipoLeitura}. Semente Energética: ${Math.random().toString(36).substring(7)}.`;
 
     console.log("Enviando prompt para a IA...");
-    // 4. Chamada da IA com suporte a Imagem (Vision)
     const parts: any[] = [{ text: systemInstruction + prompt }];
     
     if (imagem && imagem.includes("base64,")) {
@@ -126,7 +138,6 @@ export async function POST(req: Request) {
 
       console.log("Resposta recebida da IA.");
       responseText = result.response.text();
-      console.log("Conteúdo da Resposta:", responseText);
     } catch (aiError: any) {
       console.error("ERRO CRÍTICO NA IA:", aiError);
       throw new Error(`Erro na IA (${aiError.status || 'IA-Error'}): ${aiError.message}`);
@@ -154,7 +165,6 @@ export async function POST(req: Request) {
       usage: creditStatus
     });
 
-    // Adicionar headers CORS
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');

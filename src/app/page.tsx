@@ -136,9 +136,12 @@ export default function OraculoJornada() {
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       
-      // Melhoria: Forçar URL absoluta no APK para evitar Silêncio no Portal
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
-      const apiUrl = `${baseUrl}/api/oracle/read`;
+      // Melhoria: Detectar se estamos em desenvolvimento ou Mobile para decidir a URL
+      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
+      
+      // No Mobile, precisamos de URL absoluta. Na Web, usamos relativo /api/...
+      const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
 
       console.log("Chamando Portal IA em:", apiUrl);
 
@@ -151,7 +154,8 @@ export default function OraculoJornada() {
         body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
       }).catch(err => {
         console.error("Erro de rede CRÍTICO na IA:", err);
-        throw new Error("Erro de conexão com o Portal. Verifique sua internet.");
+        // Exibir o erro real no toast para ajudar no diagnóstico
+        throw new Error(`Erro de conexão: ${err.message || 'Verifique sua internet ou a URL do servidor'}`);
       });
 
       if (!res.ok) {
