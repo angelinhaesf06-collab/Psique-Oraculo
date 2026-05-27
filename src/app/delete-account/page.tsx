@@ -92,7 +92,7 @@ export default function DeleteAccount() {
         )}
 
         <div className="pt-8 text-[10px] uppercase tracking-widest opacity-40">
-          <p>© 2026 Psiquê Oráculo • pisiqueoraculo.com.br</p>
+          <p>© 2026 Psiquê Oráculo • psiqueoraculo.com.br</p>
         </div>
       </div>
     </div>

@@ -70,14 +70,14 @@ export default function PrivacyPolicy() {
           <div className="space-y-4">
             <h2 className="text-lg font-bold text-gold uppercase tracking-widest">5. Contato e Transparência</h2>
             <p>
-              Esta política é mantida por <strong>pisiqueoraculo.com.br</strong>. Para qualquer dúvida sobre a privacidade de sua alma e seus dados, entre em contato:
+              Esta política é mantida por <strong>psiqueoraculo.com.br</strong>. Para qualquer dúvida sobre a privacidade de sua alma e seus dados, entre em contato:
             </p>
             <p className="font-bold text-gold">angelinhaesf06@gmail.com</p>
           </div>
 
           <div className="space-y-4 pt-8 border-t border-gold/10 text-[10px] uppercase tracking-widest text-center">
             <p>Última atualização: 22 de Maio de 2026</p>
-            <p>© 2026 Psiquê Oráculo • pisiqueoraculo.com.br</p>
+            <p>© 2026 Psiquê Oráculo • psiqueoraculo.com.br</p>
           </div>
         </section>
       </div>

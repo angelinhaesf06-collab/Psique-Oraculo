@@ -35,14 +35,7 @@ export async function POST(req: Request) {
 
     // 3. Inicialização do Modelo Gemini
     console.log("Sintonizando com o Modelo Gemini...");
-    let model;
-    try {
-      model = getGeminiModel();
-    } catch (e: any) {
-      console.error("Erro ao obter modelo Gemini:", e.message);
-      throw new Error("Configuração da IA inválida.");
-    }
-
+    
     // Customizar instruções baseado no tipo de leitura
     let instrucaoEspecifica = "";
     if (tipoLeitura === 'sim_nao') {
@@ -58,7 +51,9 @@ export async function POST(req: Request) {
 
     const systemInstruction = `
       Você é o "Psiquê Oráculo", um mentor de alma e autoridade mística.
-      
+      Sua voz é sofisticada, empática e poética. Você integra a sabedoria dos oráculos com a Psicologia Analítica.
+      Responda SEMPRE em formato JSON puro, sem marcações de markdown.
+
       ORÁCULO ATUAL: ${tipoOraculo}
       TIPO DE LEITURA: ${tipoLeitura}
       ${instrucaoEspecifica}
@@ -116,10 +111,18 @@ export async function POST(req: Request) {
       }
     `;
 
+    let model;
+    try {
+      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction);
+    } catch (e: any) {
+      console.error("Erro ao obter modelo Gemini:", e.message);
+      throw new Error("Configuração da IA inválida.");
+    }
+
     const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada (se houver): ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Análise via Imagem"}. Método: ${tipoLeitura}. Semente Energética: ${Math.random().toString(36).substring(7)}.`;
 
     console.log("Enviando prompt para a IA...");
-    const parts: any[] = [{ text: systemInstruction + prompt }];
+    const parts: any[] = [{ text: prompt }];
     
     if (imagem && imagem.includes("base64,")) {
       console.log("Adicionando imagem ao prompt...");
