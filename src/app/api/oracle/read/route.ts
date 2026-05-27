@@ -48,7 +48,10 @@ export async function POST(req: Request) {
     if (tipoLeitura === 'sim_nao') {
       instrucaoEspecifica = `FOCO SIM OU NÃO: Responda de forma objetiva se SIM, NÃO ou TALVEZ. Use o campo 'carta_sorteada' e 'leitura_caminho.veredito_direto'.`;
     } else if (tipoLeitura === 'mensagem_dia') {
-      instrucaoEspecifica = `FOCO MENSAGEM DO DIA: Gere uma mensagem curta, inspiradora e poética para o início do dia. Use APENAS o campo 'acolhimento_quantum' (titulo e conteudo). Os outros campos de cartas podem vir vazios ou com textos genéricos.`;
+      instrucaoEspecifica = `FOCO MENSAGEM DO DIA: Gere uma mensagem curta, inspiradora e poética para o início do dia. 
+      Ao final da mensagem, inclua SEMPRE uma "Dica da Alma" prática.
+      Exemplos de dicas: Caminhar ao ar livre, meditar por 5 minutos, escrever no caderno da gratidão, cozinhar sua comida preferida, dar amor aos seus bichinhos de estimação, levá-los para passear, ou ir à academia.
+      Use APENAS o campo 'acolhimento_quantum' (titulo e conteudo).`;
     } else {
       instrucaoEspecifica = `FOCO LEITURA COMPLETA: Analise profundamente as 3 cartas enviadas. Use os campos 'situacao_atual', 'caminho_acao' e 'resultado_conselho'.`;
     }
