@@ -363,15 +363,18 @@ export default function OraculoJornada() {
             </div>
             
             <div className="flex-1 w-full overflow-y-auto px-1 custom-scrollbar">
-              <div className="flex flex-row justify-center gap-2 mb-6 w-full py-1">
-                {resultado.situacao_atual && !resultado.carta_sorteada && (
-                  <>
+              <div className="flex flex-col items-center mb-6 w-full py-1">
+                {/* Exibição para 3 Cartas (Caminho do Destino) */}
+                {resultado.situacao_atual && (
+                  <div className="flex flex-row justify-center gap-2 w-full">
                     <CardResult title="Situação" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
-                    <CardResult title="Conselho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
+                    <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
                     <CardResult title="Resultado" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
-                  </>
+                  </div>
                 )}
-                {resultado.carta_sorteada && (
+
+                {/* Exibição para 1 Carta (Sim ou Não) */}
+                {resultado.carta_sorteada && !resultado.situacao_atual && (
                    <div className="flex flex-col items-center gap-6">
                       {resultado.leitura_caminho?.veredito_direto && (
                         <div className="bg-[#C4A484] px-10 py-4 rounded-[24px] shadow-xl border-4 border-white/20 animate-in zoom-in duration-500">
