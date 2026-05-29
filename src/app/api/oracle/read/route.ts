@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
       3. TARÔ DOS ANJOS:
          - Foco: Amparo, Paz e Frequência Angelical.
-         - Entrega Obrigatória: Nomeie a carta do Anjo. Entregue "Salmo", "Arcanjo" e "Sinal".
+         - Entrega Obrigatória: Nomeie a carta do Anjo. Entregue "Salmo" (com um trecho real do salmo), "Arcanjo" e "Dizeres da Bíblia" (um versículo bíblico de acolhimento).
 
       INSTRUÇÕES DE TIRAGEM (3 CARTAS - Situação/Conselho/Resultado):
       - PROFUNDIDADE: Esta é uma leitura densa e narrativa. Não seja objetivo aqui. Explore os símbolos, as cores e as conexões entre as cartas. Cada parágrafo deve ter pelo menos 4 a 5 frases ricas. 

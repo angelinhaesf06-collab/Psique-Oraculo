@@ -432,7 +432,19 @@ export default function OraculoJornada() {
                      <div className="grid grid-cols-1 gap-5">
                        {resultado.ancoragem_rituais.mantra && <div className="flex items-start gap-4"><div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><Sparkles size={14} /></div><div className="space-y-0.5"><span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Sintonização</span><p className="text-xs italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p></div></div>}
                        {resultado.ancoragem_rituais.salmo && <div className="flex items-start gap-4"><div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><ShieldCheck size={14} /></div><div className="space-y-0.5"><span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Orientação</span><p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p></div></div>}
-                       {resultado.ancoragem_rituais.banho && <div className="flex items-start gap-4"><div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><Activity size={14} /></div><div className="space-y-0.5"><span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Ação Mística</span><p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.banho}</p></div></div>}
+                       {resultado.ancoragem_rituais.banho && (
+                         <div className="flex items-start gap-4">
+                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
+                             <Activity size={14} />
+                           </div>
+                           <div className="space-y-0.5">
+                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
+                               {tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}
+                             </span>
+                             <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.banho}</p>
+                           </div>
+                         </div>
+                       )}
                      </div>
                    </div>
                  )}
@@ -520,9 +532,9 @@ export default function OraculoJornada() {
                 </div>
 
                 <div className="flex-1 w-full overflow-y-auto px-8 flex flex-col items-center justify-start text-center py-10">
-                  {/* Ícone Circular Estelar */}
-                  <div className="w-28 h-24 rounded-full bg-[#F5F2EA] flex items-center justify-center shrink-0 mb-6">
-                    <Sparkles size={56} className="text-[#C4A484]" strokeWidth={0.8} />
+                  {/* Ícone Circular com Mandala */}
+                  <div className="w-28 h-28 rounded-full bg-[#F5F2EA] flex items-center justify-center shrink-0 mb-6 relative overflow-hidden p-2">
+                    <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow opacity-80" />
                   </div>
 
                   <div className="space-y-8 max-w-[320px]">
