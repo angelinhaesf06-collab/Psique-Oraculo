@@ -23,13 +23,7 @@ const MandalaIcon = ({ className }: { className?: string }) => (
 export default function DecorationOverlay() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {/* Mandalas - Luxo e Simetria */}
-      <div className="absolute top-[-10%] left-[-10%] text-gold/5 rotate-12 scale-150">
-        <MandalaIcon className="w-96 h-96" />
-      </div>
-      <div className="absolute bottom-[-10%] right-[-10%] text-gold/5 -rotate-12 scale-150">
-        <MandalaIcon className="w-96 h-96" />
-      </div>
+      {/* Mandalas removidas a pedido do usuário para manter apenas a colorida do fundo */}
 
       {/* Fadinhas - Delicadeza */}
       <div className="absolute top-[15%] right-[5%] text-gold/10 animate-pulse transition-all duration-[5000ms]">
