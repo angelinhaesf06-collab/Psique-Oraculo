@@ -233,17 +233,20 @@ export default function OraculoJornada() {
               </div>
             )}
 
-            <div className="flex flex-col gap-2 w-full max-w-[280px]">
+            <div className="flex flex-col gap-2.5 w-full max-w-[320px]">
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 group w-full bg-white border border-[#E5D9C3]/50 p-2 rounded-[20px] shadow-sm active:scale-95 transition-all">
-                  <div className="w-12 h-18 bg-white rounded-[14px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[12px]" />
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-5 group w-full bg-white border border-[#E5D9C3]/50 p-2.5 rounded-[24px] shadow-sm active:scale-95 transition-all">
+                  <div className="w-14 h-20 bg-white rounded-[16px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
+                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
                   </div>
-                  <span className="text-[11px] font-black tracking-[0.15em] text-[#8B735B] uppercase text-left leading-none">{o.title.split(' ')[0]}<br/><span className="text-[#C4A484] text-[10px]">{o.title.split(' ')[1]}</span></span>
+                  <div className="flex flex-col text-left">
+                    <span className="text-[12px] font-black tracking-[0.2em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
+                    <span className="text-[#C4A484] text-[11px] font-black tracking-[0.2em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
+                  </div>
                 </button>
               ))}
             </div>
