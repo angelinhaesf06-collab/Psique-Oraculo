@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeft, Trash2, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { ChevronLeft, Trash, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -60,7 +60,7 @@ export default function DeleteAccount() {
 
         <header className="space-y-4 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-500">
-            <Trash2 size={32} />
+            <Trash size={32} />
           </div>
           <h1 className="text-3xl font-serif text-[#5C4D3C]">Excluir Conta</h1>
           <p className="text-sm text-[#8B735B] leading-relaxed">
