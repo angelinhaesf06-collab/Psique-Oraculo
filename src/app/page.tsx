@@ -31,11 +31,11 @@ const MandalaSmallIcon = ({ className }: { className?: string }) => (
 );
 
 const TEMAS = [
-  { label: 'Amigos', icon: Moon, color: 'from-[#0F172A] via-[#1E293B] to-[#0F172A]' },
-  { label: 'Amor', icon: Heart, color: 'from-[#450a0a] via-[#7f1d1d] to-[#450a0a]' },
-  { label: 'Dinheiro', icon: Sun, color: 'from-[#422006] via-[#713f12] to-[#422006]' },
-  { label: 'Saúde', icon: FairyIcon, color: 'from-[#064e3b] via-[#065f46] to-[#064e3b]' },
-  { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#2e1065] via-[#4c1d95] to-[#2e1065]' },
+  { label: 'Amigos', icon: Moon, color: 'from-[#3b82f6] via-[#2dd4bf] to-[#3b82f6]' },
+  { label: 'Amor', icon: Heart, color: 'from-[#ec4899] via-[#f43f5e] to-[#ec4899]' },
+  { label: 'Dinheiro', icon: Sun, color: 'from-[#f59e0b] via-[#fbbf24] to-[#f59e0b]' },
+  { label: 'Saúde', icon: FairyIcon, color: 'from-[#10b981] via-[#4ade80] to-[#10b981]' },
+  { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#8b5cf6] via-[#a855f7] to-[#8b5cf6]' },
 ];
 
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
