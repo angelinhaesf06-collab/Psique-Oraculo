@@ -23,7 +23,10 @@ const MandalaIcon = ({ className }: { className?: string }) => (
 export default function DecorationOverlay() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {/* Mandalas removidas a pedido do usuário para manter apenas a colorida do fundo */}
+      {/* Mandala Colorida Rotativa Global */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-[0.05]">
+        <img src="/assets/brand/mandala-login.png" alt="" className="w-[150%] max-w-none animate-spin-slow-very" />
+      </div>
 
       {/* Fadinhas - Delicadeza */}
       <div className="absolute top-[15%] right-[5%] text-gold/10 animate-pulse transition-all duration-[5000ms]">

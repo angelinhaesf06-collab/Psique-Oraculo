@@ -159,11 +159,6 @@ export default function LoginPage() {
   return (
     <div className="h-[100dvh] w-full bg-[#FDFBF7] flex flex-col items-center relative overflow-hidden">
       
-      {/* Mandala Centralizada de Fundo */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] z-0">
-        <img src="/assets/brand/mandala-login.png" alt="" className="w-[150%] max-w-none animate-spin-slow" />
-      </div>
-
       <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-between px-6 py-10 text-center">
         
         {/* Logo/Mandala Superior */}

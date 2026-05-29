@@ -208,11 +208,6 @@ export default function OraculoJornada() {
 
   return (
     <div className="h-full w-full text-[#5C4D3C] font-sans flex flex-col items-center relative overflow-hidden">
-      {/* Mandala de Fundo */}
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] z-0">
-        <img src="/assets/brand/mandala-login.png" alt="" className="w-[150%] max-w-none animate-spin-slow-very" />
-      </div>
-
       <div className="relative z-10 w-full h-full flex flex-col items-center px-4 py-1 overflow-hidden">
         
         {/* Cabeçalho Fixo - Bem Pequeno */}
