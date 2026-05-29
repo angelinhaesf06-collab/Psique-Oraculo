@@ -147,11 +147,38 @@ export default function OraculoJornada() {
       if (!res.ok) throw new Error("Silêncio no Portal.");
       
       const data = await res.json();
+      
+      // Corrigindo a vinculação das cartas sorteadas com o resultado da IA
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
-        if (data.situacao_atual) data.situacao_atual.card_slug = cartasSorteadas[0]?.slug;
-        if (data.caminho_acao) data.caminho_acao.card_slug = cartasSorteadas[1]?.slug;
-        if (data.resultado_conselho) data.resultado_conselho.card_slug = cartasSorteadas[2]?.slug;
-        if (data.carta_sorteada) data.carta_sorteada.card_slug = cartasSorteadas[0]?.slug;
+        if (tipo === 'completa' && cartasSorteadas.length === 3) {
+          // Tiragem de 3 Cartas (Situação, Caminho, Resultado)
+          if (data.situacao_atual) {
+            data.situacao_atual.carta = cartasSorteadas[0].name;
+            data.situacao_atual.card_slug = cartasSorteadas[0].slug;
+            data.situacao_atual.image_url = cartasSorteadas[0].image_url;
+          }
+          if (data.caminho_acao) {
+            data.caminho_acao.carta = cartasSorteadas[1].name;
+            data.caminho_acao.card_slug = cartasSorteadas[1].slug;
+            data.caminho_acao.image_url = cartasSorteadas[1].image_url;
+          }
+          if (data.resultado_conselho) {
+            data.resultado_conselho.carta = cartasSorteadas[2].name;
+            data.resultado_conselho.card_slug = cartasSorteadas[2].slug;
+            data.resultado_conselho.image_url = cartasSorteadas[2].image_url;
+          }
+          // Limpa flag de carta única para garantir exibição tripla
+          data.carta_sorteada = null;
+        } else {
+          // Tiragem de 1 Carta (Sim/Não)
+          if (data.carta_sorteada) {
+            data.carta_sorteada.carta = cartasSorteadas[0].name;
+            data.carta_sorteada.card_slug = cartasSorteadas[0].slug;
+            data.carta_sorteada.image_url = cartasSorteadas[0].image_url;
+          }
+          // Garante que não mostre as 3 posições se for tiragem única
+          data.situacao_atual = null;
+        }
       }
       setResultado(data); setPasso(4); 
     } catch (error: any) { toast.error(error.message); } finally { setLoading(false); }
