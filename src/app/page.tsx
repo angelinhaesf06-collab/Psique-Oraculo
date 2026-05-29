@@ -98,7 +98,7 @@ export default function OraculoJornada() {
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
         
         const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
         const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
         
         const res = await fetch(apiUrl, { 
@@ -132,7 +132,7 @@ export default function OraculoJornada() {
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
       const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
 
       const res = await fetch(apiUrl, {
@@ -212,120 +212,120 @@ export default function OraculoJornada() {
         <img src="/assets/brand/mandala-login.png" alt="" className="w-[180%] max-w-none animate-spin-slow-very" />
       </div>
 
-      <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 py-6 overflow-hidden">
+      <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 py-4 overflow-y-auto custom-scrollbar">
         
         {/* Cabeçalho Fixo */}
-        <div className="flex flex-col items-center mb-8 shrink-0">
-           <div className="w-24 h-24 relative">
+        <div className="flex flex-col items-center mb-4 shrink-0">
+           <div className="w-16 h-16 relative">
               <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
            </div>
         </div>
 
         {passo === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-4">
-            <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-2 gap-6">
+            <h2 className="text-2xl md:text-3xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
             
             {mensagemDia && (
-              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[360px] p-8 bg-white rounded-[40px] border border-[#E5D9C3]/50 shadow-2xl relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
-                <p className="text-base italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3">"{mensagemDia.texto}"</p>
-                <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
+              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-5 bg-white rounded-[32px] border border-[#E5D9C3]/50 shadow-xl relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-3">
+                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
+                <p className="text-sm italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3">"{mensagemDia.texto}"</p>
+                <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
               </div>
             )}
 
-            <div className="flex flex-col gap-5 w-full max-w-[320px]">
+            <div className="flex flex-col gap-3 w-full max-w-[300px]">
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-8 group w-full bg-white border border-[#E5D9C3]/50 p-4 rounded-[32px] shadow-xl active:scale-95 transition-all">
-                  <div className="w-20 h-28 bg-white rounded-[24px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[22px]" />
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-6 group w-full bg-white border border-[#E5D9C3]/50 p-3 rounded-[24px] shadow-lg active:scale-95 transition-all">
+                  <div className="w-16 h-24 bg-white rounded-[18px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
+                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[16px]" />
                   </div>
-                  <span className="text-base font-black tracking-[0.2em] text-[#8B735B] uppercase text-left leading-tight">{o.title.split(' ')[0]}<br/><span className="text-[#C4A484]">{o.title.split(' ')[1]}</span></span>
+                  <span className="text-sm font-black tracking-[0.2em] text-[#8B735B] uppercase text-left leading-tight">{o.title.split(' ')[0]}<br/><span className="text-[#C4A484]">{o.title.split(' ')[1]}</span></span>
                 </button>
               ))}
             </div>
 
-            <div className="flex flex-col items-center gap-6 w-full shrink-0 pt-4">
-               <h1 className="text-3xl font-serif text-[#C4A484] tracking-[0.3em] opacity-10 uppercase">Psiquê Oráculo</h1>
+            <div className="flex flex-col items-center gap-4 w-full shrink-0 pt-2 pb-4">
+               <h1 className="text-2xl font-serif text-[#C4A484] tracking-[0.3em] opacity-10 uppercase">Psiquê Oráculo</h1>
                
                <div className="flex items-center gap-2 w-full justify-center flex-wrap px-2">
-                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 rounded-full border border-[#E5D9C3] bg-white px-6 py-4 shadow-md active:scale-95 transition-all group">
-                    <Crown className="w-4 h-4 text-[#C4A484]" />
-                    <span className="text-[10px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
+                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 rounded-full border border-[#E5D9C3] bg-white px-4 py-3 shadow-md active:scale-95 transition-all group">
+                    <Crown className="w-3 h-3 text-[#C4A484]" />
+                    <span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
                   </button>
-                  <button onClick={() => setModalAberto('ajuda')} className="text-[10px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-6 py-4 rounded-full border border-[#E5D9C3] shadow-md active:scale-95 transition-all">Ajuda</button>
-                  <button onClick={() => setModalAberto('politicas')} className="text-[10px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-6 py-4 rounded-full border border-[#E5D9C3] shadow-md active:scale-95 transition-all">Políticas</button>
-                  <button onClick={handleLogout} className="text-[10px] font-black uppercase tracking-widest text-red-400 bg-white px-6 py-4 rounded-full border border-red-50 shadow-md active:scale-95 transition-all">Sair</button>
+                  <button onClick={() => setModalAberto('ajuda')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-4 py-3 rounded-full border border-[#E5D9C3] shadow-md active:scale-95 transition-all">Ajuda</button>
+                  <button onClick={() => setModalAberto('politicas')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-4 py-3 rounded-full border border-[#E5D9C3] shadow-md active:scale-95 transition-all">Políticas</button>
+                  <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white px-4 py-3 rounded-full border border-red-50 shadow-md active:scale-95 transition-all">Sair</button>
                </div>
             </div>
           </div>
         )}
 
         {passo === 1 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-10">
-            <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
-            <div className="flex flex-col gap-4 w-full max-w-[360px]">
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6 gap-6">
+            <h2 className="text-3xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
+            <div className="flex flex-col gap-3 w-full max-w-[340px]">
               {TEMAS.map((t) => (
-                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-18 rounded-[28px] bg-gradient-to-r ${t.color} p-[2px] shadow-2xl active:scale-[0.98] transition-all group`}>
-                  <div className="w-full h-full bg-black/80 backdrop-blur-lg rounded-[26px] flex items-center justify-between px-10">
-                    <div className="flex items-center gap-6">
-                      <t.icon className="w-6 h-6 text-white group-hover:scale-125 transition-transform duration-500" />
-                      <span className="text-xl font-medium text-white tracking-wide">{t.label}</span>
+                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-16 rounded-[24px] bg-gradient-to-r ${t.color} p-[2px] shadow-xl active:scale-[0.98] transition-all group`}>
+                  <div className="w-full h-full bg-black/80 backdrop-blur-lg rounded-[22px] flex items-center justify-between px-8">
+                    <div className="flex items-center gap-4">
+                      <t.icon className="w-5 h-5 text-white group-hover:scale-125 transition-transform duration-500" />
+                      <span className="text-lg font-medium text-white tracking-wide">{t.label}</span>
                     </div>
-                    <ChevronLeft className="w-5 h-5 rotate-180 opacity-30 text-white group-hover:opacity-100 transition-opacity" />
+                    <ChevronLeft className="w-4 h-4 rotate-180 opacity-30 text-white group-hover:opacity-100 transition-opacity" />
                   </div>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="mt-12 py-4 px-12 rounded-full bg-white/5 border border-[#C4A484]/10 text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all uppercase">‹ Mudar Oráculo</button>
+            <button onClick={prevPasso} className="mt-4 py-3 px-10 rounded-full bg-white/5 border border-[#C4A484]/10 text-[9px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Mudar Oráculo</button>
           </div>
         )}
 
         {passo === 2 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-12">
-            <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
-            <div className="flex-1 w-full max-w-[380px] flex flex-col justify-center">
-              <div className="bg-white rounded-[48px] border border-[#E5D9C3]/60 p-12 shadow-2xl w-full space-y-10">
-                <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-60 bg-transparent border-none focus:outline-none text-xl font-light text-[#5C4D3C] resize-none placeholder:text-[#C4A484]/20 custom-scrollbar" />
-                <div className="space-y-5 pt-8 border-t border-[#E5D9C3]/40">
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6 gap-6">
+            <h2 className="text-3xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
+            <div className="flex-1 w-full max-w-[360px] flex flex-col justify-center">
+              <div className="bg-white rounded-[32px] border border-[#E5D9C3]/60 p-8 shadow-xl w-full space-y-6">
+                <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-48 bg-transparent border-none focus:outline-none text-lg font-light text-[#5C4D3C] resize-none placeholder:text-[#C4A484]/20 custom-scrollbar" />
+                <div className="space-y-4 pt-6 border-t border-[#E5D9C3]/40">
                   <button 
                     onMouseDown={startRecording} 
                     onMouseUp={stopRecording}
                     onTouchStart={startRecording}
                     onTouchEnd={stopRecording}
-                    className={`w-full py-6 rounded-full flex items-center justify-center gap-5 text-[12px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-[#FDFBF7] text-[#C4A484] border-2 border-[#C4A484]/10 shadow-inner'} active:scale-95`}
+                    className={`w-full py-5 rounded-full flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-[#FDFBF7] text-[#C4A484] border-2 border-[#C4A484]/10 shadow-inner'} active:scale-95`}
                   >
-                    <Mic size={24} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
+                    <Mic size={20} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
                   </button>
-                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#C4A484] text-white py-6 rounded-full text-[12px] font-black uppercase tracking-[0.4em] shadow-lg disabled:opacity-20 active:scale-95">Prosseguir</button>
+                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#C4A484] text-white py-5 rounded-full text-[10px] font-black uppercase tracking-[0.4em] shadow-lg disabled:opacity-20 active:scale-95">Prosseguir</button>
                 </div>
               </div>
             </div>
-            <button onClick={prevPasso} className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484] opacity-50 hover:opacity-100 transition-opacity uppercase">‹ Trocar Foco ({tema.toUpperCase()})</button>
+            <button onClick={prevPasso} className="mt-4 text-[9px] font-black uppercase tracking-[0.4em] text-[#C4A484] opacity-50 hover:opacity-100 transition-opacity uppercase">‹ Trocar Foco ({tema.toUpperCase()})</button>
           </div>
         )}
 
         {passo === 3 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-16">
-            <h2 className="text-5xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tighter">Consulte o Invisível</h2>
-            <div className="flex flex-col gap-6 w-full max-w-[360px]">
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-8 gap-8">
+            <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tighter">Consulte o Invisível</h2>
+            <div className="flex flex-col gap-4 w-full max-w-[340px]">
               {[
                 { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, 
                 { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, 
                 { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' }
               ].map((m) => (
-                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-24 flex items-center gap-8 bg-white border border-[#E5D9C3]/40 px-10 rounded-full shadow-2xl active:scale-[0.98] transition-all group">
-                  <div className={`w-14 h-14 ${m.color} rounded-[20px] flex items-center justify-center text-white shadow-xl group-hover:rotate-12 transition-transform duration-500`}>
-                    <m.icon size={28} />
+                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-20 flex items-center gap-6 bg-white border border-[#E5D9C3]/40 px-8 rounded-full shadow-xl active:scale-[0.98] transition-all group">
+                  <div className={`w-12 h-12 ${m.color} rounded-[16px] flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform duration-500`}>
+                    <m.icon size={24} />
                   </div>
-                  <h4 className="font-black text-[13px] text-[#5C4D3C] uppercase tracking-[0.3em] text-left leading-relaxed">{m.title}</h4>
+                  <h4 className="font-black text-[11px] text-[#5C4D3C] uppercase tracking-[0.3em] text-left leading-relaxed">{m.title}</h4>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="mt-16 text-[11px] font-black uppercase tracking-[0.5em] text-[#C4A484] hover:opacity-100 transition-opacity uppercase">‹ Refazer Pergunta</button>
+            <button onClick={prevPasso} className="mt-8 text-[10px] font-black uppercase tracking-[0.5em] text-[#C4A484] hover:opacity-100 transition-opacity uppercase">‹ Refazer Pergunta</button>
           </div>
         )}
 
