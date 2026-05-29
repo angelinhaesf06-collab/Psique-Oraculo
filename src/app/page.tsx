@@ -38,33 +38,34 @@ const TEMAS = [
   { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#2e1065] via-[#4c1d95] to-[#2e1065]', textColor: 'text-purple-200' },
 ];
 
-function CardResult({ title, data, index, tipoOraculo, veredito }: { title: string, data: any, index: number, tipoOraculo: string, veredito?: string }) {
+function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
-  const [useLocalFallback, setUseLocalFallback] = useState(false);
-  const [useCustomFallback, setUseCustomFallback] = useState(true);
   
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[tipoOraculo] || 'taro';
   
-  const normalizedSlug = (data.card_slug || '').replace(/_/g, '-').toLowerCase().trim();
-
-  const customMap: Record<string, string> = {
-    'o-louco': '00_louco.png.jpeg', 'o-mago': '01_mago.png.jpeg', 'a-sacerdotisa': '02_sacerdotisa.png.jpeg', 'a-imperatriz': '03_imperatriz.png.jpeg', 'o-imperador': '04_imperador.png.jpeg', 'o-hierofante': '5_opapa.png.jpeg', 'os-amantes': '06_enamorados.png.jpeg', 'o-carro': '07_carro.png.jpeg', 'a-justica': '08_justiça.png.jpeg', 'o-eremita': '09_eremita.jpeg', 'roda-da-fortuna': '10_sol.png.jpeg', 'a-forca': '11_força.png.jpeg', 'o-pendurado': '12_enforcado.png.jpeg', 'a-morte': '13_morte.png.jpeg', 'a-temperanca': '14_temperança.png.jpeg', 'o-diabo': '15_diabo.png.jpeg', 'a-torre': '16_torre.png.jpeg', 'a-estrela': '18_estrela.png.jpeg', 'a-lua': '12_lua.png.jpeg', 'o-sol': '19_sol.png.jpeg', 'o-julgamento': '20_julgamento.png.jpeg', 'o-mundo': '21_mundo.png.jpeg'
-  };
-
-  const customFile = customMap[normalizedSlug];
-  let imagePath = (tipoOraculo === 'Tarô' && customFile && useCustomFallback) ? `/assets/decks/taro/custom/${customFile}` : (useLocalFallback ? `/assets/decks/${folder}/${normalizedSlug}.jpg` : (data.image_url || `/assets/decks/${folder}/${normalizedSlug}.jpg`));
+  // Sincronização direta com o slug gerado no sorteio
+  const slug = (data.card_slug || '').toLowerCase().trim();
+  const imagePath = data.image_url || `/assets/decks/${folder}/${slug}.webp`;
 
   return (
-    <div className="flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-4 duration-700 shrink-0" style={{ animationDelay: `${index * 150}ms` }}>
-      <h5 className="text-[7px] font-bold uppercase tracking-widest text-gold/60">{title}</h5>
-      <div className="w-[80px] md:w-[110px] aspect-[3/5] bg-white rounded-lg border border-gold/20 p-0.5 shadow-sm overflow-hidden relative">
+    <div className="flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-2 duration-500 shrink-0" style={{ animationDelay: `${index * 100}ms` }}>
+      <h5 className="text-[6px] font-bold uppercase tracking-widest text-[#C4A484]/80">{title}</h5>
+      <div className="w-[75px] xs:w-[85px] md:w-[100px] aspect-[3/5] bg-white rounded-lg border border-[#C4A484]/30 p-0.5 shadow-sm overflow-hidden relative">
         <div className="w-full h-full rounded-md overflow-hidden bg-[#FDFBF7] flex items-center justify-center">
            {!imageError ? (
-             <img src={imagePath} alt={data.carta} className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`} onLoad={() => setImageLoading(false)} onError={() => { if (tipoOraculo === 'Tarô' && customFile && useCustomFallback) setUseCustomFallback(false); else if (!useLocalFallback) setUseLocalFallback(true); else setImageError(true); }} />
+             <img 
+                src={imagePath} 
+                alt={data.carta} 
+                className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`} 
+                onLoad={() => setImageLoading(false)} 
+                onError={() => setImageError(true)} 
+             />
            ) : (
-             <div className="p-1 text-center"><span className="text-gold font-serif text-[7px] leading-tight">{data.carta}</span></div>
+             <div className="p-2 text-center bg-[#F5F2EA] w-full h-full flex items-center justify-center">
+                <span className="text-[#C4A484] font-serif text-[8px] leading-tight font-bold uppercase">{data.carta}</span>
+             </div>
            )}
         </div>
       </div>
