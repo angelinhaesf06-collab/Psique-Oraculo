@@ -43,11 +43,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={`${montserrat.variable} ${cormorant.variable} antialiased font-sans text-foreground relative min-h-[100dvh] overflow-x-hidden`}>
-        <DecorationOverlay />
-        <Toaster position="top-center" richColors />
-        <div className="relative z-10">
-          {children}
+      <body className={`${montserrat.variable} ${cormorant.variable} antialiased font-sans text-foreground relative min-h-[100dvh] bg-[#FDFBF7] flex justify-center`}>
+        <div className="w-full max-w-md min-h-[100dvh] relative flex flex-col bg-[#FDFBF7] shadow-[0_0_100px_rgba(0,0,0,0.05)]">
+          <DecorationOverlay />
+          <Toaster position="top-center" richColors />
+          <div className="relative z-10 flex-1">
+            {children}
+          </div>
         </div>
       </body>
     </html>
