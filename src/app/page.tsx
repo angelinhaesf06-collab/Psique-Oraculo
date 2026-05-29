@@ -31,11 +31,11 @@ const MandalaSmallIcon = ({ className }: { className?: string }) => (
 );
 
 const TEMAS = [
-  { label: 'Amigos', icon: Moon, color: 'from-[#2D7A78] via-[#469C9A] to-[#2D7A78]' }, // Cerceta (Teal da mandala)
-  { label: 'Amor', icon: Heart, color: 'from-[#8E1B32] via-[#B92B45] to-[#8E1B32]' }, // Rubi/Vinho (Vermelho da mandala)
-  { label: 'Dinheiro', icon: Sun, color: 'from-[#C5A059] via-[#DDBE7E] to-[#C5A059]' }, // Ouro/Dourado (Detalhes da mandala)
-  { label: 'Saúde', icon: FairyIcon, color: 'from-[#1B5E20] via-[#2E7D32] to-[#1B5E20]' }, // Verde profundo
-  { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#4A3B28] via-[#6D5942] to-[#4A3B28]' }, // Bronze/Terracota
+  { label: 'Amigos', icon: Moon, color: 'from-[#4FD1C5] via-[#81E6D9] to-[#4FD1C5]' }, // Cerceta claro/Turquesa
+  { label: 'Amor', icon: Heart, color: 'from-[#F687B3] via-[#FBB6CE] to-[#F687B3]' }, // Rosa suave/vibrante
+  { label: 'Dinheiro', icon: Sun, color: 'from-[#F6E05E] via-[#FAF089] to-[#F6E05E]' }, // Amarelo Ouro claro
+  { label: 'Saúde', icon: FairyIcon, color: 'from-[#68D391] via-[#9AE6B4] to-[#68D391]' }, // Verde menta/claro
+  { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#B794F4] via-[#D6BCFA] to-[#B794F4]' }, // Lilás/Roxo claro
 ];
 
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
