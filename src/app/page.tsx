@@ -31,11 +31,11 @@ const MandalaSmallIcon = ({ className }: { className?: string }) => (
 );
 
 const TEMAS = [
-  { label: 'Amigos', icon: Moon, color: 'from-[#1E293B] via-[#334155] to-[#1E293B]', textColor: 'text-blue-200' },
-  { label: 'Amor', icon: Heart, color: 'from-[#450a0a] via-[#991b1b] to-[#450a0a]', textColor: 'text-rose-200' },
-  { label: 'Dinheiro', icon: Sun, color: 'from-[#422006] via-[#a16207] to-[#422006]', textColor: 'text-amber-200' },
-  { label: 'Saúde', icon: FairyIcon, color: 'from-[#064e3b] via-[#065f46] to-[#064e3b]', textColor: 'text-emerald-200' },
-  { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#2e1065] via-[#4c1d95] to-[#2e1065]', textColor: 'text-purple-200' },
+  { label: 'Amigos', icon: Moon, color: 'from-[#0F172A] via-[#1E293B] to-[#0F172A]' },
+  { label: 'Amor', icon: Heart, color: 'from-[#450a0a] via-[#7f1d1d] to-[#450a0a]' },
+  { label: 'Dinheiro', icon: Sun, color: 'from-[#422006] via-[#713f12] to-[#422006]' },
+  { label: 'Saúde', icon: FairyIcon, color: 'from-[#064e3b] via-[#065f46] to-[#064e3b]' },
+  { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#2e1065] via-[#4c1d95] to-[#2e1065]' },
 ];
 
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
@@ -45,7 +45,6 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[tipoOraculo] || 'taro';
   
-  // Sincronização direta com o slug gerado no sorteio
   const slug = (data.card_slug || '').toLowerCase().trim();
   const imagePath = data.image_url || `/assets/decks/${folder}/${slug}.webp`;
 
@@ -81,10 +80,8 @@ export default function OraculoJornada() {
   const [tema, setTema] = useState('');
   const [desabafo, setDesabafo] = useState('');
   const [isGravando, setIsGravando] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
-  const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | 'mensagem_ampliada' | null>(null);
   const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
 
@@ -104,16 +101,11 @@ export default function OraculoJornada() {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
         const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
         
-        console.log("Buscando Mensagem do Dia em:", apiUrl);
-        
         const res = await fetch(apiUrl, { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) 
-        }).catch(err => {
-          console.error("Erro de rede na Mensagem do Dia:", err);
-          return null;
-        });
+        }).catch(err => null);
 
         if (res && res.ok) {
           const dataRes = await res.json();
@@ -123,7 +115,7 @@ export default function OraculoJornada() {
             localStorage.setItem('psique_mensagem_dia', JSON.stringify(novaMensagem));
           }
         }
-      } catch (e) { console.error("Erro Mensagem Dia:", e); }
+      } catch (e) {}
     };
     fetchMensagemDia();
   }, []);
@@ -139,15 +131,9 @@ export default function OraculoJornada() {
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       
-      // Melhoria: Detectar se estamos em desenvolvimento ou Mobile para decidir a URL
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
-      
-      // No Mobile, precisamos de URL absoluta. Na Web, usamos relativo /api/...
       const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
-
-      console.log("Chamando Portal IA em:", apiUrl);
-      console.log("Payload enviado:", { tipoOraculo, tipoLeitura: tipo, tema });
 
       const res = await fetch(apiUrl, {
         method: 'POST', 
@@ -156,29 +142,9 @@ export default function OraculoJornada() {
           'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' 
         },
         body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
-      }).catch(err => {
-        console.error("ERRO DE REDE DETECTADO:");
-        console.error("- Mensagem:", err.message);
-        console.error("- Causa:", err.cause);
-        console.error("- Stack:", err.stack);
-        
-        if (isNative) {
-          alert(`Erro de Conexão Mobile: ${err.message}\nURL: ${apiUrl}`);
-        }
-        
-        throw new Error(`Falha de conexão: ${err.message}. Verifique se o servidor está online.`);
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Erro na Resposta da IA (Texto):", errorText);
-        let errorMsg = "Silêncio no Portal.";
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMsg = errorData.error || errorMsg;
-        } catch (e) {}
-        throw new Error(errorMsg);
-      }
+      if (!res.ok) throw new Error("Silêncio no Portal.");
       
       const data = await res.json();
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
@@ -199,9 +165,7 @@ export default function OraculoJornada() {
           await SpeechRecognition.requestPermissions();
           await VoiceRecorder.requestAudioRecordingPermission();
         }
-      } catch (e) {
-        console.warn("Permissões de áudio não concedidas ou não suportadas:", e);
-      }
+      } catch (e) {}
     };
     requestPermissions();
   }, []);
@@ -209,9 +173,7 @@ export default function OraculoJornada() {
   const startRecording = async () => {
     try {
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      
       if (!isNative) {
-        // Fallback para Web (opcional ou apenas aviso)
         const recognition = new (window as any).webkitSpeechRecognition();
         recognition.lang = 'pt-BR';
         recognition.onresult = (event: any) => {
@@ -222,29 +184,15 @@ export default function OraculoJornada() {
         setIsGravando(true);
         return;
       }
-
-      // Lógica Nativa Capacitor
       const { available } = await SpeechRecognition.available();
       if (available) {
         setIsGravando(true);
-        SpeechRecognition.start({
-          language: "pt-BR",
-          partialResults: true,
-          popup: true, // Melhor para compatibilidade visual no Android
+        SpeechRecognition.start({ language: "pt-BR", partialResults: true, popup: true });
+        SpeechRecognition.addListener("partialResults", (data: any) => {
+          if (data.matches && data.matches.length > 0) setDesabafo(data.matches[0]);
         });
-
-        const partialListener = SpeechRecognition.addListener("partialResults", (data: any) => {
-          if (data.matches && data.matches.length > 0) {
-            setDesabafo(data.matches[0]);
-          }
-        });
-      } else {
-        toast.error("Reconhecimento de voz não disponível neste aparelho.");
       }
-    } catch (err: any) {
-      console.error(err);
-      setIsGravando(false);
-    }
+    } catch (err: any) { setIsGravando(false); }
   };
 
   const stopRecording = async () => {
@@ -253,119 +201,131 @@ export default function OraculoJornada() {
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
       if (isNative) {
         await SpeechRecognition.stop();
-        // Pequeno atraso antes de remover ouvintes para garantir que o último resultado chegue
-        setTimeout(() => {
-          SpeechRecognition.removeAllListeners();
-        }, 500);
+        setTimeout(() => SpeechRecognition.removeAllListeners(), 500);
       }
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) {}
   };
 
   return (
     <div className="h-[100dvh] w-full text-[#5C4D3C] font-sans flex flex-col items-center relative bg-[#FDFBF7] overflow-hidden p-safe">
-      <div className="fixed inset-0 flex items-center justify-center pointer-events-none opacity-[0.03] z-0">
-        <img src="/assets/brand/mandala-login.png" alt="" className="w-[150%] max-w-none animate-spin-slow" />
+      <div className="fixed inset-0 flex items-center justify-center pointer-events-none opacity-[0.05] z-0">
+        <img src="/assets/brand/mandala-login.png" alt="" className="w-[180%] max-w-none animate-spin-slow-very" />
       </div>
 
       <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 py-6 overflow-hidden">
         
         {/* Cabeçalho Fixo */}
-        <div className="flex flex-col items-center mb-4 shrink-0">
-           <div className="w-14 h-14 relative">
+        <div className="flex flex-col items-center mb-8 shrink-0">
+           <div className="w-24 h-24 relative">
               <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
            </div>
         </div>
 
         {passo === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-bottom-4 duration-700 py-2">
-            <h2 className="text-2xl font-serif text-[#C4A484] text-center px-4">Qual arcano você escolhe hoje?</h2>
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-4">
+            <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
+            
             {mensagemDia && (
-              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-h-[140px] p-4 bg-white/40 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] shadow-sm relative overflow-hidden group cursor-pointer flex flex-col justify-center">
-                <div className="flex flex-col items-center text-center space-y-2">
-                  <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Sintonização do Dia</span>
-                  <p className="text-xs italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2">"{mensagemDia.texto}"</p>
-                  <span className="text-[7px] font-medium uppercase tracking-widest text-[#8B735B] animate-pulse">Toque para ampliar ✨</span>
-                </div>
+              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[360px] p-8 bg-white rounded-[40px] border border-[#E5D9C3]/50 shadow-2xl relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
+                <p className="text-base italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3">"{mensagemDia.texto}"</p>
+                <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
               </div>
             )}
-            <div className="flex flex-col gap-3 w-full max-w-[240px] px-4">
+
+            <div className="flex flex-col gap-5 w-full max-w-[320px]">
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 group w-full bg-white/40 backdrop-blur-sm border border-[#E5D9C3] p-2 rounded-2xl shadow-sm active:scale-95 transition-all">
-                  <div className="w-12 h-18 bg-white rounded-xl border border-[#E5D9C3] p-0.5 overflow-hidden shrink-0">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-lg" />
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-8 group w-full bg-white border border-[#E5D9C3]/50 p-4 rounded-[32px] shadow-xl active:scale-95 transition-all">
+                  <div className="w-20 h-28 bg-white rounded-[24px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
+                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[22px]" />
                   </div>
-                  <span className="text-xs font-bold tracking-[0.2em] text-[#8B735B] uppercase text-left">{o.title}</span>
+                  <span className="text-base font-black tracking-[0.2em] text-[#8B735B] uppercase text-left leading-tight">{o.title.split(' ')[0]}<br/><span className="text-[#C4A484]">{o.title.split(' ')[1]}</span></span>
                 </button>
               ))}
             </div>
 
-            <div className="flex flex-col items-center gap-3 w-full shrink-0">
-               <h1 className="text-xl font-serif text-[#C4A484] tracking-tight opacity-40">Psiquê Oráculo</h1>
+            <div className="flex flex-col items-center gap-6 w-full shrink-0 pt-4">
+               <h1 className="text-3xl font-serif text-[#C4A484] tracking-[0.3em] opacity-10 uppercase">Psiquê Oráculo</h1>
                
-               <div className="flex items-center gap-2 w-full justify-center flex-wrap">
-                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 rounded-full border border-[#E5D9C3] bg-white/50 px-4 py-2 shadow-sm active:scale-95 transition-all">
-                    <Crown className="w-3 h-3 text-[#C4A484]" />
-                    <span className="text-[8px] font-bold text-[#8B735B] uppercase tracking-widest">Premium</span>
+               <div className="flex items-center gap-2 w-full justify-center flex-wrap px-2">
+                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-2 rounded-full border border-[#E5D9C3] bg-white px-6 py-4 shadow-md active:scale-95 transition-all group">
+                    <Crown className="w-4 h-4 text-[#C4A484]" />
+                    <span className="text-[10px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
                   </button>
-                  <button onClick={() => setModalAberto('ajuda')} className="text-[7px] font-bold uppercase tracking-widest text-[#C4A484]/60 bg-white/30 px-3 py-2 rounded-full border border-[#E5D9C3]/50">Ajuda</button>
-                  <button onClick={() => setModalAberto('politicas')} className="text-[7px] font-bold uppercase tracking-widest text-[#C4A484]/60 bg-white/30 px-3 py-2 rounded-full border border-[#E5D9C3]/50">Políticas</button>
-                  <button onClick={handleLogout} className="text-[7px] font-bold uppercase tracking-widest text-[#991b1b]/50 bg-white/30 px-3 py-2 rounded-full border border-[#E5D9C3]/50">Sair</button>
+                  <button onClick={() => setModalAberto('ajuda')} className="text-[10px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-6 py-4 rounded-full border border-[#E5D9C3] shadow-md active:scale-95 transition-all">Ajuda</button>
+                  <button onClick={() => setModalAberto('politicas')} className="text-[10px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-6 py-4 rounded-full border border-[#E5D9C3] shadow-md active:scale-95 transition-all">Políticas</button>
+                  <button onClick={handleLogout} className="text-[10px] font-black uppercase tracking-widest text-red-400 bg-white px-6 py-4 rounded-full border border-red-50 shadow-md active:scale-95 transition-all">Sair</button>
                </div>
             </div>
           </div>
         )}
 
         {passo === 1 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-4">
-            <h2 className="text-2xl font-serif text-[#C4A484] text-center px-4">Onde sua alma busca luz?</h2>
-            <div className="flex flex-col gap-2 w-full">
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-10">
+            <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
+            <div className="flex flex-col gap-4 w-full max-w-[360px]">
               {TEMAS.map((t) => (
-                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-12 rounded-xl bg-gradient-to-r ${t.color} p-[1px] shadow-sm active:scale-[0.98] transition-all`}><div className="w-full h-full bg-black/40 backdrop-blur-md rounded-[11px] flex items-center justify-between px-6"><div className="flex items-center gap-4"><t.icon className="w-4 h-4 text-white/90" /><span className="text-sm font-medium text-white/95 tracking-wide">{t.label}</span></div><ChevronLeft className="w-3 h-3 rotate-180 opacity-40 text-white" /></div></button>
+                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-18 rounded-[28px] bg-gradient-to-r ${t.color} p-[2px] shadow-2xl active:scale-[0.98] transition-all group`}>
+                  <div className="w-full h-full bg-black/80 backdrop-blur-lg rounded-[26px] flex items-center justify-between px-10">
+                    <div className="flex items-center gap-6">
+                      <t.icon className="w-6 h-6 text-white group-hover:scale-125 transition-transform duration-500" />
+                      <span className="text-xl font-medium text-white tracking-wide">{t.label}</span>
+                    </div>
+                    <ChevronLeft className="w-5 h-5 rotate-180 opacity-30 text-white group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="mt-8 py-2 px-6 rounded-full bg-white/40 border border-[#E5D9C3] text-[8px] font-bold uppercase tracking-widest text-[#C4A484] active:scale-95 transition-all">‹ Mudar Oráculo</button>
+            <button onClick={prevPasso} className="mt-12 py-4 px-12 rounded-full bg-white/5 border border-[#C4A484]/10 text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all uppercase">‹ Mudar Oráculo</button>
           </div>
         )}
 
         {passo === 2 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6">
-            <h2 className="text-2xl font-serif text-[#C4A484] text-center px-4">Abra o seu coração</h2>
-            <div className="flex-1 w-full max-w-[340px] flex flex-col justify-center">
-              <div className="bg-white/80 backdrop-blur-md rounded-[32px] border border-[#E5D9C3] p-6 shadow-xl w-full">
-                <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base font-light text-[#5C4D3C] resize-none" />
-                <div className="space-y-3 pt-4 border-t border-[#E5D9C3]/30">
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-12">
+            <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
+            <div className="flex-1 w-full max-w-[380px] flex flex-col justify-center">
+              <div className="bg-white rounded-[48px] border border-[#E5D9C3]/60 p-12 shadow-2xl w-full space-y-10">
+                <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-60 bg-transparent border-none focus:outline-none text-xl font-light text-[#5C4D3C] resize-none placeholder:text-[#C4A484]/20 custom-scrollbar" />
+                <div className="space-y-5 pt-8 border-t border-[#E5D9C3]/40">
                   <button 
                     onMouseDown={startRecording} 
                     onMouseUp={stopRecording}
                     onTouchStart={startRecording}
                     onTouchEnd={stopRecording}
-                    className={`w-full py-3 rounded-full flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-widest transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse' : 'bg-[#C4A484]/10 text-[#C4A484] border border-[#C4A484]/20'} active:scale-95`}
+                    className={`w-full py-6 rounded-full flex items-center justify-center gap-5 text-[12px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-[#FDFBF7] text-[#C4A484] border-2 border-[#C4A484]/10 shadow-inner'} active:scale-95`}
                   >
-                    <Mic size={16} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
+                    <Mic size={24} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
                   </button>
-                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#C4A484] text-white py-4 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg disabled:opacity-20 active:scale-95">Prosseguir</button>
+                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#C4A484] text-white py-6 rounded-full text-[12px] font-black uppercase tracking-[0.4em] shadow-lg disabled:opacity-20 active:scale-95">Prosseguir</button>
                 </div>
               </div>
             </div>
-            <button onClick={prevPasso} className="mt-6 text-[8px] font-bold uppercase tracking-widest text-[#C4A484]">‹ Trocar Foco ({tema})</button>
+            <button onClick={prevPasso} className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484] opacity-50 hover:opacity-100 transition-opacity uppercase">‹ Trocar Foco ({tema.toUpperCase()})</button>
           </div>
         )}
 
         {passo === 3 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-10">
-            <h2 className="text-2xl font-serif text-[#C4A484] text-center px-4">Consulte o Invisível</h2>
-            <div className="flex flex-col gap-3 w-full max-w-[280px]">
-              {[{ id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' }].map((m) => (
-                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-14 flex items-center gap-4 bg-white border border-[#E5D9C3] px-5 rounded-[18px] shadow-md active:scale-[0.98] transition-all"><div className={`w-8 h-8 ${m.color} rounded-lg flex items-center justify-center text-white shadow-sm`}><m.icon size={16} /></div><h4 className="font-bold text-[9px] text-[#5C4D3C] uppercase tracking-widest text-left">{m.title}</h4></button>
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-16">
+            <h2 className="text-5xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tighter">Consulte o Invisível</h2>
+            <div className="flex flex-col gap-6 w-full max-w-[360px]">
+              {[
+                { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, 
+                { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, 
+                { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' }
+              ].map((m) => (
+                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-24 flex items-center gap-8 bg-white border border-[#E5D9C3]/40 px-10 rounded-full shadow-2xl active:scale-[0.98] transition-all group">
+                  <div className={`w-14 h-14 ${m.color} rounded-[20px] flex items-center justify-center text-white shadow-xl group-hover:rotate-12 transition-transform duration-500`}>
+                    <m.icon size={28} />
+                  </div>
+                  <h4 className="font-black text-[13px] text-[#5C4D3C] uppercase tracking-[0.3em] text-left leading-relaxed">{m.title}</h4>
+                </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="mt-8 text-[8px] font-bold uppercase tracking-widest text-[#C4A484]">‹ Refazer Pergunta</button>
+            <button onClick={prevPasso} className="mt-16 text-[11px] font-black uppercase tracking-[0.5em] text-[#C4A484] hover:opacity-100 transition-opacity uppercase">‹ Refazer Pergunta</button>
           </div>
         )}
 
@@ -380,24 +340,9 @@ export default function OraculoJornada() {
               <div className="flex flex-row justify-center gap-2 mb-6 w-full py-1">
                 {resultado.situacao_atual && !resultado.carta_sorteada && (
                   <>
-                    <CardResult 
-                      title="Situação" 
-                      data={resultado.situacao_atual} 
-                      index={1} 
-                      tipoOraculo={tipoOraculo} 
-                    />
-                    <CardResult 
-                      title="Conselho" 
-                      data={resultado.caminho_acao} 
-                      index={2} 
-                      tipoOraculo={tipoOraculo} 
-                    />
-                    <CardResult 
-                      title="Resultado" 
-                      data={resultado.resultado_conselho} 
-                      index={3} 
-                      tipoOraculo={tipoOraculo} 
-                    />
+                    <CardResult title="Situação" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
+                    <CardResult title="Conselho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
+                    <CardResult title="Resultado" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
                   </>
                 )}
                 {resultado.carta_sorteada && (
@@ -415,12 +360,9 @@ export default function OraculoJornada() {
               </div>
 
               <div className="w-full space-y-6 pb-6">
-                 {/* Card de Leitura - Único que Rola Conteúdo Longo */}
                  <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden">
                     <h3 className="text-[#C4A484] font-serif text-xl mb-4">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
-                    <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-justify">
-                      {resultado.leitura_caminho?.analise_detalhada}
-                    </p>
+                    <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-justify">{resultado.leitura_caminho?.analise_detalhada}</p>
                     {resultado.leitura_caminho?.veredito_direto && !(tipoOraculo === 'Tarô') && (
                       <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-[9px] tracking-widest">{resultado.leitura_caminho.veredito_direto}</div>
                     )}
@@ -434,13 +376,9 @@ export default function OraculoJornada() {
                        {resultado.ancoragem_rituais.salmo && <div className="flex items-start gap-4"><div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><ShieldCheck size={14} /></div><div className="space-y-0.5"><span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Orientação</span><p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p></div></div>}
                        {resultado.ancoragem_rituais.banho && (
                          <div className="flex items-start gap-4">
-                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
-                             <Activity size={14} />
-                           </div>
+                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><Activity size={14} /></div>
                            <div className="space-y-0.5">
-                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
-                               {tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}
-                             </span>
+                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">{tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}</span>
                              <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.banho}</p>
                            </div>
                          </div>
@@ -452,9 +390,7 @@ export default function OraculoJornada() {
                  {resultado.acolhimento_quantum && (
                    <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic">
                      <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} className={tipoOraculo === 'Tarô' ? 'animate-pulse' : ''} /></div>
-                     <h4 className="text-[#C4A484] font-serif text-lg mb-2">
-                       {tipoOraculo === 'Tarô' ? 'Mantra da Alma' : resultado.acolhimento_quantum.titulo}
-                     </h4>
+                     <h4 className="text-[#C4A484] font-serif text-lg mb-2">{tipoOraculo === 'Tarô' ? 'Mantra da Alma' : resultado.acolhimento_quantum.titulo}</h4>
                      <p className={`text-xs text-[#5C4D3C]/70 leading-relaxed ${tipoOraculo === 'Tarô' ? 'animate-pulse font-bold text-[#C4A484]' : ''}`}>
                        {tipoOraculo === 'Tarô' ? resultado.ancoragem_rituais?.mantra || resultado.acolhimento_quantum.conteudo : resultado.acolhimento_quantum.conteudo}
                      </p>
@@ -465,12 +401,7 @@ export default function OraculoJornada() {
 
             <div className="w-full pt-4 pb-2 flex flex-col items-center gap-4 shrink-0">
                {resultado.acolhimento_psicologico && (
-                 <button 
-                   onClick={() => setPasso(5)} 
-                   className="text-[10px] font-bold uppercase tracking-[0.2em] text-white py-3 px-8 bg-[#2C2420] rounded-full shadow-lg border border-[#C4A484]/30 animate-pulse hover:bg-[#4A3B28] transition-all"
-                 >
-                   Quer um conselho do Psico? 👨‍⚕️
-                 </button>
+                 <button onClick={() => setPasso(5)} className="text-[10px] font-bold uppercase tracking-[0.2em] text-white py-3 px-8 bg-[#2C2420] rounded-full shadow-lg border border-[#C4A484]/30 animate-pulse hover:bg-[#4A3B28] transition-all">Quer um conselho do Psico? 👨‍⚕️</button>
                )}
                <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[9px] font-black uppercase tracking-widest text-[#C4A484] py-4 bg-white shadow-md px-10 rounded-full border border-[#E5D9C3] active:scale-95 transition-all">Novo Ciclo ✨</button>
             </div>
@@ -483,31 +414,14 @@ export default function OraculoJornada() {
                <h2 className="text-3xl font-serif text-[#C4A484] leading-tight">O Olhar Clínico</h2>
                <p className="text-[9px] font-bold uppercase tracking-widest text-[#8B735B]/60">Sua jornada emocional</p>
             </div>
-
             <div className="flex-1 w-full overflow-y-auto px-1 custom-scrollbar pb-10">
                <div className="bg-white/80 backdrop-blur-md rounded-[40px] border border-[#E5D9C3] p-8 shadow-2xl space-y-6 relative overflow-hidden">
-                  <div className="absolute -top-10 -left-10 opacity-[0.03] rotate-12">
-                     <Users size={200} className="text-[#C4A484]" />
-                  </div>
-                  
-                  <h3 className="text-xl font-serif text-[#5C4D3C] text-center border-b border-[#E5D9C3]/30 pb-4">
-                     {resultado.acolhimento_psicologico.titulo}
-                  </h3>
-
-                  <div className="space-y-4">
-                    <p className="text-sm md:text-base leading-relaxed text-[#5C4D3C]/90 font-sans font-light text-justify first-letter:text-3xl first-letter:font-serif first-letter:text-[#C4A484] first-letter:mr-2">
-                       {resultado.acolhimento_psicologico.conteudo}
-                    </p>
-                  </div>
-
-                  <div className="pt-6 border-t border-[#E5D9C3]/30">
-                    <p className="text-[10px] text-center italic text-[#8B735B]/80 font-serif">
-                       "O autoconhecimento é o portal para a cura da alma."
-                    </p>
-                  </div>
+                  <div className="absolute -top-10 -left-10 opacity-[0.03] rotate-12"><Users size={200} className="text-[#C4A484]" /></div>
+                  <h3 className="text-xl font-serif text-[#5C4D3C] text-center border-b border-[#E5D9C3]/30 pb-4">{resultado.acolhimento_psicologico.titulo}</h3>
+                  <div className="space-y-4"><p className="text-sm md:text-base leading-relaxed text-[#5C4D3C]/90 font-sans font-light text-justify first-letter:text-3xl first-letter:font-serif first-letter:text-[#C4A484] first-letter:mr-2">{resultado.acolhimento_psicologico.conteudo}</p></div>
+                  <div className="pt-6 border-t border-[#E5D9C3]/30"><p className="text-[10px] text-center italic text-[#8B735B]/80 font-serif">"O autoconhecimento é o portal para a cura da alma."</p></div>
                </div>
             </div>
-
             <div className="w-full pt-4 pb-2 flex justify-center shrink-0 gap-4">
                <button onClick={() => setPasso(4)} className="text-[9px] font-bold uppercase tracking-widest text-[#C4A484] py-4 bg-white/50 px-8 rounded-full border border-[#E5D9C3] active:scale-95 transition-all">‹ Voltar ao Oráculo</button>
                <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[9px] font-black uppercase tracking-widest text-white py-4 bg-[#C4A484] shadow-md px-10 rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
@@ -522,105 +436,59 @@ export default function OraculoJornada() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-[#2C2420]/70 backdrop-blur-md" onClick={() => setModalAberto(null)} />
           <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden h-[85vh] max-h-[85vh] flex flex-col">
-            
             {modalAberto === 'mensagem_ampliada' && mensagemDia && (
               <div className="flex flex-col h-full bg-[#FDFBF7]">
-                {/* Cabeçalho do Print */}
                 <div className="w-full flex justify-between items-center px-6 py-4 shrink-0 bg-white/20">
                   <span className="text-2xl italic font-serif text-[#C4A484] lowercase tracking-tight opacity-70">mensagem_ampliada</span>
                   <button onClick={() => setModalAberto(null)} className="p-2 text-[#C4A484] hover:opacity-50 transition-opacity"><X size={28} strokeWidth={1} /></button>
                 </div>
-
                 <div className="flex-1 w-full overflow-y-auto px-8 flex flex-col items-center justify-start text-center py-10">
-                  {/* Ícone Circular com Mandala */}
                   <div className="w-28 h-28 rounded-full bg-[#F5F2EA] flex items-center justify-center shrink-0 mb-6 relative overflow-hidden p-2">
                     <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow opacity-80" />
                   </div>
-
                   <div className="space-y-8 max-w-[320px]">
-                    <h4 className="text-[11px] font-sans font-black tracking-[0.4em] text-[#C4A484] uppercase opacity-80">
-                      Sintonização e Bem-estar
-                    </h4>
-                    
-                    <p className="text-2xl italic font-serif text-[#5C4D3C] leading-relaxed">
-                      "{mensagemDia.texto}"
-                    </p>
-
+                    <h4 className="text-[11px] font-sans font-black tracking-[0.4em] text-[#C4A484] uppercase opacity-80">Sintonização e Bem-estar</h4>
+                    <p className="text-2xl italic font-serif text-[#5C4D3C] leading-relaxed">"{mensagemDia.texto}"</p>
                     <div className="flex flex-col items-center gap-6 pt-6">
                       <div className="w-20 h-[0.5px] bg-[#C4A484]/20" />
-                      <span className="text-xs font-sans font-bold tracking-[0.2em] text-[#C4A484] uppercase">
-                        {mensagemDia.autor || "Abraço da Alma"}
-                      </span>
+                      <span className="text-xs font-sans font-bold tracking-[0.2em] text-[#C4A484] uppercase">{mensagemDia.autor || "Abraço da Alma"}</span>
                     </div>
                   </div>
                 </div>
-
-                {/* Botão Inferior do Print */}
                 <div className="w-full px-10 pb-10 pt-4 shrink-0">
-                  <button 
-                    onClick={() => setModalAberto(null)} 
-                    className="w-full py-5 bg-[#C4A484] text-white rounded-[45px] font-sans font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl active:scale-95 transition-all hover:bg-[#B39373]"
-                  >
-                    Receber com Gratidão ✨
-                  </button>
+                  <button onClick={() => setModalAberto(null)} className="w-full py-5 bg-[#C4A484] text-white rounded-[45px] font-sans font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl active:scale-95 transition-all hover:bg-[#B39373]">Receber com Gratidão ✨</button>
                 </div>
               </div>
             )}
-
             {modalAberto !== 'mensagem_ampliada' && (
               <>
                 <div className="p-5 border-b border-[#E5D9C3]/30 flex justify-between items-center bg-white/50">
-                  <h3 className="text-xl font-serif text-[#C4A484]">
-                    {modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Guia de Sintonização' : 'Pacto de Luz')}
-                  </h3>
+                  <h3 className="text-xl font-serif text-[#C4A484]">{modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Guia de Sintonização' : 'Pacto de Luz')}</h3>
                   <button onClick={() => setModalAberto(null)} className="p-2"><X className="w-5 h-5 text-[#C4A484]" /></button>
                 </div>
                 <div className="p-6 overflow-y-auto">
                   {modalAberto === 'assinatura' && (
                     <div className="space-y-6 text-center">
-                      <div className="w-16 h-16 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto">
-                        <Crown className="w-8 h-8 text-[#C4A484]" />
-                      </div>
+                      <div className="w-16 h-16 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto"><Crown className="w-8 h-8 text-[#C4A484]" /></div>
                       <div className="space-y-2">
                         <h4 className="text-lg font-bold text-[#5C4D3C]">Acesso Premium</h4>
-                        <p className="text-[10px] leading-relaxed text-[#8B735B]">
-                          Experimente <span className="font-bold">grátis por 24 horas</span>.<br/>
-                          Após o período, assine para continuar sua jornada.
-                        </p>
+                        <p className="text-[10px] leading-relaxed text-[#8B735B]">Experimente <span className="font-bold">grátis por 24 horas</span>.<br/>Após o período, assine para continuar sua jornada.</p>
                       </div>
-                      
                       <div className="bg-white rounded-3xl border border-[#E5D9C3] p-6 shadow-sm space-y-4">
                         <div className="space-y-1">
                           <div className="text-3xl font-black text-[#C4A484]">R$ 89,00<span className="text-xs opacity-60 ml-1">/ano</span></div>
                           <p className="text-[9px] uppercase tracking-widest font-bold text-[#8B735B]/70">Plano Anual Soul</p>
                         </div>
-                        
                         <div className="space-y-2 pt-2 border-t border-[#E5D9C3]/50">
-                          <div className="flex items-center gap-2 text-left">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                            <span className="text-[10px] text-[#5C4D3C]">5 tiragens completas por dia</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-left">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                            <span className="text-[10px] text-[#5C4D3C]">Acesso a todos os Decks</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-left">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                            <span className="text-[10px] text-[#5C4D3C]">Rituais e Banhos exclusivos</span>
-                          </div>
+                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">5 tiragens completas por dia</span></div>
+                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">Acesso a todos os Decks</span></div>
+                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">Rituais e Banhos exclusivos</span></div>
                         </div>
                       </div>
-
-                      <button className="w-full py-5 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-[32px] font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all">
-                        Iniciar 24h Grátis
-                      </button>
-                      
-                      <p className="text-[8px] text-[#8B735B]/50 px-4">
-                        Cancele a qualquer momento antes do fim do período de teste.
-                      </p>
+                      <button className="w-full py-5 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-[32px] font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all">Iniciar 24h Grátis</button>
+                      <p className="text-[8px] text-[#8B735B]/50 px-4">Cancele a qualquer momento antes do fim do período de teste.</p>
                     </div>
                   )}
-
                   {modalAberto === 'ajuda' && (
                     <div className="space-y-6 text-[#5C4D3C]">
                       <div className="space-y-4">
@@ -640,22 +508,12 @@ export default function OraculoJornada() {
                       <p className="text-[9px] text-[#8B735B] italic">Suporte: angelinhaesf06@gmail.com</p>
                     </div>
                   )}
-
                   {modalAberto === 'politicas' && (
                     <div className="space-y-6 text-[#5C4D3C]">
                       <div className="flex flex-col gap-3">
-                        <button onClick={() => router.push('/terms')} className="w-full p-4 bg-white rounded-2xl border border-[#E5D9C3] flex items-center justify-between group">
-                          <span className="text-[10px] font-bold uppercase tracking-widest">Termos de Uso</span>
-                          <ChevronLeft className="w-3 h-3 rotate-180 opacity-40" />
-                        </button>
-                        <button onClick={() => router.push('/privacy')} className="w-full p-4 bg-white rounded-2xl border border-[#E5D9C3] flex items-center justify-between group">
-                          <span className="text-[10px] font-bold uppercase tracking-widest">Privacidade</span>
-                          <ChevronLeft className="w-3 h-3 rotate-180 opacity-40" />
-                        </button>
-                        <button onClick={() => router.push('/delete-account')} className="w-full p-4 bg-white rounded-2xl border border-red-100 flex items-center justify-between group">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-red-500">Excluir Minha Conta</span>
-                          <Trash className="w-3 h-3 text-red-300" />
-                        </button>
+                        <button onClick={() => router.push('/terms')} className="w-full p-4 bg-white rounded-2xl border border-[#E5D9C3] flex items-center justify-between group"><span className="text-[10px] font-bold uppercase tracking-widest">Termos de Uso</span><ChevronLeft className="w-3 h-3 rotate-180 opacity-40" /></button>
+                        <button onClick={() => router.push('/privacy')} className="w-full p-4 bg-white rounded-2xl border border-[#E5D9C3] flex items-center justify-between group"><span className="text-[10px] font-bold uppercase tracking-widest">Privacidade</span><ChevronLeft className="w-3 h-3 rotate-180 opacity-40" /></button>
+                        <button onClick={() => router.push('/delete-account')} className="w-full p-4 bg-white rounded-2xl border border-red-100 flex items-center justify-between group"><span className="text-[10px] font-bold uppercase tracking-widest text-red-500">Excluir Minha Conta</span><Trash className="w-3 h-3 text-red-300" /></button>
                       </div>
                       <p className="text-[8px] text-[#8B735B]/50 uppercase tracking-widest text-center">Versão 1.0.0 • Psiquê Oráculo</p>
                     </div>

@@ -49,6 +49,19 @@ body::before {
 }
 
 
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 120s linear infinite;
+}
+
+.animate-spin-slow-very {
+  animation: spin-slow 240s linear infinite;
+}
+
 .p-safe {
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
