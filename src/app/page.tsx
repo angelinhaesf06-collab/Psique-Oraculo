@@ -100,7 +100,7 @@ export default function OraculoJornada() {
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
         
         const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
         const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
         
         console.log("Buscando Mensagem do Dia em:", apiUrl);
@@ -140,7 +140,7 @@ export default function OraculoJornada() {
       
       // Melhoria: Detectar se estamos em desenvolvimento ou Mobile para decidir a URL
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
       
       // No Mobile, precisamos de URL absoluta. Na Web, usamos relativo /api/...
       const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;

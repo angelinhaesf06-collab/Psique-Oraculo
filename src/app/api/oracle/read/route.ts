@@ -117,7 +117,9 @@ export async function POST(req: Request) {
 
     let model;
     try {
-      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction);
+      // Ativando Google Search como ferramenta de sintonização com o mundo
+      const tools = [{ googleSearch: {} }]; 
+      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction, tools);
     } catch (e: any) {
       console.error("Erro ao obter modelo Gemini:", e.message);
       throw new Error("Configuração da IA inválida.");
@@ -125,7 +127,7 @@ export async function POST(req: Request) {
 
     const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada (se houver): ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Análise via Imagem"}. Método: ${tipoLeitura}. Semente Energética: ${Math.random().toString(36).substring(7)}.`;
 
-    console.log("Enviando prompt para a IA...");
+    console.log("Enviando prompt para a IA (com Thinking e Search)...");
     const parts: any[] = [{ text: prompt }];
     
     if (imagem && imagem.includes("base64,")) {
@@ -147,8 +149,13 @@ export async function POST(req: Request) {
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.9,
-          maxOutputTokens: 1200,
-        }
+          maxOutputTokens: 2000, // Aumentado para acomodar leituras mais densas
+          // Configuração de Pensamento (Thinking) conforme solicitado
+          thinkingConfig: {
+             includeThoughts: true,
+             thinkingLevel: "MINIMAL"
+          }
+        } as any
       });
 
       console.log("Resposta recebida da IA.");
