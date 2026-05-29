@@ -520,9 +520,9 @@ export default function OraculoJornada() {
                   <button onClick={() => setModalAberto(null)} className="p-2 text-[#C4A484] hover:opacity-50 transition-opacity"><X size={28} strokeWidth={1} /></button>
                 </div>
 
-                <div className="flex-1 w-full overflow-y-auto px-8 flex flex-col items-center justify-center text-center py-6">
+                <div className="flex-1 w-full overflow-y-auto px-8 flex flex-col items-center justify-start text-center py-10">
                   {/* Ícone Circular Estelar */}
-                  <div className="w-28 h-24 rounded-full bg-[#F5F2EA] flex items-center justify-center shrink-0 mb-10">
+                  <div className="w-28 h-24 rounded-full bg-[#F5F2EA] flex items-center justify-center shrink-0 mb-6">
                     <Sparkles size={56} className="text-[#C4A484]" strokeWidth={0.8} />
                   </div>
 
@@ -559,19 +559,94 @@ export default function OraculoJornada() {
             {modalAberto !== 'mensagem_ampliada' && (
               <>
                 <div className="p-5 border-b border-[#E5D9C3]/30 flex justify-between items-center bg-white/50">
-                  <h3 className="text-xl font-serif text-[#C4A484]">{modalAberto === 'assinatura' ? 'Portal da Abundância' : modalAberto}</h3>
+                  <h3 className="text-xl font-serif text-[#C4A484]">
+                    {modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Guia de Sintonização' : 'Pacto de Luz')}
+                  </h3>
                   <button onClick={() => setModalAberto(null)} className="p-2"><X className="w-5 h-5 text-[#C4A484]" /></button>
                 </div>
-                <div className="p-6 overflow-y-auto text-center">
+                <div className="p-6 overflow-y-auto">
                   {modalAberto === 'assinatura' && (
-                    <div className="space-y-5">
-                      <div className="w-16 h-16 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto"><Crown className="w-8 h-8 text-[#C4A484]" /></div>
-                      <h4 className="text-lg font-bold">Jornada de Conexão</h4>
-                      <p className="text-[10px] leading-relaxed opacity-70">Acesse consultas ilimitadas, rituais e banhos exclusivos.</p>
-                      <div className="bg-[#C4A484]/5 p-4 rounded-2xl border border-[#C4A484]/20">
-                        <div className="text-2xl font-black text-[#C4A484]">R$ 89,00<span className="text-[8px] opacity-40 ml-1">/ano</span></div>
+                    <div className="space-y-6 text-center">
+                      <div className="w-16 h-16 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto">
+                        <Crown className="w-8 h-8 text-[#C4A484]" />
                       </div>
-                      <button className="w-full py-4 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-xl font-bold uppercase tracking-widest text-[9px]">Desbloquear Acesso</button>
+                      <div className="space-y-2">
+                        <h4 className="text-lg font-bold text-[#5C4D3C]">Acesso Premium</h4>
+                        <p className="text-[10px] leading-relaxed text-[#8B735B]">
+                          Experimente <span className="font-bold">grátis por 24 horas</span>.<br/>
+                          Após o período, assine para continuar sua jornada.
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white rounded-3xl border border-[#E5D9C3] p-6 shadow-sm space-y-4">
+                        <div className="space-y-1">
+                          <div className="text-3xl font-black text-[#C4A484]">R$ 89,00<span className="text-xs opacity-60 ml-1">/ano</span></div>
+                          <p className="text-[9px] uppercase tracking-widest font-bold text-[#8B735B]/70">Plano Anual Soul</p>
+                        </div>
+                        
+                        <div className="space-y-2 pt-2 border-t border-[#E5D9C3]/50">
+                          <div className="flex items-center gap-2 text-left">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                            <span className="text-[10px] text-[#5C4D3C]">5 tiragens completas por dia</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-left">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                            <span className="text-[10px] text-[#5C4D3C]">Acesso a todos os Decks</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-left">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                            <span className="text-[10px] text-[#5C4D3C]">Rituais e Banhos exclusivos</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button className="w-full py-5 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-[32px] font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all">
+                        Iniciar 24h Grátis
+                      </button>
+                      
+                      <p className="text-[8px] text-[#8B735B]/50 px-4">
+                        Cancele a qualquer momento antes do fim do período de teste.
+                      </p>
+                    </div>
+                  )}
+
+                  {modalAberto === 'ajuda' && (
+                    <div className="space-y-6 text-[#5C4D3C]">
+                      <div className="space-y-4">
+                        <div className="p-4 bg-white rounded-2xl border border-[#E5D9C3] space-y-2 text-left">
+                          <h4 className="font-bold text-[10px] uppercase tracking-widest text-[#C4A484]">Como consultar?</h4>
+                          <p className="text-[11px] leading-relaxed">Escolha seu deck preferido, foque em uma questão do seu coração e deixe que a IA interprete os símbolos para você.</p>
+                        </div>
+                        <div className="p-4 bg-white rounded-2xl border border-[#E5D9C3] space-y-2 text-left">
+                          <h4 className="font-bold text-[10px] uppercase tracking-widest text-[#C4A484]">Métodos de Leitura</h4>
+                          <p className="text-[11px] leading-relaxed">Oferecemos a Bússola Sim/Não para dúvidas rápidas e o Caminho do Destino para análises profundas de 3 cartas.</p>
+                        </div>
+                        <div className="p-4 bg-white rounded-2xl border border-[#E5D9C3] space-y-2 text-left">
+                          <h4 className="font-bold text-[10px] uppercase tracking-widest text-[#C4A484]">Voz e Imagem</h4>
+                          <p className="text-[11px] leading-relaxed">Você pode falar sua dúvida segurando o microfone ou fotografar um jogo de cartas físico para análise.</p>
+                        </div>
+                      </div>
+                      <p className="text-[9px] text-[#8B735B] italic">Suporte: angelinhaesf06@gmail.com</p>
+                    </div>
+                  )}
+
+                  {modalAberto === 'politicas' && (
+                    <div className="space-y-6 text-[#5C4D3C]">
+                      <div className="flex flex-col gap-3">
+                        <button onClick={() => router.push('/terms')} className="w-full p-4 bg-white rounded-2xl border border-[#E5D9C3] flex items-center justify-between group">
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Termos de Uso</span>
+                          <ChevronLeft className="w-3 h-3 rotate-180 opacity-40" />
+                        </button>
+                        <button onClick={() => router.push('/privacy')} className="w-full p-4 bg-white rounded-2xl border border-[#E5D9C3] flex items-center justify-between group">
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Privacidade</span>
+                          <ChevronLeft className="w-3 h-3 rotate-180 opacity-40" />
+                        </button>
+                        <button onClick={() => router.push('/delete-account')} className="w-full p-4 bg-white rounded-2xl border border-red-100 flex items-center justify-between group">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-red-500">Excluir Minha Conta</span>
+                          <Trash2 className="w-3 h-3 text-red-300" />
+                        </button>
+                      </div>
+                      <p className="text-[8px] text-[#8B735B]/50 uppercase tracking-widest text-center">Versão 1.0.0 • Psiquê Oráculo</p>
                     </div>
                   )}
                 </div>
