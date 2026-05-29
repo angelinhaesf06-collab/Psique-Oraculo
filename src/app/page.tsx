@@ -378,40 +378,38 @@ export default function OraculoJornada() {
             
             <div className="flex-1 w-full overflow-y-auto px-1 custom-scrollbar">
               <div className="flex flex-row justify-center gap-2 mb-6 w-full py-1">
-                {resultado.situacao_atual && (
-                  <CardResult 
-                    title="Situação" 
-                    data={resultado.situacao_atual} 
-                    index={1} 
-                    tipoOraculo={tipoOraculo} 
-                  />
+                {resultado.situacao_atual && !resultado.carta_sorteada && (
+                  <>
+                    <CardResult 
+                      title="Situação" 
+                      data={resultado.situacao_atual} 
+                      index={1} 
+                      tipoOraculo={tipoOraculo} 
+                    />
+                    <CardResult 
+                      title="Conselho" 
+                      data={resultado.caminho_acao} 
+                      index={2} 
+                      tipoOraculo={tipoOraculo} 
+                    />
+                    <CardResult 
+                      title="Resultado" 
+                      data={resultado.resultado_conselho} 
+                      index={3} 
+                      tipoOraculo={tipoOraculo} 
+                    />
+                  </>
                 )}
-                {resultado.caminho_acao && (
-                  <CardResult 
-                    title="Conselho" 
-                    data={resultado.caminho_acao} 
-                    index={2} 
-                    tipoOraculo={tipoOraculo} 
-                  />
-                )}
-                {resultado.resultado_conselho && (
-                  <CardResult 
-                    title="Resultado" 
-                    data={resultado.resultado_conselho} 
-                    index={3} 
-                    tipoOraculo={tipoOraculo} 
-                  />
-                )}
-                {!resultado.situacao_atual && resultado.carta_sorteada && (
-                   <div className="flex flex-col items-center gap-4">
-                      <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />
+                {resultado.carta_sorteada && (
+                   <div className="flex flex-col items-center gap-6">
                       {resultado.leitura_caminho?.veredito_direto && (
-                        <div className="bg-[#C4A484]/20 px-8 py-3 rounded-2xl border-2 border-[#C4A484]/30 animate-bounce shadow-lg">
-                          <span className="text-2xl font-black text-[#C4A484] uppercase tracking-[0.3em]">
-                            {resultado.leitura_caminho.veredito_direto.split(' ')[0]}
+                        <div className="bg-[#C4A484] px-10 py-4 rounded-[24px] shadow-xl border-4 border-white/20 animate-in zoom-in duration-500">
+                          <span className="text-3xl font-black text-white uppercase tracking-[0.4em] drop-shadow-md">
+                            {resultado.leitura_caminho.veredito_direto.split(' ')[0].replace(/[^a-zA-ZáéíóúÁÉÍÓÚ]/g, '')}
                           </span>
                         </div>
                       )}
+                      <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />
                    </div>
                 )}
               </div>
