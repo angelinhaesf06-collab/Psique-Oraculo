@@ -245,7 +245,7 @@ export default function OraculoJornada() {
         </div>
 
         {passo === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-2">
+          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-2 gap-4">
             <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight shrink-0">Qual arcano você escolhe hoje?</h2>
             
             {mensagemDia && (
@@ -274,7 +274,7 @@ export default function OraculoJornada() {
               ))}
             </div>
 
-            <div className="flex flex-col items-center gap-2 w-full shrink-0 pt-2 pb-2">
+            <div className="flex flex-col items-center gap-2 w-full shrink-0 pt-2 pb-2 mt-auto">
                <h1 className="text-xl font-serif text-[#C4A484] tracking-[0.3em] opacity-10 uppercase">Psiquê Oráculo</h1>
                
                <div className="flex items-center gap-1.5 w-full justify-center flex-wrap px-1">
@@ -291,7 +291,7 @@ export default function OraculoJornada() {
         )}
 
         {passo === 1 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6 gap-6">
+          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6 gap-6">
             <h2 className="text-3xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
             <div className="flex flex-col gap-3 w-full max-w-[340px]">
               {TEMAS.map((t) => (
@@ -311,9 +311,9 @@ export default function OraculoJornada() {
         )}
 
         {passo === 2 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6 gap-6">
+          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6 gap-6">
             <h2 className="text-3xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
-            <div className="flex-1 w-full max-w-[360px] flex flex-col justify-center">
+            <div className="w-full max-w-[360px] flex flex-col justify-center">
               <div className="bg-white rounded-[32px] border border-[#E5D9C3]/60 p-8 shadow-xl w-full space-y-6">
                 <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-48 bg-transparent border-none focus:outline-none text-lg font-light text-[#5C4D3C] resize-none placeholder:text-[#C4A484]/20 custom-scrollbar" />
                 <div className="space-y-4 pt-6 border-t border-[#E5D9C3]/40">
@@ -335,7 +335,7 @@ export default function OraculoJornada() {
         )}
 
         {passo === 3 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-8 gap-8">
+          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-8 gap-8">
             <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tighter">Consulte o Invisível</h2>
             <div className="flex flex-col gap-4 w-full max-w-[340px]">
               {[
