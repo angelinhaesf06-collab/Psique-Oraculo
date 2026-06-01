@@ -397,17 +397,50 @@ export default function OraculoJornada() {
                     )}
                  </div>
 
-                 {resultado.ancoragem_rituais && !(tipoOraculo === 'Tarô') && (
+                 {resultado.ancoragem_rituais && (
                    <div className="bg-white/90 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-6">
-                     <h3 className="text-[#C4A484] font-serif text-xl text-center">Ancoragem e Rituais</h3>
+                     <h3 className="text-[#C4A484] font-serif text-xl text-center">
+                       {tipoOraculo === 'Tarô dos Anjos' ? 'Luz e Proteção' : 'Ancoragem e Rituais'}
+                     </h3>
                      <div className="grid grid-cols-1 gap-5">
-                       {resultado.ancoragem_rituais.mantra && <div className="flex items-start gap-4"><div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><Sparkles size={14} /></div><div className="space-y-0.5"><span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Sintonização</span><p className="text-xs italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p></div></div>}
-                       {resultado.ancoragem_rituais.salmo && <div className="flex items-start gap-4"><div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><ShieldCheck size={14} /></div><div className="space-y-0.5"><span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Orientação</span><p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p></div></div>}
+                       {/* Mantra/Sintonização - Ocultar para Anjos */}
+                       {resultado.ancoragem_rituais.mantra && tipoOraculo !== 'Tarô dos Anjos' && (
+                         <div className="flex items-start gap-4">
+                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
+                             <Sparkles size={14} />
+                           </div>
+                           <div className="space-y-0.5">
+                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Sintonização</span>
+                             <p className="text-xs italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p>
+                           </div>
+                         </div>
+                       )}
+
+                       {/* Salmo/Orientação - Sempre visível se houver */}
+                       {resultado.ancoragem_rituais.salmo && (
+                         <div className="flex items-start gap-4">
+                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
+                             <ShieldCheck size={14} />
+                           </div>
+                           <div className="space-y-0.5">
+                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
+                               {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo' : 'Orientação'}
+                             </span>
+                             <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p>
+                           </div>
+                         </div>
+                       )}
+
+                       {/* Banho/Bíblia - Mostrar apenas um ou outro conforme o deck */}
                        {resultado.ancoragem_rituais.banho && (
                          <div className="flex items-start gap-4">
-                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]"><Activity size={14} /></div>
+                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
+                             <Activity size={14} />
+                           </div>
                            <div className="space-y-0.5">
-                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">{tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}</span>
+                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
+                               {tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}
+                             </span>
                              <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.banho}</p>
                            </div>
                          </div>
@@ -416,7 +449,7 @@ export default function OraculoJornada() {
                    </div>
                  )}
 
-                 {resultado.acolhimento_quantum && (
+                 {resultado.acolhimento_quantum && tipoOraculo !== 'Tarô dos Anjos' && (
                    <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic">
                      <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} className={tipoOraculo === 'Tarô' ? 'animate-pulse' : ''} /></div>
                      <h4 className="text-[#C4A484] font-serif text-lg mb-2">{tipoOraculo === 'Tarô' ? 'Mantra da Alma' : resultado.acolhimento_quantum.titulo}</h4>
