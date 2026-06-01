@@ -7,6 +7,7 @@ import { Fingerprint, Mail, LogIn, Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
+import DecorationOverlay from '../DecorationOverlay';
 
 export default function LoginPage() {
   const [nome, setNome] = useState('');
@@ -80,7 +81,10 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+      const baseUrl = isNative ? siteUrl : '';
+      
       console.log("Iniciando login para:", email, "em", baseUrl);
       const password = 'psique-oraculo-guest';
       
@@ -157,7 +161,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-[#FDFBF7] flex flex-col items-center relative overflow-hidden">
+    <div className="h-[100dvh] w-full bg-transparent flex flex-col items-center relative overflow-hidden">
+      <DecorationOverlay />
       
       <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-between px-6 py-10 text-center">
         

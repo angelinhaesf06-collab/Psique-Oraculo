@@ -31,6 +31,11 @@ body {
   padding-right: env(safe-area-inset-right);
 }
 
+/* Permitir que o Capacitor mostre o que está por baixo se necessário */
+html.plt-mobile body {
+  background-color: transparent;
+}
+
 /* Camada de brilho sutil */
 body::before {
   content: "";

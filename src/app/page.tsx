@@ -105,7 +105,11 @@ export default function OraculoJornada() {
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) 
-        }).catch(err => null);
+        }).catch(err => {
+          console.error("Erro de rede fetchMensagemDia:", err);
+          if (isNative) alert("Erro de Conexão Portal: " + err.message + " em " + apiUrl);
+          return null;
+        });
 
         if (res && res.ok) {
           const dataRes = await res.json();
@@ -491,7 +495,7 @@ export default function OraculoJornada() {
           </div>
         )}
 
-        {loading && <div className="fixed inset-0 bg-white/98 backdrop-blur-2xl z-[100] flex flex-col items-center justify-center gap-6"><div className="w-16 h-16 relative"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full animate-spin-slow opacity-20" /><div className="absolute inset-0 border-t border-[#C4A484] rounded-full animate-spin" /></div><p className="text-[8px] font-black uppercase tracking-[0.5em] text-[#C4A484] animate-pulse">Sintonizando Essência...</p></div>}
+        {loading && <div className="fixed inset-0 bg-white/98 backdrop-blur-2xl z-[100] flex flex-col items-center justify-center gap-6"><div className="w-16 h-16 relative"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full animate-spin-slow opacity-40" /><div className="absolute inset-0 border-t border-[#C4A484] rounded-full animate-spin" /></div><p className="text-[8px] font-black uppercase tracking-[0.5em] text-[#C4A484] animate-pulse">Sintonizando Essência...</p></div>}
       </div>
 
       {modalAberto && (
