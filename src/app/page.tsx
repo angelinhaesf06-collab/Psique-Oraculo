@@ -46,7 +46,7 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   const folder = folderMap[tipoOraculo] || 'taro';
   
   const slug = (data.card_slug || '').toLowerCase().trim();
-  const imagePath = data.image_url || `/assets/decks/${folder}/${slug}.webp`;
+  const imagePath = data.image_url || `/assets/decks/${folder}/${slug}.jpg`;
 
   return (
     <div className="flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-2 duration-500 shrink-0" style={{ animationDelay: `${index * 100}ms` }}>

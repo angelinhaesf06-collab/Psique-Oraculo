@@ -67,17 +67,65 @@ export async function drawCards(deckName: string, count: number = 3) {
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[deckName] || 'taro';
 
+  // Mapeamento de Arcanos Maiores para arquivos customizados
+  const CUSTOM_MAP: Record<string, string> = {
+    'O Louco': 'custom/00_louco.png.jpeg',
+    'O Mago': 'custom/01_mago.png.jpeg',
+    'A Sacerdotisa': 'custom/02_sacerdotisa.png.jpeg',
+    'A Imperatriz': 'custom/03_imperatriz.png.jpeg',
+    'O Imperador': 'custom/04_imperador.png.jpeg',
+    'O Hierofante': 'custom/5_opapa.png.jpeg',
+    'Os Amantes': 'custom/06_enamorados.png.jpeg',
+    'O Carro': 'custom/07_carro.png.jpeg',
+    'A Justiça': 'custom/08_justiça.png.jpeg',
+    'O Eremita': 'custom/09_eremita.jpeg',
+    'A Força': 'custom/11_força.png.jpeg',
+    'O Pendurado': 'custom/12_enforcado.png.jpeg',
+    'A Morte': 'custom/13_morte.png.jpeg',
+    'A Temperança': 'custom/14_temperança.png.jpeg',
+    'O Diabo': 'custom/15_diabo.png.jpeg',
+    'A Torre': 'custom/16_torre.png.jpeg',
+    'A Estrela': 'custom/18_estrela.png.jpeg',
+    'A Lua': 'custom/12_lua.png.jpeg',
+    'O Sol': 'custom/19_sol.png.jpeg',
+    'O Julgamento': 'custom/20_julgamento.png.jpeg',
+    'O Mundo': 'custom/21_mundo.png.jpeg'
+  };
+
+  const translateMinorArcana = (name: string) => {
+    const parts = name.split(' de ');
+    if (parts.length !== 2) return null;
+
+    const rankMap: Record<string, string> = {
+      'Ás': 'ace', 'Dois': 'two', 'Três': 'three', 'Quatro': 'four', 'Cinco': 'five',
+      'Seis': 'six', 'Sete': 'seven', 'Oito': 'eight', 'Nove': 'nine', 'Dez': 'ten',
+      'Valete': 'page', 'Cavaleiro': 'knight', 'Rainha': 'queen', 'Rei': 'king'
+    };
+
+    const suitMap: Record<string, string> = {
+      'Copas': 'cups', 'Espadas': 'swords', 'Paus': 'wands', 'Ouros': 'pentacles'
+    };
+
+    const rank = rankMap[parts[0]];
+    const suit = suitMap[parts[1]];
+
+    if (rank && suit) return `${rank}-of-${suit}.jpg`;
+    return null;
+  };
+
   const result = shuffled.slice(0, count).map(name => {
-    const slug = name.toLowerCase()
+    let slug = name.toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[\s_]+/g, '-') // Troca espaços e sublinhados por hífens
       .replace(/[^\w-]/g, '');
+
+    let filename = CUSTOM_MAP[name] || translateMinorArcana(name) || `${slug}.jpg`;
     
     return {
       name,
       slug,
-      image_url: `${supabaseUrl}/storage/v1/object/public/cartas-oraculo/${folder}/${slug}.webp`
+      image_url: `/assets/decks/${folder}/${filename}`
     };
   });
 

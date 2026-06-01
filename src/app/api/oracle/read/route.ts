@@ -125,7 +125,11 @@ export async function POST(req: Request) {
       throw new Error("Configuração da IA inválida.");
     }
 
-    const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada (se houver): ${Array.isArray(cartas) ? cartas.join(", ") : cartas || "Análise via Imagem"}. Método: ${tipoLeitura}. Semente Energética: ${Math.random().toString(36).substring(7)}.`;
+    const nomesDasCartas = Array.isArray(cartas) 
+      ? cartas.map(c => typeof c === 'string' ? c : (c.name || c.carta)).join(", ") 
+      : (typeof cartas === 'string' ? cartas : "Análise via Imagem");
+
+    const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada (se houver): ${nomesDasCartas}. Método: ${tipoLeitura}. Semente Energética: ${Math.random().toString(36).substring(7)}.`;
 
     console.log("Enviando prompt para a IA (com Thinking e Search)...");
     const parts: any[] = [{ text: prompt }];
