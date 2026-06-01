@@ -80,7 +80,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
       console.log("Iniciando login para:", email, "em", baseUrl);
       const password = 'psique-oraculo-guest';
       
