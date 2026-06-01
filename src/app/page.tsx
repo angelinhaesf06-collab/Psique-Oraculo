@@ -400,24 +400,24 @@ export default function OraculoJornada() {
                  {resultado.ancoragem_rituais && (
                    <div className="bg-white/90 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-6">
                      <h3 className="text-[#C4A484] font-serif text-xl text-center">
-                       {tipoOraculo === 'Tarô dos Anjos' ? 'Luz e Proteção' : 'Ancoragem e Rituais'}
+                       {tipoOraculo === 'Tarô dos Anjos' ? 'Luz e Proteção' : (tipoOraculo === 'Tarô' ? 'Sintonização' : 'Ancoragem e Rituais')}
                      </h3>
                      <div className="grid grid-cols-1 gap-5">
-                       {/* Mantra/Sintonização - Ocultar para Anjos */}
+                       {/* Mantra - Apenas para Tarô Clássico e Cigano */}
                        {resultado.ancoragem_rituais.mantra && tipoOraculo !== 'Tarô dos Anjos' && (
                          <div className="flex items-start gap-4">
                            <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
                              <Sparkles size={14} />
                            </div>
                            <div className="space-y-0.5">
-                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Sintonização</span>
+                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Mantra da Alma</span>
                              <p className="text-xs italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p>
                            </div>
                          </div>
                        )}
 
-                       {/* Salmo/Orientação - Sempre visível se houver */}
-                       {resultado.ancoragem_rituais.salmo && (
+                       {/* Salmo - Apenas para Tarô dos Anjos e Cigano */}
+                       {resultado.ancoragem_rituais.salmo && tipoOraculo !== 'Tarô' && (
                          <div className="flex items-start gap-4">
                            <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
                              <ShieldCheck size={14} />
@@ -431,8 +431,8 @@ export default function OraculoJornada() {
                          </div>
                        )}
 
-                       {/* Banho/Bíblia - Mostrar apenas um ou outro conforme o deck */}
-                       {resultado.ancoragem_rituais.banho && (
+                       {/* Banho/Bíblia - Conforme o deck */}
+                       {resultado.ancoragem_rituais.banho && tipoOraculo !== 'Tarô' && (
                          <div className="flex items-start gap-4">
                            <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
                              <Activity size={14} />
@@ -449,12 +449,12 @@ export default function OraculoJornada() {
                    </div>
                  )}
 
-                 {resultado.acolhimento_quantum && tipoOraculo !== 'Tarô dos Anjos' && (
+                 {resultado.acolhimento_quantum && tipoOraculo !== 'Tarô dos Anjos' && tipoOraculo !== 'Tarô' && (
                    <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic">
-                     <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} className={tipoOraculo === 'Tarô' ? 'animate-pulse' : ''} /></div>
-                     <h4 className="text-[#C4A484] font-serif text-lg mb-2">{tipoOraculo === 'Tarô' ? 'Mantra da Alma' : resultado.acolhimento_quantum.titulo}</h4>
-                     <p className={`text-xs text-[#5C4D3C]/70 leading-relaxed ${tipoOraculo === 'Tarô' ? 'animate-pulse font-bold text-[#C4A484]' : ''}`}>
-                       {tipoOraculo === 'Tarô' ? resultado.ancoragem_rituais?.mantra || resultado.acolhimento_quantum.conteudo : resultado.acolhimento_quantum.conteudo}
+                     <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} /></div>
+                     <h4 className="text-[#C4A484] font-serif text-lg mb-2">{resultado.acolhimento_quantum.titulo}</h4>
+                     <p className="text-xs text-[#5C4D3C]/70 leading-relaxed">
+                       {resultado.acolhimento_quantum.conteudo}
                      </p>
                    </div>
                  )}
