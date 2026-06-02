@@ -9,6 +9,15 @@ import { drawCards } from '@/lib/cards';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 
+const MandalaSmallIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    <path d="M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2" />
+    <circle cx="12" cy="12" r="9" strokeDasharray="2 2" />
+  </svg>
+);
+
 const TEMAS = [
   { label: 'Amigos', icon: Moon, color: 'from-[#4FD1C5] via-[#81E6D9] to-[#4FD1C5]' }, // Cerceta claro/Turquesa
   { label: 'Amor', icon: Heart, color: 'from-[#F687B3] via-[#FBB6CE] to-[#F687B3]' }, // Rosa suave/vibrante
