@@ -65,6 +65,12 @@ body::before {
 
 .animate-spin-slow-very {
   animation: spin-slow 240s linear infinite;
+  will-change: transform;
+}
+
+.image-render-sharp {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
 }
 
 .p-safe {

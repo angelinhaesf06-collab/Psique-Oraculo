@@ -168,7 +168,7 @@ export default function LoginPage() {
         
         {/* Logo/Mandala Superior */}
         <div className="w-24 h-24 md:w-32 md:h-32 animate-in zoom-in duration-1000">
-          <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
+          <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
         </div>
 
         <div className="flex flex-col gap-2">
