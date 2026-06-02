@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getGeminiModel } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
 
-export const dynamic = process.env.NEXT_PUBLIC_EXPORT === 'true' ? 'force-static' : 'force-dynamic';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   return NextResponse.json({ status: "online", message: "Portal Oráculo está pronto para sintonização." });

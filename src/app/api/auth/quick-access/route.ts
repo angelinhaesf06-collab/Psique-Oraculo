@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
-export const dynamic = process.env.NEXT_PUBLIC_EXPORT === 'true' ? 'force-static' : 'force-dynamic';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
