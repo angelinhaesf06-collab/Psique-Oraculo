@@ -9,32 +9,11 @@ import { drawCards } from '@/lib/cards';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 
-const FairyIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M12 2L9 7h6l-3-5z" />
-    <path d="M12 7c-2 0-4 2-4 4s2 4 4 4 4-2 4-4-2-4-4-4z" />
-    <path d="M8 11c-2 0-4 1-4 3s2 3 4 3" />
-    <path d="M16 11c2 0 4 1 4 3s-2 3-4 3" />
-    <path d="M12 15v5" />
-    <path d="M10 21h4" />
-    <circle cx="12" cy="7" r="1" fill="currentColor" />
-  </svg>
-);
-
-const MandalaSmallIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
-    <circle cx="12" cy="12" r="3" />
-    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-    <path d="M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2" />
-    <circle cx="12" cy="12" r="9" strokeDasharray="2 2" />
-  </svg>
-);
-
 const TEMAS = [
   { label: 'Amigos', icon: Moon, color: 'from-[#4FD1C5] via-[#81E6D9] to-[#4FD1C5]' }, // Cerceta claro/Turquesa
   { label: 'Amor', icon: Heart, color: 'from-[#F687B3] via-[#FBB6CE] to-[#F687B3]' }, // Rosa suave/vibrante
   { label: 'Dinheiro', icon: Sun, color: 'from-[#F6E05E] via-[#FAF089] to-[#F6E05E]' }, // Amarelo Ouro claro
-  { label: 'Saúde', icon: FairyIcon, color: 'from-[#68D391] via-[#9AE6B4] to-[#68D391]' }, // Verde menta/claro
+  { label: 'Saúde', icon: Activity, color: 'from-[#68D391] via-[#9AE6B4] to-[#68D391]' }, // Verde menta/claro
   { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#B794F4] via-[#D6BCFA] to-[#B794F4]' }, // Lilás/Roxo claro
 ];
 
