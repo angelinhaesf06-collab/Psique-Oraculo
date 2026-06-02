@@ -436,7 +436,7 @@ export default function OraculoJornada() {
                        )}
 
                        {/* Banho/Bíblia - Conforme o deck */}
-                       {resultado.ancoragem_rituais.banho && tipoOraculo !== 'Tarô' && (
+                       {((tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.biblia) || (tipoOraculo === 'Baralho Cigano' && resultado.ancoragem_rituais.banho)) && (
                          <div className="flex items-start gap-4">
                            <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
                              <Activity size={14} />
@@ -445,7 +445,9 @@ export default function OraculoJornada() {
                              <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
                                {tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}
                              </span>
-                             <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.banho}</p>
+                             <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">
+                               {tipoOraculo === 'Tarô dos Anjos' ? resultado.ancoragem_rituais.biblia : resultado.ancoragem_rituais.banho}
+                             </p>
                            </div>
                          </div>
                        )}

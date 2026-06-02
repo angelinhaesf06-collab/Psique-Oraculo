@@ -114,7 +114,12 @@ export async function POST(req: Request) {
           "titulo": "Um Espaço de Escuta e Acolhimento",
           "conteudo": "Análise profunda em PORTUGUÊS com tom de psicólogo renomado."
         },
-        "ancoragem_rituais": { "mantra": "Mantra ou Cristal", "salmo": "Ritual ou Salmo", "banho": "Banho ou Sinal", "biblia": "Nota" }
+        "ancoragem_rituais": { 
+          "mantra": "Mantra da Alma (Para Tarô ou Cigano)", 
+          "salmo": "Salmo com trecho (Para Anjos) ou Dica da Cigana (Para Cigano)", 
+          "banho": "Sugestão de Banho ou Erva (Para Cigano)", 
+          "biblia": "Dizeres da Bíblia / Versículo de Acolhimento (Apenas para Anjos)" 
+        }
       }
     `;
 
