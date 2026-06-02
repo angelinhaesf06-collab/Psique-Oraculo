@@ -451,6 +451,28 @@ export default function OraculoJornada() {
                            </div>
                          </div>
                        )}
+
+                       {/* Dica Angelical - Novo Bloco */}
+                       {tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.dica_angelical && (
+                         <div className="mt-4 p-5 bg-[#FDFBF7] rounded-[24px] border border-[#E5D9C3] shadow-inner space-y-3">
+                           <div className="flex items-center gap-2 mb-1">
+                             <Sparkles className="w-4 h-4 text-[#C4A484]" />
+                             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C4A484]">✨ Dica Angelical</h4>
+                           </div>
+                           <div className="space-y-3">
+                             <p className="text-[11px] text-[#5C4D3C] leading-relaxed italic">
+                               "Para trabalhar a energia de <span className="font-bold text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.foco_oracao}</span>, 
+                               acenda uma vela <span className="font-bold text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.vela_cor}</span> em um lugar seguro e acima da altura da sua cabeça. 
+                               Faça a sua oração voltada a essa intenção durante <span className="font-bold text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.ritual_dias}</span>, 
+                               mentalizando o seu pedido."
+                             </p>
+                             <div className="w-8 h-[1px] bg-[#C4A484]/20 mx-auto" />
+                             <p className="text-[11px] text-[#5C4D3C]/80 leading-relaxed text-center">
+                               {resultado.ancoragem_rituais.dica_angelical.dica_texto}
+                             </p>
+                           </div>
+                         </div>
+                       )}
                      </div>
                    </div>
                  )}

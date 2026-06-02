@@ -78,6 +78,7 @@ export async function POST(req: Request) {
       3. TARÔ DOS ANJOS:
          - Foco: Amparo, Paz e Frequência Angelical.
          - Entrega Obrigatória: Nomeie a carta do Anjo. Entregue "Salmo" (com um trecho real do salmo), "Arcanjo" e "Dizeres da Bíblia" (um versículo bíblico de acolhimento).
+         - Dica Angelical: No campo 'dica_angelical', entregue um ritual com: 'foco_oracao' (tema), 'vela_cor' (cor da vela), 'ritual_dias' (duração) e 'dica_texto' (instrução complementar).
 
       INSTRUÇÕES DE TIRAGEM (3 CARTAS - Situação/Conselho/Resultado):
       - PROFUNDIDADE: Esta é uma leitura densa e narrativa. Não seja objetivo aqui. Explore os símbolos, as cores e as conexões entre as cartas. Cada parágrafo deve ter pelo menos 4 a 5 frases ricas. 
@@ -118,7 +119,13 @@ export async function POST(req: Request) {
           "mantra": "Mantra da Alma (Para Tarô ou Cigano)", 
           "salmo": "Salmo com trecho (Para Anjos) ou Dica da Cigana (Para Cigano)", 
           "banho": "Sugestão de Banho ou Erva (Para Cigano)", 
-          "biblia": "Dizeres da Bíblia / Versículo de Acolhimento (Apenas para Anjos)" 
+          "biblia": "Dizeres da Bíblia / Versículo de Acolhimento (Apenas para Anjos)",
+          "dica_angelical": {
+            "foco_oracao": "Tema central",
+            "vela_cor": "Cor da vela",
+            "ritual_dias": "Duração do ritual",
+            "dica_texto": "Instrução complementar"
+          }
         }
       }
     `;
