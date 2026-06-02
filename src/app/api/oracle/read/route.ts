@@ -73,7 +73,7 @@ export async function POST(req: Request) {
 
       2. BARALHO CIGANO:
          - Foco: Preditivo, Direto e Prático.
-         - Entrega Obrigatória: Identifique o nome da carta e seu número. Entregue "Banho", "Cristal" e "Erva".
+         - Entrega Obrigatória: Identifique o nome da carta e seu número. Entregue "Banho", "Cristal", "Erva" e, no campo 'salmo', entregue uma "Simpatia Leve" (um pequeno ritual ou ação prática e positiva) relacionada ao tema.
 
       3. TARÔ DOS ANJOS:
          - Foco: Amparo, Paz e Frequência Angelical.
