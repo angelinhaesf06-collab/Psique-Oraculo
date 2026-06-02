@@ -191,7 +191,7 @@ export default function LoginPage() {
             placeholder="SEU NOME"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            className="w-full h-12 bg-white rounded-xl border border-[#E5D9C3] px-6 text-[10px] font-bold tracking-widest text-center uppercase focus:border-[#C4A484] outline-none transition-colors"
+            className="w-full h-12 bg-[#FDFBF7] rounded-xl border border-[#E5D9C3] px-6 text-[10px] font-bold tracking-widest text-center uppercase focus:border-[#C4A484] outline-none transition-colors"
           />
 
           <button
