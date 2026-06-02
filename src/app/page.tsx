@@ -341,23 +341,23 @@ export default function OraculoJornada() {
         )}
 
         {passo === 3 && (
-          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-8 gap-8">
-            <h2 className="text-4xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tighter">Consulte o Invisível</h2>
-            <div className="flex flex-col gap-4 w-full max-w-[340px]">
+          <div className="flex-1 flex flex-col items-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-2 gap-4">
+            <h2 className="text-3xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tighter mt-4">Consulte o Invisível</h2>
+            <div className="flex flex-col gap-3.5 w-full max-w-[340px] flex-1 justify-start pt-4">
               {[
                 { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, 
                 { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, 
                 { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' }
               ].map((m) => (
-                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-20 flex items-center gap-6 bg-white border border-[#E5D9C3]/40 px-8 rounded-full shadow-xl active:scale-[0.98] transition-all group">
-                  <div className={`w-12 h-12 ${m.color} rounded-[16px] flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform duration-500`}>
-                    <m.icon size={24} />
+                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-18 flex items-center gap-5 bg-white/40 backdrop-blur-[2px] border border-[#E5D9C3]/40 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
+                  <div className={`w-10 h-10 ${m.color} rounded-[14px] flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-500`}>
+                    <m.icon size={20} />
                   </div>
-                  <h4 className="font-black text-[11px] text-[#5C4D3C] uppercase tracking-[0.3em] text-left leading-relaxed">{m.title}</h4>
+                  <h4 className="font-black text-[10px] text-[#5C4D3C] uppercase tracking-[0.25em] text-left leading-relaxed">{m.title}</h4>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="mt-8 text-[10px] font-black uppercase tracking-[0.5em] text-[#C4A484] hover:opacity-100 transition-opacity uppercase">‹ Refazer Pergunta</button>
+            <button onClick={prevPasso} className="mb-8 text-[10px] font-black uppercase tracking-[0.5em] text-[#C4A484] hover:opacity-100 transition-opacity">‹ Refazer Pergunta</button>
           </div>
         )}
 
