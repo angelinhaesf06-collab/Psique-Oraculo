@@ -238,7 +238,7 @@ export default function OraculoJornada() {
   };
 
   return (
-    <div className="h-full w-full text-[#5C4D3C] font-sans flex flex-col items-center relative overflow-hidden">
+    <div className={`h-full w-full text-[#5C4D3C] font-sans flex flex-col items-center relative ${passo <= 3 ? 'overflow-hidden' : ''}`}>
       <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 py-2 overflow-hidden">
         
         {/* Cabeçalho Fixo - Equilibrado */}
