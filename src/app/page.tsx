@@ -520,8 +520,7 @@ export default function OraculoJornada() {
           <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden h-[85vh] max-h-[85vh] flex flex-col">
             {modalAberto === 'mensagem_ampliada' && mensagemDia && (
               <div className="flex flex-col h-full bg-[#FDFBF7]">
-                <div className="w-full flex justify-between items-center px-6 py-4 shrink-0 bg-white/20">
-                  <span className="text-2xl italic font-serif text-[#C4A484] lowercase tracking-tight opacity-70">mensagem_ampliada</span>
+                <div className="w-full flex justify-end items-center px-6 py-4 shrink-0 bg-white/20">
                   <button onClick={() => setModalAberto(null)} className="p-2 text-[#C4A484] hover:opacity-50 transition-opacity"><X size={28} strokeWidth={1} /></button>
                 </div>
                 <div className="flex-1 w-full overflow-y-auto px-8 flex flex-col items-center justify-start text-center py-10">
