@@ -428,7 +428,7 @@ export default function OraculoJornada() {
                            </div>
                            <div className="space-y-0.5">
                              <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
-                               {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo' : 'Orientação'}
+                               {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo' : (tipoOraculo === 'Baralho Cigano' ? 'Dica da Cigana' : 'Orientação')}
                              </span>
                              <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p>
                            </div>
