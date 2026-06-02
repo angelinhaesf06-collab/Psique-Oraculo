@@ -253,7 +253,7 @@ export default function OraculoJornada() {
             <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight shrink-0 mb-2">Qual arcano você escolhe hoje?</h2>
             
             {mensagemDia && (
-              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-4 bg-white rounded-[28px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-2 shrink-0">
+              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-4 bg-white/60 backdrop-blur-sm rounded-[28px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-2 shrink-0">
                 <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
                 <p className="text-[13px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2">"{mensagemDia.texto}"</p>
                 <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
@@ -266,7 +266,7 @@ export default function OraculoJornada() {
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-5 group w-full bg-white border border-[#E5D9C3]/50 p-3 rounded-[24px] shadow-sm active:scale-[0.97] transition-all">
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-5 group w-full bg-white/40 backdrop-blur-[2px] border border-[#E5D9C3]/50 p-3 rounded-[24px] shadow-sm active:scale-[0.97] transition-all">
                   <div className="w-14 h-20 bg-white rounded-[16px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
                   </div>
