@@ -448,7 +448,9 @@ export default function OraculoJornada() {
                                {tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}
                              </span>
                              <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">
-                               {tipoOraculo === 'Tarô dos Anjos' ? resultado.ancoragem_rituais.biblia : resultado.ancoragem_rituais.banho}
+                               {tipoOraculo === 'Tarô dos Anjos' 
+                                 ? (resultado.ancoragem_rituais.biblia?.toLowerCase().includes('banho') || resultado.ancoragem_rituais.biblia?.toLowerCase().includes('erva') ? 'Mentalize a luz angelical protetora em sua jornada.' : resultado.ancoragem_rituais.biblia)
+                                 : resultado.ancoragem_rituais.banho}
                              </p>
                            </div>
                          </div>

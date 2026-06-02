@@ -79,6 +79,7 @@ export async function POST(req: Request) {
          - Foco: Amparo, Paz e Frequência Angelical.
          - Entrega Obrigatória: Nomeie a carta do Anjo. Entregue "Salmo" (com um trecho real do salmo), "Arcanjo" e "Dizeres da Bíblia" (um versículo bíblico de acolhimento).
          - Dica Angelical: No campo 'dica_angelical', entregue um ritual com: 'foco_oracao' (tema), 'vela_cor' (cor da vela), 'ritual_dias' (duração) e 'dica_texto' (instrução complementar).
+         - REGRAS RÍGIDAS: NUNCA entregue "Banhos" ou "Ervas" neste oráculo. Deixe o campo 'banho' VAZIO ou nulo.
 
       INSTRUÇÕES DE TIRAGEM (3 CARTAS - Situação/Conselho/Resultado):
       - PROFUNDIDADE: Esta é uma leitura densa e narrativa. Não seja objetivo aqui. Explore os símbolos, as cores e as conexões entre as cartas. Cada parágrafo deve ter pelo menos 4 a 5 frases ricas. 
