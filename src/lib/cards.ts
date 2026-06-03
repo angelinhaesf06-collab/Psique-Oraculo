@@ -29,6 +29,29 @@ export async function drawCards(deckName: string, count: number = 3) {
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[deckName] || 'taro';
 
+  // Mapeamento para Baralho Cigano (arquivos .jpeg customizados)
+  const CIGANO_MAP: Record<string, string> = {
+    'O Cavaleiro': 'o-cavaleiro.jpeg',
+    'O Trevo': 'o-trevo.jpeg',
+    'O Navio': 'o-navio.jpeg',
+    'A Casa': 'a-casa.jpeg',
+    'A Árvore': 'a-arvore.jpeg',
+    'As Nuvens': 'as-nuvens.jpeg',
+    'A Serpente': 'a-serpente.jpeg',
+    'O Caixão': 'o-caixao.jpeg',
+    'As Flores': 'o-buque.jpeg', // Nome no arquivo é buque
+    'A Foice': 'a-foice.jpeg',
+    'O Chicote': 'o-chicote.jpeg',
+    'Os Pássaros': 'os-passaros.jpeg',
+    'A Raposa': 'a-raposa.jpeg',
+    'O Urso': 'o-urso.jpeg',
+    'A Estrela': 'a-estrela.jpeg',
+    'A Cegonha': 'a-cegonha.jpeg',
+    'A Torre': 'a-torre.jpeg',
+    'Caminhos': 'os-caminhos.jpeg',
+    'A Carta': 'a-carta.jpeg'
+  };
+
   // Mapeamento de Arcanos Maiores para arquivos customizados
   const CUSTOM_MAP: Record<string, string> = {
     'O Louco': 'custom/o-louco.webp.jpeg',
@@ -83,7 +106,7 @@ export async function drawCards(deckName: string, count: number = 3) {
       .replace(/[\s_]+/g, '-') 
       .replace(/[^\w-]/g, '');
 
-    let filename = CUSTOM_MAP[name] || translateMinorArcana(name) || `${slug}.jpg`;
+    let filename = CIGANO_MAP[name] || CUSTOM_MAP[name] || translateMinorArcana(name) || `${slug}.jpg`;
     return `/assets/decks/${folder}/${filename}`;
   };
 
