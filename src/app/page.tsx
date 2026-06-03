@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { drawCards, getAngelAttributes } from '@/lib/cards';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
+import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
 
 const MandalaSmallIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
@@ -138,6 +139,28 @@ export default function OraculoJornada() {
   const prevPasso = () => setPasso(passo - 1);
 
   const handleLeitura = async (tipo: string, imageData?: string) => {
+    // Se o tipo for foto e não tiver imagem, abre a câmera primeiro
+    if (tipo === 'foto' && !imageData) {
+      try {
+        const image = await CapacitorCamera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.Base64,
+          promptLabelHeader: 'Analisar Jogo Físico',
+          promptLabelPhoto: 'Escolher da Galeria',
+          promptLabelPicture: 'Tirar Foto Agora'
+        });
+        
+        if (image.base64String) {
+          handleLeitura('foto', `data:image/jpeg;base64,${image.base64String}`);
+        }
+        return;
+      } catch (e) {
+        console.warn("Usuário cancelou a câmera");
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const cartasSorteadas = tipo === 'foto' ? null : (tipo === 'completa' ? await drawCards(tipoOraculo, 3) : await drawCards(tipoOraculo, 1));

@@ -11,8 +11,10 @@
   "dependencies": {
     "@capacitor-community/speech-recognition": "^7.0.1",
     "@capacitor/android": "^8.3.4",
+    "@capacitor/camera": "^8.2.0",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
+    "@capacitor/preferences": "^8.0.1",
     "@capgo/capacitor-native-biometric": "^8.4.5",
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.106.0",
