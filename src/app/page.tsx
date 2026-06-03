@@ -195,10 +195,7 @@ export default function OraculoJornada() {
       }
       setResultado(data); setPasso(4); 
     } catch (error: any) { 
-      toast.error(error.message, { duration: 8000 }); 
-      if (typeof window !== 'undefined' && (window as any).Capacitor?.isNative) {
-        alert("Detalhe do Erro: " + error.message);
-      }
+      toast.error(error.message || "As energias do universo não puderam ser canalizadas agora.", { duration: 5000 }); 
     } finally { setLoading(false); }
   };
 
