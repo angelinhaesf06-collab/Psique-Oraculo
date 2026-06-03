@@ -248,70 +248,70 @@ export default function OraculoJornada() {
         </div>
 
         {passo === 0 && (
-          <div className="flex-1 flex flex-col items-center w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-4 gap-6">
-            <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight shrink-0 mb-2">Qual arcano você escolhe hoje?</h2>
+          <div className="flex-1 flex flex-col items-center w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-1 gap-3">
+            <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight shrink-0 mb-1">Qual arcano você escolhe hoje?</h2>
             
             {mensagemDia && (
-              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-4 bg-white/60 backdrop-blur-sm rounded-[28px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-2 shrink-0">
+              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-3 bg-white/60 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1 shrink-0">
                 <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
-                <p className="text-[13px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2">"{mensagemDia.texto}"</p>
+                <p className="text-[12px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2">"{mensagemDia.texto}"</p>
                 <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
               </div>
             )}
 
-            <div className="flex flex-col gap-3 w-full max-w-[320px] shrink-0 flex-1 justify-center">
+            <div className="flex flex-col gap-2 w-full max-w-[320px] shrink-0 flex-1 justify-center">
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-5 group w-full bg-white/40 backdrop-blur-[2px] border border-[#E5D9C3]/50 p-3 rounded-[24px] shadow-sm active:scale-[0.97] transition-all">
-                  <div className="w-14 h-20 bg-white rounded-[16px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 group w-full bg-white/40 backdrop-blur-[2px] border border-[#E5D9C3]/50 p-2 rounded-[20px] shadow-sm active:scale-[0.97] transition-all">
+                  <div className="w-12 h-16 bg-white rounded-[14px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
+                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[12px]" />
                   </div>
                   <div className="flex flex-col text-left">
-                    <span className="text-[12px] font-black tracking-[0.2em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
-                    <span className="text-[#C4A484] text-[11px] font-black tracking-[0.2em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
+                    <span className="text-[11px] font-black tracking-[0.2em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
+                    <span className="text-[#C4A484] text-[10px] font-black tracking-[0.2em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
                   </div>
                 </button>
               ))}
             </div>
 
-            <div className="flex flex-col items-center gap-4 w-full shrink-0 pt-4 pb-6 mt-auto">
-               <h1 className="text-xl font-serif text-[#C4A484] tracking-[0.3em] opacity-10 uppercase select-none">Psiquê Oráculo</h1>
+            <div className="flex flex-col items-center gap-2 w-full shrink-0 pt-2 pb-2 mt-auto">
+               <h1 className="text-lg font-serif text-[#C4A484] tracking-[0.3em] opacity-10 uppercase select-none">Psiquê Oráculo</h1>
                
-               <div className="flex flex-col items-center gap-3 w-full">
+               <div className="flex flex-col items-center gap-2 w-full">
                  <div className="flex items-center gap-2 w-full justify-center flex-wrap px-1">
-                    <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white px-5 py-2.5 shadow-sm active:scale-95 transition-all group">
+                    <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white px-4 py-2 shadow-sm active:scale-95 transition-all group">
                       <Crown className="w-3.5 h-3.5 text-[#C4A484]" />
-                      <span className="text-[9px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
+                      <span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
                     </button>
-                    <button onClick={() => setModalAberto('ajuda')} className="text-[9px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-5 py-2.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Ajuda</button>
-                    <button onClick={() => setModalAberto('politicas')} className="text-[9px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-5 py-2.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Políticas</button>
+                    <button onClick={() => setModalAberto('ajuda')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-4 py-2 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Ajuda</button>
+                    <button onClick={() => setModalAberto('politicas')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-4 py-2 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Políticas</button>
                  </div>
-                 <button onClick={handleLogout} className="text-[9px] font-black uppercase tracking-widest text-red-500 bg-white/50 px-8 py-2.5 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
+                 <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-500 bg-white/50 px-6 py-2 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
                </div>
             </div>
           </div>
         )}
 
         {passo === 1 && (
-          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6 gap-6">
-            <h2 className="text-3xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
-            <div className="flex flex-col gap-3 w-full max-w-[340px]">
+          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-2 gap-3">
+            <h2 className="text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
+            <div className="flex flex-col gap-2 w-full max-w-[340px]">
               {TEMAS.map((t) => (
-                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-16 rounded-[24px] bg-gradient-to-r ${t.color} p-[2px] shadow-xl active:scale-[0.98] transition-all group`}>
-                  <div className="w-full h-full bg-black/80 backdrop-blur-lg rounded-[22px] flex items-center justify-between px-8">
+                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-14 rounded-[22px] bg-gradient-to-r ${t.color} p-[2px] shadow-xl active:scale-[0.98] transition-all group`}>
+                  <div className="w-full h-full bg-black/80 backdrop-blur-lg rounded-[20px] flex items-center justify-between px-6">
                     <div className="flex items-center gap-4">
                       <t.icon className="w-5 h-5 text-white group-hover:scale-125 transition-transform duration-500" />
-                      <span className="text-lg font-medium text-white tracking-wide">{t.label}</span>
+                      <span className="text-base font-medium text-white tracking-wide">{t.label}</span>
                     </div>
                     <ChevronLeft className="w-4 h-4 rotate-180 opacity-30 text-white group-hover:opacity-100 transition-opacity" />
                   </div>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="mt-4 py-3 px-10 rounded-full bg-white/5 border border-[#C4A484]/10 text-[9px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Mudar Oráculo</button>
+            <button onClick={prevPasso} className="mt-2 py-2 px-10 rounded-full bg-white/5 border border-[#C4A484]/10 text-[9px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Mudar Oráculo</button>
           </div>
         )}
 
