@@ -99,12 +99,20 @@ export default function OraculoJornada() {
           return null;
         });
 
-        if (res && res.ok) {
-          const dataRes = await res.json();
-          if (dataRes.acolhimento_quantum) {
-            const novaMensagem = { texto: dataRes.acolhimento_quantum.conteudo, autor: dataRes.acolhimento_quantum.titulo, data: today };
-            setMensagemDia({ texto: novaMensagem.texto, autor: novaMensagem.autor });
-            localStorage.setItem('psique_mensagem_dia', JSON.stringify(novaMensagem));
+        if (res) {
+          const textRes = await res.text();
+          console.log("RESPOSTA MENSAGEM DIA:", textRes);
+          if (res.ok) {
+            try {
+              const dataRes = JSON.parse(textRes);
+              if (dataRes.acolhimento_quantum) {
+                const novaMensagem = { texto: dataRes.acolhimento_quantum.conteudo, autor: dataRes.acolhimento_quantum.titulo, data: today };
+                setMensagemDia({ texto: novaMensagem.texto, autor: novaMensagem.autor });
+                localStorage.setItem('psique_mensagem_dia', JSON.stringify(novaMensagem));
+              }
+            } catch (err) {
+              console.error("Erro ao processar JSON da mensagem do dia:", err);
+            }
           }
         }
       } catch (e) {}
@@ -136,9 +144,12 @@ export default function OraculoJornada() {
         body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
       });
 
-      if (!res.ok) throw new Error("Silêncio no Portal.");
+      const textResponse = await res.text();
+      console.log("RESPOSTA DO SERVIDOR:", textResponse);
+
+      if (!res.ok) throw new Error(`Silêncio no Portal: ${res.status}`);
       
-      const data = await res.json();
+      const data = JSON.parse(textResponse);
       
       // Corrigindo a vinculação das cartas sorteadas com o resultado da IA
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
