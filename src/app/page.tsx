@@ -257,7 +257,7 @@ export default function OraculoJornada() {
         
         {/* Cabeçalho Fixo - Equilibrado */}
         <div className="flex flex-col items-center mb-2 shrink-0">
-           <div className="w-14 h-14 relative">
+           <div className="w-16 h-16 relative p-1.5">
               <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
            </div>
         </div>

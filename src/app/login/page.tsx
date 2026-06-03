@@ -167,7 +167,7 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-between px-6 py-10 text-center">
         
         {/* Logo/Mandala Superior */}
-        <div className="w-24 h-24 md:w-32 md:h-32 animate-in zoom-in duration-1000">
+        <div className="w-28 h-28 md:w-36 md:h-36 animate-in zoom-in duration-1000 p-2">
           <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
         </div>
 
