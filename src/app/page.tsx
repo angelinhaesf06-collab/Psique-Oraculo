@@ -381,7 +381,7 @@ export default function OraculoJornada() {
                 { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, 
                 { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' }
               ].map((m) => (
-                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-16 flex items-center gap-5 bg-white/40 backdrop-blur-[2px] border border-[#E5D9C3]/40 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
+                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-16 flex items-center gap-5 bg-white/20 backdrop-blur-[2px] border border-[#E5D9C3]/40 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
                   <div className={`w-10 h-10 ${m.color} rounded-[14px] flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-500`}>
                     <m.icon size={20} />
                   </div>
