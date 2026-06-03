@@ -147,9 +147,19 @@ export default function OraculoJornada() {
       const textResponse = await res.text();
       console.log("RESPOSTA DO SERVIDOR:", textResponse);
 
-      if (!res.ok) throw new Error(`Silêncio no Portal: ${res.status}`);
+      if (!res.ok) {
+        let errorSnippet = textResponse.substring(0, 200).replace(/<[^>]*>?/gm, ''); // Pega o começo do erro removendo HTML
+        if (!errorSnippet.trim()) errorSnippet = textResponse.substring(0, 100);
+        throw new Error(`Erro do Servidor (${res.status}): ${errorSnippet}`);
+      }
       
-      const data = JSON.parse(textResponse);
+      let data;
+      try {
+        data = JSON.parse(textResponse);
+      } catch (parseError) {
+        let snippet = textResponse.substring(0, 150);
+        throw new Error(`Resposta inválida (não é JSON): ${snippet}...`);
+      }
       
       // Corrigindo a vinculação das cartas sorteadas com o resultado da IA
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
@@ -184,7 +194,12 @@ export default function OraculoJornada() {
         }
       }
       setResultado(data); setPasso(4); 
-    } catch (error: any) { toast.error(error.message); } finally { setLoading(false); }
+    } catch (error: any) { 
+      toast.error(error.message, { duration: 8000 }); 
+      if (typeof window !== 'undefined' && (window as any).Capacitor?.isNative) {
+        alert("Detalhe do Erro: " + error.message);
+      }
+    } finally { setLoading(false); }
   };
 
   useEffect(() => {
