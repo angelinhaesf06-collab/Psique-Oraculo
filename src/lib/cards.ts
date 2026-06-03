@@ -26,44 +26,6 @@ export const DECKS = {
 export async function drawCards(deckName: string, count: number = 3) {
   console.log(`Sorteando ${count} cartas do deck: ${deckName}`);
   
-  try {
-    const { data, error } = await supabase.rpc('draw_random_cards', {
-      p_deck_name: deckName,
-      p_count: count,
-      p_random_seed: `${Date.now()}-${Math.random()}-${Math.random().toString(36)}`
-    });
-
-    if (!error && data && data.length > 0) {
-      // Re-embaralhar localmente com maior entropia
-      const shuffledData = [...data].sort(() => 0.5 - Math.random());
-      
-      return shuffledData.map((card: any) => ({
-        name: card.card_name,
-        slug: card.card_slug,
-        image_url: card.image_url.startsWith('http') 
-          ? card.image_url 
-          : `${process.env.NEXT_PUBLIC_SUPABASE_URL}${card.image_url}`
-      }));
-    }
-    if (error) console.error("Erro RPC Supabase:", error);
-  } catch (err) {
-    console.warn("Falha ao sortear do Supabase, usando fallback local:", err);
-  }
-
-  // Fallback Local Ultra-Robusto
-  console.log("Usando fallback local para sorteio...");
-  const deck = DECKS[deckName as keyof typeof DECKS] || DECKS['Tarô'];
-  
-  // Criar cópia e embaralhar múltiplas vezes para garantir aleatoriedade
-  let shuffled = [...deck];
-  for (let cycle = 0; cycle < 3; cycle++) {
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-  }
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[deckName] || 'taro';
 
@@ -114,19 +76,63 @@ export async function drawCards(deckName: string, count: number = 3) {
     return null;
   };
 
+  const getLocalImageUrl = (name: string) => {
+    let slug = name.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[\s_]+/g, '-') 
+      .replace(/[^\w-]/g, '');
+
+    let filename = CUSTOM_MAP[name] || translateMinorArcana(name) || `${slug}.jpg`;
+    return `/assets/decks/${folder}/${filename}`;
+  };
+
+  try {
+    const { data, error } = await supabase.rpc('draw_random_cards', {
+      p_deck_name: deckName,
+      p_count: count,
+      p_random_seed: `${Date.now()}-${Math.random()}-${Math.random().toString(36)}`
+    });
+
+    if (!error && data && data.length > 0) {
+      // Re-embaralhar localmente com maior entropia
+      const shuffledData = [...data].sort(() => 0.5 - Math.random());
+      
+      return shuffledData.map((card: any) => ({
+        name: card.card_name,
+        slug: card.card_slug,
+        image_url: getLocalImageUrl(card.card_name)
+      }));
+    }
+    if (error) console.error("Erro RPC Supabase:", error);
+  } catch (err) {
+    console.warn("Falha ao sortear do Supabase, usando fallback local:", err);
+  }
+
+  // Fallback Local Ultra-Robusto
+  console.log("Usando fallback local para sorteio...");
+  const deck = DECKS[deckName as keyof typeof DECKS] || DECKS['Tarô'];
+  
+  // Criar cópia e embaralhar múltiplas vezes para garantir aleatoriedade
+  let shuffled = [...deck];
+  for (let cycle = 0; cycle < 3; cycle++) {
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+  }
+
   const result = shuffled.slice(0, count).map(name => {
     let slug = name.toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[\s_]+/g, '-') // Troca espaços e sublinhados por hífens
+      .replace(/[\s_]+/g, '-') 
       .replace(/[^\w-]/g, '');
 
-    let filename = CUSTOM_MAP[name] || translateMinorArcana(name) || `${slug}.jpg`;
-    
     return {
       name,
       slug,
-      image_url: `/assets/decks/${folder}/${filename}`
+      image_url: getLocalImageUrl(name)
     };
   });
 
