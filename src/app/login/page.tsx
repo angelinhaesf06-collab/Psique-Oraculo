@@ -82,7 +82,7 @@ export default function LoginPage() {
 
     try {
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pisiqueoraculo.com.br';
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
       const baseUrl = isNative ? siteUrl : '';
       
       console.log("Iniciando login para:", email, "em", baseUrl);
