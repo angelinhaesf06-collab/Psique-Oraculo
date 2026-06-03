@@ -19,11 +19,11 @@ const MandalaSmallIcon = ({ className }: { className?: string }) => (
 );
 
 const TEMAS = [
-  { label: 'Amigos', icon: Moon, color: 'from-[#4FD1C5] via-[#81E6D9] to-[#4FD1C5]' }, // Cerceta claro/Turquesa
-  { label: 'Amor', icon: Heart, color: 'from-[#F687B3] via-[#FBB6CE] to-[#F687B3]' }, // Rosa suave/vibrante
-  { label: 'Dinheiro', icon: Sun, color: 'from-[#F6E05E] via-[#FAF089] to-[#F6E05E]' }, // Amarelo Ouro claro
-  { label: 'Saúde', icon: Activity, color: 'from-[#68D391] via-[#9AE6B4] to-[#68D391]' }, // Verde menta/claro
-  { label: 'Trabalho', icon: MandalaSmallIcon, color: 'from-[#B794F4] via-[#D6BCFA] to-[#B794F4]' }, // Lilás/Roxo claro
+  { label: 'Amigos', icon: Moon, color: 'text-[#4FD1C5]' }, 
+  { label: 'Amor', icon: Heart, color: 'text-[#F687B3]' }, 
+  { label: 'Dinheiro', icon: Sun, color: 'text-[#D69E2E]' }, // Ouro mais escuro para contraste no fundo claro
+  { label: 'Saúde', icon: Activity, color: 'text-[#48BB78]' }, 
+  { label: 'Trabalho', icon: MandalaSmallIcon, color: 'text-[#9F7AEA]' }, 
 ];
 
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
@@ -310,22 +310,30 @@ export default function OraculoJornada() {
         )}
 
         {passo === 1 && (
-          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-2 gap-3">
-            <h2 className="text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
-            <div className="flex flex-col gap-2 w-full max-w-[340px]">
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-1">
+            <div className="flex flex-col items-center w-full gap-2 shrink-0">
+              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
+            </div>
+            
+            <div className="flex flex-col gap-2.5 w-full max-w-[340px] shrink-0 justify-center py-2">
               {TEMAS.map((t) => (
-                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className={`w-full h-14 rounded-[22px] bg-gradient-to-r ${t.color} p-[2px] shadow-xl active:scale-[0.98] transition-all group`}>
-                  <div className="w-full h-full bg-black/80 backdrop-blur-lg rounded-[20px] flex items-center justify-between px-6">
+                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/40 backdrop-blur-md border border-[#E5D9C3]/50 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
+                  <div className="w-full h-full bg-transparent rounded-[20px] flex items-center justify-between px-6">
                     <div className="flex items-center gap-4">
-                      <t.icon className="w-5 h-5 text-white group-hover:scale-125 transition-transform duration-500" />
-                      <span className="text-base font-medium text-white tracking-wide">{t.label}</span>
+                      <div className={`p-1.5 rounded-full bg-white shadow-sm ${t.color}`}>
+                        <t.icon className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                      </div>
+                      <span className={`text-sm font-bold tracking-[0.2em] uppercase ${t.color}`}>{t.label}</span>
                     </div>
-                    <ChevronLeft className="w-4 h-4 rotate-180 opacity-30 text-white group-hover:opacity-100 transition-opacity" />
+                    <ChevronLeft className={`w-4 h-4 rotate-180 opacity-30 ${t.color} group-hover:opacity-100 transition-opacity`} />
                   </div>
                 </button>
               ))}
             </div>
-            <button onClick={prevPasso} className="mt-2 py-2 px-10 rounded-full bg-white/5 border border-[#C4A484]/10 text-[9px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Mudar Oráculo</button>
+
+            <div className="flex flex-col items-center gap-2 w-full shrink-0 pb-2 pt-2">
+               <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Voltar ao Oráculo</button>
+            </div>
           </div>
         )}
 
