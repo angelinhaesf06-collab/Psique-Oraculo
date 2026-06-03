@@ -341,7 +341,7 @@ export default function OraculoJornada() {
             </div>
             
             <div className="w-full max-w-[340px] flex flex-col justify-center shrink-0 py-2">
-              <div className="bg-white/40 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/60 p-6 shadow-sm w-full space-y-4">
+              <div className="bg-white/20 backdrop-blur-[2px] rounded-[24px] border border-[#E5D9C3]/60 p-6 shadow-sm w-full space-y-4">
                 <textarea 
                   value={desabafo} 
                   onChange={(e) => setDesabafo(e.target.value)} 
