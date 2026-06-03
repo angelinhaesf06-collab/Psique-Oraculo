@@ -263,18 +263,21 @@ export default function OraculoJornada() {
         </div>
 
         {passo === 0 && (
-          <div className="flex-1 flex flex-col items-center w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-1 gap-3">
-            <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight shrink-0 mb-1">Qual arcano você escolhe hoje?</h2>
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-1">
             
-            {mensagemDia && (
-              <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-3 bg-white/60 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1 shrink-0">
-                <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
-                <p className="text-[12px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2">"{mensagemDia.texto}"</p>
-                <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
-              </div>
-            )}
+            <div className="flex flex-col items-center w-full gap-2 shrink-0">
+              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
+              
+              {mensagemDia && (
+                <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-3 bg-white/60 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
+                  <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
+                  <p className="text-[12px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2">"{mensagemDia.texto}"</p>
+                  <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
+                </div>
+              )}
+            </div>
 
-            <div className="flex flex-col gap-2 w-full max-w-[320px] shrink-0 flex-1 justify-center">
+            <div className="flex flex-col gap-2 w-full max-w-[320px] shrink-0 justify-center py-2">
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
@@ -292,19 +295,15 @@ export default function OraculoJornada() {
               ))}
             </div>
 
-            <div className="flex flex-col items-center gap-2 w-full shrink-0 pt-2 pb-2 mt-auto">
-               <h1 className="text-lg font-serif text-[#C4A484] tracking-[0.3em] opacity-10 uppercase select-none">Psiquê Oráculo</h1>
-               
-               <div className="flex flex-col items-center gap-2 w-full">
-                 <div className="flex items-center gap-2 w-full justify-center flex-wrap px-1">
-                    <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white px-4 py-2 shadow-sm active:scale-95 transition-all group">
-                      <Crown className="w-3.5 h-3.5 text-[#C4A484]" />
-                      <span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
-                    </button>
-                    <button onClick={() => setModalAberto('ajuda')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-4 py-2 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Ajuda</button>
-                    <button onClick={() => setModalAberto('politicas')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-4 py-2 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Políticas</button>
-                 </div>
-                 <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-500 bg-white/50 px-6 py-2 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
+            <div className="flex flex-col items-center gap-2 w-full shrink-0 pb-1 pt-2">
+               <div className="flex items-center gap-2 w-full justify-center flex-wrap px-1">
+                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white px-3 py-1.5 shadow-sm active:scale-95 transition-all group">
+                    <Crown className="w-3.5 h-3.5 text-[#C4A484]" />
+                    <span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
+                  </button>
+                  <button onClick={() => setModalAberto('ajuda')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-3 py-1.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Ajuda</button>
+                  <button onClick={() => setModalAberto('politicas')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-3 py-1.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Políticas</button>
+                  <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-3 py-1.5 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
                </div>
             </div>
           </div>
