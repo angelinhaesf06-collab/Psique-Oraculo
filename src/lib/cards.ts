@@ -49,7 +49,11 @@ export async function drawCards(deckName: string, count: number = 3) {
     'A Cegonha': 'a-cegonha.jpeg',
     'A Torre': 'a-torre.jpeg',
     'Caminhos': 'os-caminhos.jpeg',
-    'A Carta': 'a-carta.jpeg'
+    'A Carta': 'a-carta.jpeg',
+    'O Anel': 'o-anel.jpeg',
+    'O Coração': 'o-coracao.jpeg',
+    'Os Peixes': 'os-peixes.jpeg',
+    'A Âncora': 'a-ancora.jpeg'
   };
 
   // Mapeamento de Arcanos Maiores para arquivos customizados
@@ -161,4 +165,79 @@ export async function drawCards(deckName: string, count: number = 3) {
 
   console.log("Cartas sorteadas localmente:", result.map(c => c.name));
   return result;
+}
+
+export function getAngelAttributes(name: string): string[] {
+  const mapping: Record<string, string[]> = {
+    'Vehuiah': ['Força de Vontade'],
+    'Jeliel': ['Amor', 'Amizade'],
+    'Sitael': ['Proteção', 'Trabalho'],
+    'Elemiah': ['Proteção', 'Trabalho'],
+    'Mahasiah': ['Corpo', 'Intelecto'],
+    'Lelahel': ['Artes', 'Intelecto', 'Saúde'],
+    'Achaiah': ['Força de Vontade'],
+    'Cahetel': ['Proteção'],
+    'Haziel': ['Amizade'],
+    'Aladiah': ['Trabalho', 'Saúde'],
+    'Lauviah': ['Intelecto', 'Trabalho'],
+    'Hahaiah': ['Proteção', 'Sonhos'],
+    'Iezalel': ['Amor', 'Amizade', 'Intelecto'],
+    'Mebahel': ['Corpo', 'Proteção', 'Justiça'],
+    'Hariel': ['Intelecto'],
+    'Hakamiah': ['Proteção'],
+    'Lauviah II': ['Amizade', 'Sonhos', 'Música'],
+    'Caliel': ['Justiça'],
+    'Leuviah': ['Força de Vontade', 'Intelecto'],
+    'Pahaliah': ['Intelecto'],
+    'Nelchael': ['Intelecto', 'Proteção'],
+    'Ieiaiel': ['Prosperidade'],
+    'Melahel': ['Proteção', 'Saúde'],
+    'Haheuiah': ['Justiça'],
+    'Nith-Haiah': ['Intelecto', 'Sonhos'],
+    'Haaiah': ['Justiça'],
+    'Ierathel': ['Proteção'],
+    'Seheiah': ['Proteção'],
+    'Reyel': ['Proteção'],
+    'Omael': ['Intelecto', 'Saúde'],
+    'Lecabel': ['Intelecto', 'Prosperidade'],
+    'Vasariah': ['Justiça'],
+    'Iehuiah': ['Amor', 'Força de Vontade', 'Proteção'],
+    'Lehahiah': ['Amizade'],
+    'Chavakiah': ['Amizade'],
+    'Menadel': ['Intelecto', 'Trabalho'],
+    'Aniel': ['Intelecto'],
+    'Haamiah': ['Intelecto', 'Proteção'],
+    'Rehael': ['Saúde'],
+    'Ieiazel': ['Criatividade', 'Intelecto'],
+    'Hahahel': ['Proteção'],
+    'Mikael': ['Trabalho'],
+    'Veuliah': ['Prosperidade'],
+    'Ielaiah': ['Proteção', 'Justiça'],
+    'Sealiah': ['Força de Vontade', 'Proteção'],
+    'Ariel': ['Sonhos'],
+    'Asaliah': ['Justiça'],
+    'Mihael': ['Amor'],
+    'Vehuel': ['Criatividade'],
+    'Daniel': ['Corpo', 'Justiça'],
+    'Hahasiah': ['Intelecto', 'Saúde'],
+    'Imamiah': ['Proteção'],
+    'Nanael': ['Intelecto'],
+    'Nithael': ['Trabalho'],
+    'Mebahiah': ['Força de Vontade'],
+    'Poiel': ['Intelecto', 'Proteção', 'Prosperidade'],
+    'Nemamiah': ['Força de Vontade', 'Prosperidade'],
+    'Ieiaiel II': ['Saúde'],
+    'Harahel': ['Criatividade', 'Prosperidade', 'Trabalho'],
+    'Mizrael': ['Trabalho', 'Saúde'],
+    'Umabel': ['Amor', 'Amizade', 'Intelecto'],
+    'Iah-Hel': ['Amor', 'Intelecto'],
+    'Anauel': ['Proteção', 'Saúde'],
+    'Mehiel': ['Criatividade', 'Proteção'],
+    'Habuhiah': ['Saúde'],
+    'Rochel': ['Prosperidade', 'Trabalho', 'Justiça'],
+    'Jabamiah': ['Saúde', 'Cura Vícios'],
+    'Haiaiel': ['Força de Vontade'],
+    'Mumiah': ['Saúde']
+  };
+  return mapping[name] || [];
 }

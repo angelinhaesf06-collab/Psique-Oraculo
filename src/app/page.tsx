@@ -5,7 +5,7 @@ import { Trash, Sparkles, Mic, Type, Camera, LayoutGrid, CheckCircle2, ChevronLe
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { drawCards } from '@/lib/cards';
+import { drawCards, getAngelAttributes } from '@/lib/cards';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 
@@ -35,6 +35,8 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
   
   const slug = (data.card_slug || '').toLowerCase().trim();
   const imagePath = data.image_url || `/assets/decks/${folder}/${slug}.jpg`;
+  
+  const atributosAnjo = tipoOraculo === 'Tarô dos Anjos' ? getAngelAttributes(data.carta) : [];
 
   return (
     <div className="flex flex-col items-center gap-1 animate-in fade-in slide-in-from-bottom-2 duration-500 shrink-0" style={{ animationDelay: `${index * 100}ms` }}>
@@ -56,6 +58,17 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
            )}
         </div>
       </div>
+      
+      {/* Selos de Atributos Sagrados (Tarô dos Anjos) */}
+      {atributosAnjo.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-0.5 mt-1 max-w-[80px]">
+          {atributosAnjo.map(attr => (
+            <span key={attr} className="bg-[#C4A484]/10 text-[#8B735B] text-[5px] font-black uppercase px-1 py-0.5 rounded-full border border-[#C4A484]/20 tracking-tighter">
+              {attr}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
