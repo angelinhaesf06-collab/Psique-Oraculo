@@ -444,8 +444,8 @@ export default function OraculoJornada() {
                        {tipoOraculo === 'Tarô dos Anjos' ? 'Luz e Proteção' : (tipoOraculo === 'Tarô' ? 'Sintonização' : 'Ancoragem e Rituais')}
                      </h3>
                      <div className="grid grid-cols-1 gap-5">
-                       {/* Mantra - Apenas para Tarô Clássico e Cigano */}
-                       {resultado.ancoragem_rituais.mantra && tipoOraculo !== 'Tarô dos Anjos' && (
+                       {/* Mantra - Exclusivo para Tarô Clássico */}
+                       {resultado.ancoragem_rituais.mantra && tipoOraculo === 'Tarô' && (
                          <div className="flex items-start gap-4">
                            <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
                              <Sparkles size={14} />
