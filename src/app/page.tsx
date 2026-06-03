@@ -86,7 +86,7 @@ export default function OraculoJornada() {
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
         
         const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://psiqueoraculo.com.br';
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pisiqueoraculo.com.br';
         const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
         
         const res = await fetch(apiUrl, { 
