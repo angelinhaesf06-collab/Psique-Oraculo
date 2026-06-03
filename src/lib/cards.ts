@@ -23,6 +23,27 @@ export const DECKS = {
  * Sorteia cartas usando aleatoriedade real do Supabase (RANDOM())
  * Se falhar, usa o fallback local com Fisher-Yates.
  */
+export function getFallbackImageUrl(name: string, deckName: string): string {
+  const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '');
+  
+  if (deckName === 'Tarô') {
+    // Rider-Waite Tarot de repositório público
+    return `https://raw.githubusercontent.com/fabiolous/tarot-images/master/cards/${slug}.jpg`;
+  }
+  
+  if (deckName === 'Baralho Cigano') {
+    // Petit Lenormand clássico (mapeamento simples de número ou nome)
+    return `https://raw.githubusercontent.com/Gisat/lenormand-cards/master/images/${slug}.png`;
+  }
+
+  if (deckName === 'Tarô dos Anjos') {
+    // Imagem genérica de anjo majestoso ou luz divina baseada no nome
+    return `https://images.unsplash.com/photo-1598463162624-912b535d4615?auto=format&fit=crop&q=80&w=300&q=80`;
+  }
+
+  return 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=300';
+}
+
 export async function drawCards(deckName: string, count: number = 3) {
   console.log(`Sorteando ${count} cartas do deck: ${deckName}`);
   

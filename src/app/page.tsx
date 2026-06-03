@@ -5,7 +5,7 @@ import { Trash, Sparkles, Mic, Type, Camera, LayoutGrid, CheckCircle2, ChevronLe
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { drawCards, getAngelAttributes } from '@/lib/cards';
+import { drawCards, getAngelAttributes, getFallbackImageUrl } from '@/lib/cards';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
@@ -30,12 +30,13 @@ const TEMAS = [
 function CardResult({ title, data, index, tipoOraculo }: { title: string, data: any, index: number, tipoOraculo: string }) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [useFallback, setUseFallback] = useState(false);
   
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[tipoOraculo] || 'taro';
   
   const slug = (data.card_slug || '').toLowerCase().trim();
-  const imagePath = data.image_url || `/assets/decks/${folder}/${slug}.jpg`;
+  const imagePath = useFallback ? getFallbackImageUrl(data.carta, tipoOraculo) : (data.image_url || `/assets/decks/${folder}/${slug}.jpg`);
   
   const atributosAnjo = tipoOraculo === 'Tarô dos Anjos' ? getAngelAttributes(data.carta) : [];
 
@@ -50,7 +51,14 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
                 alt={data.carta} 
                 className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`} 
                 onLoad={() => setImageLoading(false)} 
-                onError={() => setImageError(true)} 
+                onError={() => {
+                  if (!useFallback) {
+                    setUseFallback(true);
+                    setImageLoading(true);
+                  } else {
+                    setImageError(true);
+                  }
+                }} 
              />
            ) : (
              <div className="p-2 text-center bg-[#F5F2EA] w-full h-full flex items-center justify-center">
