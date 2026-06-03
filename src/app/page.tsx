@@ -338,26 +338,37 @@ export default function OraculoJornada() {
         )}
 
         {passo === 2 && (
-          <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in slide-in-from-right-4 duration-700 py-6 gap-6">
-            <h2 className="text-3xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
-            <div className="w-full max-w-[360px] flex flex-col justify-center">
-              <div className="bg-white rounded-[32px] border border-[#E5D9C3]/60 p-8 shadow-xl w-full space-y-6">
-                <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-48 bg-transparent border-none focus:outline-none text-lg font-light text-[#5C4D3C] resize-none placeholder:text-[#C4A484]/20 custom-scrollbar" />
-                <div className="space-y-4 pt-6 border-t border-[#E5D9C3]/40">
+          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-1">
+            <div className="flex flex-col items-center w-full gap-2 shrink-0">
+              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
+            </div>
+            
+            <div className="w-full max-w-[340px] flex flex-col justify-center shrink-0 py-2">
+              <div className="bg-white/40 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/60 p-6 shadow-sm w-full space-y-4">
+                <textarea 
+                  value={desabafo} 
+                  onChange={(e) => setDesabafo(e.target.value)} 
+                  placeholder="Escreva sua dúvida..." 
+                  className="w-full h-32 bg-transparent border-none focus:outline-none text-base md:text-lg font-light text-[#5C4D3C] resize-none placeholder:text-[#C4A484]/40 custom-scrollbar" 
+                />
+                <div className="space-y-3 pt-4 border-t border-[#E5D9C3]/40">
                   <button 
                     onMouseDown={startRecording} 
                     onMouseUp={stopRecording}
                     onTouchStart={startRecording}
                     onTouchEnd={stopRecording}
-                    className={`w-full py-5 rounded-full flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-[#FDFBF7] text-[#C4A484] border-2 border-[#C4A484]/10 shadow-inner'} active:scale-95`}
+                    className={`w-full py-4 rounded-full flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-white/50 text-[#C4A484] border border-[#E5D9C3]/50 shadow-sm'} active:scale-95`}
                   >
-                    <Mic size={20} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
+                    <Mic size={16} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
                   </button>
-                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#C4A484] text-white py-5 rounded-full text-[10px] font-black uppercase tracking-[0.4em] shadow-lg disabled:opacity-20 active:scale-95">Prosseguir</button>
+                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#C4A484] text-white py-4 rounded-full text-[9px] font-black uppercase tracking-[0.4em] shadow-md disabled:opacity-20 active:scale-95 transition-all">Prosseguir</button>
                 </div>
               </div>
             </div>
-            <button onClick={prevPasso} className="mt-4 text-[9px] font-black uppercase tracking-[0.4em] text-[#C4A484] opacity-50 hover:opacity-100 transition-opacity uppercase">‹ Trocar Foco ({tema.toUpperCase()})</button>
+            
+            <div className="flex flex-col items-center gap-2 w-full shrink-0 pb-2 pt-2">
+               <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Trocar Foco ({tema.toUpperCase()})</button>
+            </div>
           </div>
         )}
 
