@@ -336,22 +336,22 @@ export default function OraculoJornada() {
               )}
             </div>
 
-            <div className="flex flex-col gap-4 w-full max-w-[360px] shrink-0 justify-center py-4">
+            <div className="flex flex-col gap-2.5 w-full max-w-[360px] shrink-0 justify-center py-2">
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-5 group w-full bg-white/60 backdrop-blur-md border border-[#E5D9C3] p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/80">
-                  <div className="w-16 h-24 bg-white rounded-[20px] border border-[#E5D9C3]/50 p-1 overflow-hidden shrink-0 shadow-md group-hover:rotate-2 transition-transform duration-500">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[16px]" />
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/60 backdrop-blur-md border border-[#E5D9C3] p-2.5 md:p-3 rounded-[28px] md:rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/80">
+                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white rounded-[16px] md:rounded-[20px] border border-[#E5D9C3]/50 p-1 overflow-hidden shrink-0 shadow-md group-hover:rotate-2 transition-transform duration-500">
+                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[12px] md:rounded-[16px]" />
                   </div>
-                  <div className="flex flex-col text-left space-y-1">
+                  <div className="flex flex-col text-left space-y-0.5">
                     <div className="flex flex-col">
-                      <span className="text-[13px] font-black tracking-[0.25em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
-                      <span className="text-[#C4A484] text-[12px] font-black tracking-[0.25em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
+                      <span className="text-[12px] md:text-[13px] font-black tracking-[0.25em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
+                      <span className="text-[#C4A484] text-[11px] md:text-[12px] font-black tracking-[0.25em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
                     </div>
-                    <span className="text-[9px] font-medium text-[#8B735B]/50 uppercase tracking-widest">{o.desc}</span>
+                    <span className="text-[8px] md:text-[9px] font-medium text-[#8B735B]/50 uppercase tracking-widest leading-tight">{o.desc}</span>
                   </div>
                 </button>
               ))}

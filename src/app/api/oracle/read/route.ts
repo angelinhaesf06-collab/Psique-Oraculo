@@ -136,9 +136,7 @@ export async function POST(req: Request) {
 
     let model;
     try {
-      // Ativando Google Search como ferramenta de sintonização com o mundo
-      const tools = [{ googleSearch: {} }]; 
-      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction, tools);
+      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction);
     } catch (e: any) {
       console.error("Erro ao obter modelo Gemini:", e.message);
       throw new Error("Configuração da IA inválida.");
@@ -159,7 +157,7 @@ Semente Energética: ${Math.random().toString(36).substring(7)}
 
 Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e responda no formato JSON solicitado. IDENTIFIQUE AS CARTAS CORRETAMENTE PELO NOME EM PORTUGUÊS NO JSON.`;
 
-    console.log("Enviando prompt para a IA (com Thinking e Search)...");
+    console.log("Enviando prompt para a IA (Modo Rápido)...");
     const parts: any[] = [{ text: prompt }];
     
     if (imagem && imagem.includes("base64,")) {
@@ -181,11 +179,7 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.9,
-          maxOutputTokens: 2000, 
-          thinkingConfig: {
-             includeThoughts: true,
-             thinkingLevel: "MINIMAL"
-          }
+          maxOutputTokens: 2000
         } as any
       });
 
