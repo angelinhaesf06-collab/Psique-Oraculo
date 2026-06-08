@@ -630,7 +630,7 @@ export default function OraculoJornada() {
         )}
 
         {loading && (
-          <div className="fixed inset-0 bg-[#FDFBF7]/95 z-[100] flex flex-col items-center justify-center overflow-hidden">
+          <div className="fixed inset-0 bg-[#FDFBF7] z-[100] flex flex-col items-center justify-center overflow-hidden">
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-40 h-40 md:w-48 md:h-48 relative flex items-center justify-center">
                 <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full animate-spin opacity-90 drop-shadow-lg" />
