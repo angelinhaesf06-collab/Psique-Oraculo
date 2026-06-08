@@ -152,7 +152,7 @@ export default function OraculoJornada() {
     if (tipo === 'foto' && !imageData) {
       try {
         const image = await CapacitorCamera.getPhoto({
-          quality: 90,
+          quality: 70, // Reduzido ligeiramente para evitar erros de payload grande
           allowEditing: false,
           resultType: CameraResultType.Base64,
           promptLabelHeader: 'Analisar Jogo Físico',
@@ -176,8 +176,9 @@ export default function OraculoJornada() {
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
       
+      const isNative = Capacitor.isNativePlatform();
       const siteUrl = 'https://www.pisiqueoraculo.com.br';
-      const apiUrl = `${siteUrl}/api/oracle/read`;
+      const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
 
       const res = await fetch(apiUrl, {
         method: 'POST', 
@@ -186,6 +187,9 @@ export default function OraculoJornada() {
           'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' 
         },
         body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
+      }).catch(err => {
+        console.error("Erro de rede handleLeitura:", err);
+        throw new Error(`Erro de Conexão: ${err.message}. Verifique sua internet.`);
       });
 
       const textResponse = await res.text();
