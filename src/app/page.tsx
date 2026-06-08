@@ -318,19 +318,22 @@ export default function OraculoJornada() {
               )}
             </div>
 
-            <div className="flex flex-col gap-2 w-full max-w-[320px] shrink-0 justify-center py-2">
+            <div className="flex flex-col gap-4 w-full max-w-[360px] shrink-0 justify-center py-4">
               {[
-                { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg' },
-                { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg' },
-                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg' }
+                { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma' },
+                { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
+                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 group w-full bg-white/40 backdrop-blur-[2px] border border-[#E5D9C3]/50 p-2 rounded-[20px] shadow-sm active:scale-[0.97] transition-all">
-                  <div className="w-12 h-16 bg-white rounded-[14px] border border-[#E5D9C3]/30 p-0.5 overflow-hidden shrink-0 shadow-inner relative z-10">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[12px]" />
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-5 group w-full bg-white/60 backdrop-blur-md border border-[#E5D9C3] p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/80">
+                  <div className="w-16 h-24 bg-white rounded-[20px] border border-[#E5D9C3]/50 p-1 overflow-hidden shrink-0 shadow-md group-hover:rotate-2 transition-transform duration-500">
+                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[16px]" />
                   </div>
-                  <div className="flex flex-col text-left">
-                    <span className="text-[11px] font-black tracking-[0.2em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
-                    <span className="text-[#C4A484] text-[10px] font-black tracking-[0.2em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
+                  <div className="flex flex-col text-left space-y-1">
+                    <div className="flex flex-col">
+                      <span className="text-[13px] font-black tracking-[0.25em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
+                      <span className="text-[#C4A484] text-[12px] font-black tracking-[0.25em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
+                    </div>
+                    <span className="text-[9px] font-medium text-[#8B735B]/50 uppercase tracking-widest">{o.desc}</span>
                   </div>
                 </button>
               ))}

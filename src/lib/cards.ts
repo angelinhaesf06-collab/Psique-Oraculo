@@ -141,7 +141,15 @@ export async function drawCards(deckName: string, count: number = 3) {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[\s_]+/g, '-') 
+      .replace(/[^\[\]"']/g, (m) => m === ' ' ? '-' : m) // Preserva espaços para o slug básico
       .replace(/[^\w-]/g, '');
+
+    // Se for Tarô e não for Arcano Maior, tenta primeiro o nome em português
+    if (deckName === 'Tarô' && !CUSTOM_MAP[name]) {
+      const ptFilename = `${slug}.jpg`;
+      // O frontend vai tentar carregar essa imagem primeiro
+      return `/assets/decks/${folder}/${ptFilename}`;
+    }
 
     let filename = CIGANO_MAP[name] || CUSTOM_MAP[name] || translateMinorArcana(name) || `${slug}.jpg`;
     return `/assets/decks/${folder}/${filename}`;
