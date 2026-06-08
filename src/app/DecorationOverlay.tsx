@@ -7,7 +7,9 @@ export default function DecorationOverlay() {
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       {/* Mandala Colorida Rotativa Global - Maior e mais visível como Marca D'água */}
       <div className="absolute inset-0 flex items-center justify-center opacity-[0.25] mix-blend-multiply">
-        <img src="/assets/brand/mandala-login.png" alt="" className="w-[120%] max-w-none animate-spin-slow" />
+        <div className="w-[120vw] md:w-[100vw] max-w-[600px] aspect-square flex items-center justify-center">
+          <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
+        </div>
       </div>
 
       {/* Astros - Sol e Lua */}
