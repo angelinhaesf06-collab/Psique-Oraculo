@@ -131,28 +131,30 @@ export default function LoginPage() {
     <div className="h-[100dvh] w-full bg-transparent flex flex-col items-center relative overflow-hidden">
       <DecorationOverlay />
       
-      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-between px-6 py-10 text-center">
+      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-between px-6 py-8 text-center">
         
-        {/* Logo/Mandala Superior */}
-        <div className="w-28 h-28 md:w-36 md:h-36 animate-in zoom-in duration-1000 p-2">
-          <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
-        </div>
+        <div className="flex flex-col items-center gap-6 w-full pt-4">
+          {/* Logo/Mandala Superior */}
+          <div className="w-24 h-24 md:w-32 md:h-32 animate-in zoom-in duration-1000 p-2 shrink-0">
+            <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
+          </div>
 
-        <div className="flex flex-col gap-2">
-          <h1 className="text-4xl md:text-6xl font-serif text-[#C4A484] leading-tight">
-            Psiquê Oráculo
-          </h1>
-          <div className="space-y-1">
-            <h2 className="text-[10px] md:text-xs font-sans font-bold tracking-[0.4em] text-[#8B735B] uppercase">
-              Seu oráculo de bolso
-            </h2>
-            <p className="text-[8px] font-sans font-medium tracking-[0.2em] text-[#C4A484]/60 uppercase">
-              Sintonize sua Essência
-            </p>
+          <div className="flex flex-col gap-1 drop-shadow-md">
+            <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484] leading-tight">
+              Psiquê Oráculo
+            </h1>
+            <div className="space-y-1">
+              <h2 className="text-[10px] md:text-xs font-sans font-bold tracking-[0.4em] text-[#8B735B] uppercase">
+                Seu oráculo de bolso
+              </h2>
+              <p className="text-[8px] font-sans font-medium tracking-[0.2em] text-[#C4A484]/60 uppercase">
+                Sintonize sua Essência
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="w-full space-y-4">
+        <div className="w-full space-y-4 pb-4">
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
