@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     console.log("Tema:", tema);
 
     // 2. Validação e Consumo de Créditos
-    let creditStatus = { allowed: true, type: "anonymous" };
+    let creditStatus: { allowed: boolean; type: string; message?: string; reason?: string } = { allowed: true, type: "anonymous" };
     
     if (userId) {
       const { data: checkData, error: checkError } = await supabaseAdmin.rpc('check_and_consume_reading', {
