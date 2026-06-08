@@ -200,6 +200,16 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       const cleanedResponse = jsonMatch ? jsonMatch[0] : responseText;
       jsonResponse = JSON.parse(cleanedResponse);
+
+      // Trava de Segurança: Forçar a tradução caso a IA alucine em inglês no Bússola Sim ou Não
+      if (jsonResponse?.leitura_caminho?.veredito_direto) {
+        let v = jsonResponse.leitura_caminho.veredito_direto.toString().toUpperCase().trim();
+        if (v === 'NO' || v.includes('NO')) {
+          jsonResponse.leitura_caminho.veredito_direto = 'NÃO';
+        } else if (v === 'YES' || v.includes('YES')) {
+          jsonResponse.leitura_caminho.veredito_direto = 'SIM';
+        }
+      }
     } catch (parseError: any) {
       console.error("Erro ao parsear JSON da IA. Resposta bruta:", responseText);
       throw new Error(`O Oráculo retornou um formato inesperado. Detalhes: ${responseText.substring(0, 50)}...`);
