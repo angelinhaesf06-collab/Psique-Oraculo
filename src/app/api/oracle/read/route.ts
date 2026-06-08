@@ -61,7 +61,7 @@ export async function POST(req: Request) {
       Responda RIGOROSAMENTE em PORTUGUÊS DO BRASIL.
       Responda EXCLUSIVAMENTE em formato JSON puro. 
       NÃO adicione saudações, introduções, "Okay", ou qualquer texto fora do objeto JSON.
-      NÃO use marcações de markdown como ```json.
+      NÃO use marcações de markdown como \`\`\`json.
 
       ORÁCULO ATUAL: ${tipoOraculo}
       TIPO DE LEITURA: ${tipoLeitura}
