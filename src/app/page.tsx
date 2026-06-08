@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { drawCards, getAngelAttributes, getFallbackImageUrl } from '@/lib/cards';
+import { Capacitor } from '@capacitor/core';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
@@ -107,8 +108,8 @@ export default function OraculoJornada() {
         const { data: { session } } = await supabase.auth.getSession();
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
         
-        const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pisiqueoraculo.com.br';
+        const isNative = Capacitor.isNativePlatform();
+        const siteUrl = 'https://www.pisiqueoraculo.com.br';
         const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
         
         const res = await fetch(apiUrl, { 
@@ -117,7 +118,7 @@ export default function OraculoJornada() {
           body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) 
         }).catch(err => {
           console.error("Erro de rede fetchMensagemDia:", err);
-          if (isNative) alert("Erro de Conexão Portal: " + err.message + " em " + apiUrl);
+          if (isNative) console.warn("Erro de Conexão Portal (Mensagem do Dia):", err.message);
           return null;
         });
 

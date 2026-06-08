@@ -59,7 +59,9 @@ export async function POST(req: Request) {
       Você é o "Psiquê Oráculo", um mentor de alma e autoridade mística.
       Sua voz é sofisticada, empática e poética. Você integra a sabedoria dos oráculos com a Psicologia Analítica.
       Responda RIGOROSAMENTE em PORTUGUÊS DO BRASIL.
-      Responda SEMPRE em formato JSON puro, sem marcações de markdown.
+      Responda EXCLUSIVAMENTE em formato JSON puro. 
+      NÃO adicione saudações, introduções, "Okay", ou qualquer texto fora do objeto JSON.
+      NÃO use marcações de markdown como ```json.
 
       ORÁCULO ATUAL: ${tipoOraculo}
       TIPO DE LEITURA: ${tipoLeitura}
@@ -88,12 +90,12 @@ export async function POST(req: Request) {
       INSTRUÇÕES DE TIRAGEM (1 CARTA - SIM OU NÃO):
       - OBJETIVIDADE: Esta sim deve ser direta e rápida. 
       - VEREDITO: No campo "veredito_direto", use APENAS as palavras: "SIM", "NÃO" ou "TALVEZ". NUNCA use "YES" ou "NO".
-      - MOTIVO: 2 frases preditivas em português mencionando o nome da carta.
+      - MOTIVO: 2 frases preditivas em português mencionando o nome da carta, respondendo DIRETAMENTE à pergunta do consulente.
 
       CONSELHO DO PSICÓLOGO (TOM HUMANISTA E ACOLHEDOR):
       - Imagine um psicólogo de renome que é, acima de tudo, um ser humano profundamente empático e gentil.
       - O tom deve ser um "Abraço em Palavras". Use uma linguagem suave, acolhedora e validadora em PORTUGUÊS. 
-      - Fale diretamente ao coração do consulente sobre sua questão ("Abra o seu Coração").
+      - Fale diretamente ao coração do consulente sobre sua questão ou pergunta específica.
       - Use conceitos de "possibilidades" e "vibração" de forma sutil e poética, sem ser excessivamente técnico ou frio.
       - O objetivo principal é fazer a pessoa se sentir ouvida, compreendida e amparada emocionalmente. 
       - Evite termos complexos da física; foque na jornada da alma, no autocuidado e na paz interior.
@@ -105,7 +107,7 @@ export async function POST(req: Request) {
         "situacao_atual": { "carta": "NOME DO ARCANO", "interpretacao": "ANÁLISE PROFUNDA E EXTENSA" },
         "caminho_acao": { "carta": "NOME DO ARCANO", "interpretacao": "CONSELHO PRÁTICO E PROFUNDO" },
         "resultado_conselho": { "carta": "NOME DO ARCANO", "interpretacao": "DESDOBRAMENTO NARRATIVO E RICO" },
-        "carta_sorteada": { "carta": "NOME DO ARCANO", "interpretacao": "MOTIVO DIRETO" },
+        "carta_sorteada": { "carta": "NOME DO ARCANO", "interpretacao": "MOTIVO DIRETO E RESPOSTA À PERGUNTA" },
         "leitura_caminho": { 
           "titulo": "Título", 
           "analise_detalhada": "SÍNTESE NARRATIVA RICA E CONECTADA DAS 3 CARTAS", 
@@ -145,7 +147,16 @@ export async function POST(req: Request) {
       ? cartas.map(c => typeof c === 'string' ? c : (c.name || c.carta)).join(", ") 
       : (typeof cartas === 'string' ? cartas : "Análise via Imagem");
 
-    const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada (se houver): ${nomesDasCartas}. Método: ${tipoLeitura}. Semente Energética: ${Math.random().toString(36).substring(7)}.`;
+    // Construção do prompt mais clara para a IA separar pergunta de metadados
+    const prompt = `DADOS DA CONSULTA:
+Consulente: ${body.userName || "Alma Querida"}
+Tema: ${tema}
+Pergunta/Desabafo: "${pergunta || "Sintonização Geral"}"
+Cartas Sorteada: ${nomesDasCartas}
+Método: ${tipoLeitura}
+Semente Energética: ${Math.random().toString(36).substring(7)}
+
+Por favor, analise as cartas acima e responda no formato JSON solicitado.`;
 
     console.log("Enviando prompt para a IA (com Thinking e Search)...");
     const parts: any[] = [{ text: prompt }];
@@ -169,8 +180,7 @@ export async function POST(req: Request) {
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.9,
-          maxOutputTokens: 2000, // Aumentado para acomodar leituras mais densas
-          // Configuração de Pensamento (Thinking) conforme solicitado
+          maxOutputTokens: 2000, 
           thinkingConfig: {
              includeThoughts: true,
              thinkingLevel: "MINIMAL"
@@ -180,12 +190,25 @@ export async function POST(req: Request) {
 
       console.log("Resposta recebida da IA.");
       responseText = result.response.text();
+      
+      // Log da resposta bruta para depuração (pode ser visto nos logs do servidor)
+      console.log("Conteúdo bruto da resposta:", responseText.substring(0, 200) + "...");
     } catch (aiError: any) {
       console.error("ERRO CRÍTICO NA IA:", aiError);
       throw new Error(`Erro na IA (${aiError.status || 'IA-Error'}): ${aiError.message}`);
     }
 
-    const jsonResponse = JSON.parse(responseText);
+    let jsonResponse;
+    try {
+      // Tentar extrair apenas o JSON da resposta, caso a IA tenha incluído conversa ou markdown
+      // Isso resolve o erro "Unexpected token 'O', 'Okay, I'm '..."
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      const cleanedResponse = jsonMatch ? jsonMatch[0] : responseText;
+      jsonResponse = JSON.parse(cleanedResponse);
+    } catch (parseError: any) {
+      console.error("Erro ao parsear JSON da IA. Resposta bruta:", responseText);
+      throw new Error(`O Oráculo retornou um formato inesperado. Detalhes: ${responseText.substring(0, 50)}...`);
+    }
 
     // 5. Salvando no Histórico
     try {
