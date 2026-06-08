@@ -406,12 +406,12 @@ export default function OraculoJornada() {
             </div>
             
             <div className="w-full max-w-[340px] flex flex-col justify-center shrink-0 py-2">
-              <div className="bg-white/20 backdrop-blur-[2px] rounded-[24px] border border-[#E5D9C3]/60 p-6 shadow-sm w-full space-y-4">
+              <div className="bg-white/10 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/40 p-6 shadow-sm w-full space-y-4">
                 <textarea 
                   value={desabafo} 
                   onChange={(e) => setDesabafo(e.target.value)} 
                   placeholder="Escreva sua dúvida..." 
-                  className="w-full h-32 bg-transparent border-none focus:outline-none text-base md:text-lg font-light text-[#5C4D3C] resize-none placeholder:text-[#C4A484]/40 custom-scrollbar" 
+                  className="w-full h-32 bg-transparent border-none focus:outline-none text-base md:text-lg font-medium text-[#4A3B28] resize-none placeholder:text-[#8B735B]/50 custom-scrollbar" 
                 />
                 <div className="space-y-3 pt-4 border-t border-[#E5D9C3]/40">
                   <button 
@@ -419,11 +419,11 @@ export default function OraculoJornada() {
                     onMouseUp={stopRecording}
                     onTouchStart={startRecording}
                     onTouchEnd={stopRecording}
-                    className={`w-full py-4 rounded-full flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-white/50 text-[#C4A484] border border-[#E5D9C3]/50 shadow-sm'} active:scale-95`}
+                    className={`w-full py-4 rounded-full flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-white/20 text-[#4A3B28] border border-[#E5D9C3]/50 shadow-sm'} active:scale-95`}
                   >
                     <Mic size={16} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
                   </button>
-                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#C4A484] text-white py-4 rounded-full text-[9px] font-black uppercase tracking-[0.4em] shadow-md disabled:opacity-20 active:scale-95 transition-all">Prosseguir</button>
+                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#4A3B28] text-white py-4 rounded-full text-[9px] font-black uppercase tracking-[0.4em] shadow-md disabled:opacity-20 active:scale-95 transition-all">Prosseguir</button>
                 </div>
               </div>
             </div>
