@@ -86,6 +86,7 @@ export async function POST(req: Request) {
       INSTRUÇÕES DE TIRAGEM (3 CARTAS - Situação/Conselho/Resultado):
       - PROFUNDIDADE: Esta é uma leitura densa e narrativa. Não seja objetivo aqui. Explore os símbolos, as cores e as conexões entre as cartas. Cada parágrafo deve ter pelo menos 4 a 5 frases ricas. 
       - IDENTIFICAÇÃO: Inicie cada interpretação com: "[NOME DO ARCANO EM PORTUGUÊS]: [Sua análise profunda...]".
+      - VISÃO FÍSICA (FOTO): Se o TIPO DE LEITURA for 'foto', o campo "carta" de cada posição ('situacao_atual', 'caminho_acao', 'resultado_conselho') DEVE CONTER O NOME EXATO DA CARTA que você identificou na imagem enviada. NÃO invente nomes.
 
       INSTRUÇÕES DE TIRAGEM (1 CARTA - SIM OU NÃO):
       - OBJETIVIDADE: Esta sim deve ser direta e rápida. 
@@ -104,9 +105,9 @@ export async function POST(req: Request) {
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "NOME DO ARCANO", "interpretacao": "ANÁLISE PROFUNDA E EXTENSA" },
-        "caminho_acao": { "carta": "NOME DO ARCANO", "interpretacao": "CONSELHO PRÁTICO E PROFUNDO" },
-        "resultado_conselho": { "carta": "NOME DO ARCANO", "interpretacao": "DESDOBRAMENTO NARRATIVO E RICO" },
+        "situacao_atual": { "carta": "NOME DO ARCANO DA FOTO OU SORTEIO", "interpretacao": "ANÁLISE PROFUNDA E EXTENSA" },
+        "caminho_acao": { "carta": "NOME DO ARCANO DA FOTO OU SORTEIO", "interpretacao": "CONSELHO PRÁTICO E PROFUNDO" },
+        "resultado_conselho": { "carta": "NOME DO ARCANO DA FOTO OU SORTEIO", "interpretacao": "DESDOBRAMENTO NARRATIVO E RICO" },
         "carta_sorteada": { "carta": "NOME DO ARCANO", "interpretacao": "MOTIVO DIRETO E RESPOSTA À PERGUNTA" },
         "leitura_caminho": { 
           "titulo": "Título", 
@@ -145,7 +146,7 @@ export async function POST(req: Request) {
 
     const nomesDasCartas = Array.isArray(cartas) 
       ? cartas.map(c => typeof c === 'string' ? c : (c.name || c.carta)).join(", ") 
-      : (typeof cartas === 'string' ? cartas : "Análise via Imagem");
+      : (typeof cartas === 'string' ? cartas : "Aguardando identificação via Imagem...");
 
     // Construção do prompt mais clara para a IA separar pergunta de metadados
     const prompt = `DADOS DA CONSULTA:
@@ -156,7 +157,7 @@ Cartas Sorteada: ${nomesDasCartas}
 Método: ${tipoLeitura}
 Semente Energética: ${Math.random().toString(36).substring(7)}
 
-Por favor, analise as cartas acima e responda no formato JSON solicitado.`;
+Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e responda no formato JSON solicitado. IDENTIFIQUE AS CARTAS CORRETAMENTE PELO NOME EM PORTUGUÊS NO JSON.`;
 
     console.log("Enviando prompt para a IA (com Thinking e Search)...");
     const parts: any[] = [{ text: prompt }];

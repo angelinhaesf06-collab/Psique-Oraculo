@@ -86,7 +86,8 @@ export async function drawCards(deckName: string, count: number = 3) {
     'A Lua': 'a-lua.jpeg',
     'A Chave': 'a-chave.jpeg',
     'Os Peixes': 'os-peixes.jpeg',
-    'A Âncora': 'a-ancora.jpeg'
+    'A Âncora': 'a-ancora.jpeg',
+    'A Cruz': 'a-cruz.jpeg'
   };
 
   // Mapeamento de Arcanos Maiores para arquivos customizados

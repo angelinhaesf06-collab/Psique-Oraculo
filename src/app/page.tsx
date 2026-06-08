@@ -240,6 +240,20 @@ export default function OraculoJornada() {
           // Garante que não mostre as 3 posições se for tiragem única
           data.situacao_atual = null;
         }
+      } else if (tipo === 'foto') {
+        // Se foi por foto, a IA devolveu os nomes. Precisamos apenas garantir que as URLs sejam buscadas.
+        if (data.situacao_atual && data.situacao_atual.carta) {
+           data.situacao_atual.image_url = getFallbackImageUrl(data.situacao_atual.carta, tipoOraculo);
+        }
+        if (data.caminho_acao && data.caminho_acao.carta) {
+           data.caminho_acao.image_url = getFallbackImageUrl(data.caminho_acao.carta, tipoOraculo);
+        }
+        if (data.resultado_conselho && data.resultado_conselho.carta) {
+           data.resultado_conselho.image_url = getFallbackImageUrl(data.resultado_conselho.carta, tipoOraculo);
+        }
+        if (data.carta_sorteada && data.carta_sorteada.carta) {
+           data.carta_sorteada.image_url = getFallbackImageUrl(data.carta_sorteada.carta, tipoOraculo);
+        }
       }
       setResultado(data); setPasso(4); 
     } catch (error: any) { 
