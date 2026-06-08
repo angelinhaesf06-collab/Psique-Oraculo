@@ -485,7 +485,13 @@ export default function OraculoJornada() {
                       {resultado.leitura_caminho?.veredito_direto && (
                         <div className="bg-[#C4A484] px-10 py-4 rounded-[24px] shadow-xl border-4 border-white/20 animate-in zoom-in duration-500">
                           <span className="text-3xl font-black text-white uppercase tracking-[0.4em] drop-shadow-md">
-                            {resultado.leitura_caminho.veredito_direto.split(' ')[0].replace(/[^a-zA-ZáéíóúÁÉÍÓÚ]/g, '')}
+                            {(() => {
+                               let v = resultado.leitura_caminho.veredito_direto.toUpperCase();
+                               if (/\bNO\b/.test(v)) return 'NÃO';
+                               if (/\bYES\b/.test(v)) return 'SIM';
+                               if (/\bMAYBE\b/.test(v)) return 'TALVEZ';
+                               return v.split(' ')[0].replace(/[^a-zA-ZáéíóúÁÉÍÓÚ]/g, '');
+                            })()}
                           </span>
                         </div>
                       )}

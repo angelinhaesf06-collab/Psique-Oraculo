@@ -203,12 +203,12 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
 
       // Trava de Segurança: Forçar a tradução caso a IA alucine em inglês no Bússola Sim ou Não
       if (jsonResponse?.leitura_caminho?.veredito_direto) {
-        let v = jsonResponse.leitura_caminho.veredito_direto.toString().toUpperCase().trim();
-        if (v === 'NO' || v.includes('NO')) {
+        let v = jsonResponse.leitura_caminho.veredito_direto.toString().toUpperCase();
+        if (/\bNO\b/.test(v) || v.includes('NÃO')) {
           jsonResponse.leitura_caminho.veredito_direto = 'NÃO';
-        } else if (v === 'YES' || v.includes('YES')) {
+        } else if (/\bYES\b/.test(v) || v.includes('SIM')) {
           jsonResponse.leitura_caminho.veredito_direto = 'SIM';
-        } else if (v === 'MAYBE' || v.includes('MAYBE')) {
+        } else if (/\bMAYBE\b/.test(v) || v.includes('TALVEZ')) {
           jsonResponse.leitura_caminho.veredito_direto = 'TALVEZ';
         }
       }
