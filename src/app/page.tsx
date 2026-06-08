@@ -142,18 +142,10 @@ export default function OraculoJornada() {
         const { data: { session } } = await supabase.auth.getSession();
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
         
-        const isNative = Capacitor.isNativePlatform();
-        const siteUrl = 'https://www.pisiqueoraculo.com.br';
-        const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
-        
-        const res = await fetch(apiUrl, { 
+        const res = await fetch('/api/oracle/read', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) 
-        }).catch(err => {
-          console.error("Erro de rede fetchMensagemDia:", err);
-          if (isNative) console.warn("Erro de Conexão Portal (Mensagem do Dia):", err.message);
-          return null;
         });
 
         if (res) {
@@ -379,7 +371,7 @@ export default function OraculoJornada() {
                     <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span>
                     <Sparkles size={12} className="text-[#C4A484] animate-pulse" />
                   </div>
-                  <p className="text-[13px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3 px-2 font-medium">"{mensagemDia.texto}"</p>
+                  <p className="text-[13px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3 px-2 font-medium">&quot;{mensagemDia.texto}&quot;</p>
                   <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 group-hover:text-[#C4A484] transition-colors">Toque para ler a mensagem completa ✨</span>
                 </div>
               )}

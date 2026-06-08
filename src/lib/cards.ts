@@ -48,72 +48,72 @@ export async function drawCards(deckName: string, count: number = 3) {
   console.log(`Sorteando ${count} cartas do deck: ${deckName}`);
   
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
-  const folder = folderMap[deckName] || 'taro';
+  const folder = folderMap[deckName] || 'tarot';
 
-  // Mapeamento para Baralho Cigano (arquivos .jpeg customizados)
+  // Mapeamento para Baralho Cigano (arquivos .jpg customizados)
   const CIGANO_MAP: Record<string, string> = {
-    'O Cavaleiro': 'o-cavaleiro.jpeg',
-    'O Trevo': 'o-trevo.jpeg',
-    'O Navio': 'o-navio.jpeg',
-    'A Casa': 'a-casa.jpeg',
-    'A Árvore': 'a-arvore.jpeg',
-    'As Nuvens': 'as-nuvens.jpeg',
-    'A Serpente': 'a-serpente.jpeg',
-    'O Caixão': 'o-caixao.jpeg',
-    'As Flores': 'o-buque.jpeg', 
-    'A Foice': 'a-foice.jpeg',
-    'O Chicote': 'o-chicote.jpeg',
-    'Os Pássaros': 'os-passaros.jpeg',
-    'A Criança': 'a-criança.jpeg',
-    'A Raposa': 'a-raposa.jpeg',
-    'O Urso': 'o-urso.jpeg',
-    'A Estrela': 'a-estrela.jpeg',
-    'A Cegonha': 'a-cegonha.jpeg',
-    'O Cão': 'o-cao.jpeg',
-    'A Torre': 'a-torre.jpeg',
-    'O Jardim': 'o-jardim.jpeg',
-    'A Montanha': 'a-montanha.jpeg',
-    'Caminhos': 'os-caminhos.jpeg',
-    'O Rato': 'os-ratos.jpeg',
-    'O Coração': 'o-coracao.jpeg',
-    'O Anel': 'o-anel.jpeg',
-    'Os Livros': 'o-livro.jpeg',
-    'A Carta': 'a-carta.jpeg',
-    'O Homem': 'o-cigano.jpeg',
-    'A Mulher': 'a-cigana.jpeg',
-    'Os Lírios': 'os-lirios.jpeg',
-    'O Sol': 'o-sol.jpeg',
-    'A Lua': 'a-lua.jpeg',
-    'A Chave': 'a-chave.jpeg',
-    'Os Peixes': 'os-peixes.jpeg',
-    'A Âncora': 'a-ancora.jpeg',
-    'A Cruz': 'a-cruz.jpeg'
+    'O Cavaleiro': 'o-cavaleiro.jpg',
+    'O Trevo': 'o-trevo.jpg',
+    'O Navio': 'o-navio.jpg',
+    'A Casa': 'a-casa.jpg',
+    'A Árvore': 'a-arvore.jpg',
+    'As Nuvens': 'as-nuvens.jpg',
+    'A Serpente': 'a-serpente.jpg',
+    'O Caixão': 'o-caixao.jpg',
+    'As Flores': 'o-buque.jpg', 
+    'A Foice': 'a-foice.jpg',
+    'O Chicote': 'o-chicote.jpg',
+    'Os Pássaros': 'os-passaros.jpg',
+    'A Criança': 'a-crianca.jpg',
+    'A Raposa': 'a-raposa.jpg',
+    'O Urso': 'o-urso.jpg',
+    'A Estrela': 'a-estrela.jpg',
+    'A Cegonha': 'a-cegonha.jpg',
+    'O Cão': 'o-cao.jpg',
+    'A Torre': 'a-torre.jpg',
+    'O Jardim': 'o-jardim.jpg',
+    'A Montanha': 'a-montanha.jpg',
+    'Caminhos': 'os-caminhos.jpg',
+    'O Rato': 'os-ratos.jpg',
+    'O Coração': 'o-coracao.jpg',
+    'O Anel': 'o-anel.jpg',
+    'Os Livros': 'o-livro.jpg',
+    'A Carta': 'a-carta.jpg',
+    'O Homem': 'o-cigano.jpg',
+    'A Mulher': 'a-cigana.jpg',
+    'Os Lírios': 'os-lirios.jpg',
+    'O Sol': 'o-sol.jpg',
+    'A Lua': 'a-lua.jpg',
+    'A Chave': 'a-chave.jpg',
+    'Os Peixes': 'os-peixes.jpg',
+    'A Âncora': 'a-ancora.jpg',
+    'A Cruz': 'a-cruz.jpg'
   };
 
   // Mapeamento de Arcanos Maiores para arquivos customizados
   const CUSTOM_MAP: Record<string, string> = {
-    'O Louco': 'custom/o-louco.webp.jpeg',
-    'O Mago': 'custom/o-mago.webp.jpeg',
-    'A Sacerdotisa': 'custom/a-sacerdotisa.webp.jpeg',
-    'A Imperatriz': 'custom/a-imperatriz.webp.jpeg',
-    'O Imperador': 'custom/o-imperador.webp.jpeg',
-    'O Hierofante': 'custom/o-hierofante.webp.jpeg',
-    'Os Amantes': 'custom/os-amantes.webp.jpeg',
-    'O Carro': 'custom/o-carro.webp.jpeg',
-    'A Justiça': 'custom/a-justica.webp.jpeg',
-    'O Eremita': 'custom/o-eremita.webp.jpeg',
-    'Roda da Fortuna': 'custom/roda-da-fortuna.webp.jpeg',
-    'A Força': 'custom/a-forca.webp.jpeg',
-    'O Pendurado': 'custom/o-pendurado.webp.jpeg',
-    'A Morte': 'custom/a-morte.webp.jpeg',
-    'A Temperança': 'custom/a-temperanca.webp.jpeg',
-    'O Diabo': 'custom/o-diabo.webp.jpeg',
-    'A Torre': 'custom/a-torre.webp.jpeg',
-    'A Estrela': 'custom/a-estrela.webp.jpeg',
-    'A Lua': 'custom/a-lua.webp.jpeg',
-    'O Sol': 'custom/o-sol.webp.jpeg',
-    'O Julgamento': 'custom/o-julgamento.webp.jpeg',
-    'O Mundo': 'custom/o-mundo.webp.jpeg'
+    'O Louco': 'major/o-louco.jpg',
+    'O Mago': 'major/o-mago.jpg',
+    'A Sacerdotisa': 'major/a-sacerdotisa.jpg',
+    'A Imperatriz': 'major/a-imperatriz.jpg',
+    'O Imperador': 'major/o-imperador.jpg',
+    'O Hierofante': 'major/o-hierofante.jpg',
+    'Os Amantes': 'major/os-amantes.jpg',
+    'O Carro': 'major/o-carro.jpg',
+    'A Justiça': 'major/a-justica.jpg',
+    'O Eremita': 'major/o-eremita.jpg',
+    'Roda da Fortuna': 'major/roda-da-fortuna.jpg',
+    'A Força': 'major/a-forca.jpg',
+    'O Pendurado': 'major/o-pendurado.jpg',
+    'A Morte': 'major/a-morte.jpg',
+    'A Temperança': 'major/a-temperanca.jpg',
+    'O Diabo': 'major/o-diabo.jpg',
+    'A Torre': 'major/a-torre.jpg',
+    'A Estrela': 'major/a-estrela.jpg',
+    'A Lua': 'major/a-lua.jpg',
+    'O Sol': 'major/o-sol.jpg',
+    'O Julgamento': 'major/o-julgamento.jpg',
+    'O Mundo': 'major/o-mundo.jpg'
   };
 
   const translateMinorArcana = (name: string) => {
@@ -121,38 +121,30 @@ export async function drawCards(deckName: string, count: number = 3) {
     if (parts.length !== 2) return null;
 
     const rankMap: Record<string, string> = {
-      'Ás': 'ace', 'Dois': 'two', 'Três': 'three', 'Quatro': 'four', 'Cinco': 'five',
-      'Seis': 'six', 'Sete': 'seven', 'Oito': 'eight', 'Nove': 'nine', 'Dez': 'ten',
-      'Valete': 'page', 'Cavaleiro': 'knight', 'Rainha': 'queen', 'Rei': 'king'
+      'Ás': 'as', 'Dois': 'dois', 'Três': 'tres', 'Quatro': 'quatro', 'Cinco': 'cinco',
+      'Seis': 'seis', 'Sete': 'sete', 'Oito': 'oito', 'Nove': 'nove', 'Dez': 'dez',
+      'Valete': 'pagem', 'Cavaleiro': 'cavalheiro', 'Rainha': 'rainha', 'Rei': 'rei'
     };
 
     const suitMap: Record<string, string> = {
-      'Copas': 'cups', 'Espadas': 'swords', 'Paus': 'wands', 'Ouros': 'pentacles'
+      'Copas': 'copas', 'Espadas': 'espadas', 'Paus': 'paus', 'Ouros': 'ouros'
     };
 
     const rank = rankMap[parts[0]];
     const suit = suitMap[parts[1]];
 
-    if (rank && suit) return `${rank}-of-${suit}.jpg`;
+    if (rank && suit) return `minor/${rank}-de-${suit}.jpg`;
     return null;
   };
 
   const getLocalImageUrl = (name: string) => {
-    let slug = name.toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[\s_]+/g, '-') 
-      .replace(/[^\[\]"']/g, (m) => m === ' ' ? '-' : m) // Preserva espaços para o slug básico
-      .replace(/[^\w-]/g, '');
-
-    // Se for Tarô e não for Arcano Maior, tenta primeiro o nome em português
+    // Se for Tarô e não for Arcano Maior, tenta primeiro o nome em português via translateMinorArcana
     if (deckName === 'Tarô' && !CUSTOM_MAP[name]) {
-      const ptFilename = `${slug}.jpg`;
-      // O frontend vai tentar carregar essa imagem primeiro
-      return `/assets/decks/${folder}/${ptFilename}`;
+      const minorPath = translateMinorArcana(name);
+      if (minorPath) return `/assets/decks/${folder}/${minorPath}`;
     }
 
-    let filename = CIGANO_MAP[name] || CUSTOM_MAP[name] || translateMinorArcana(name) || `${slug}.jpg`;
+    let filename = CIGANO_MAP[name] || CUSTOM_MAP[name] || `${name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '')}.jpg`;
     return `/assets/decks/${folder}/${filename}`;
   };
 
