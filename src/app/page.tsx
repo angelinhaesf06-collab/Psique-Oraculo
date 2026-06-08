@@ -717,7 +717,7 @@ export default function OraculoJornada() {
       {modalAberto && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-[#2C2420]/70 backdrop-blur-md" onClick={() => setModalAberto(null)} />
-          <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden h-[85vh] max-h-[85vh] flex flex-col">
+          <div className="relative w-full max-w-md bg-[#FDFBF7]/90 backdrop-blur-xl rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden h-[85vh] max-h-[85vh] flex flex-col">
             {modalAberto === 'mensagem_ampliada' && mensagemDia && (
               <div className="flex flex-col h-full bg-[#FDFBF7]">
                 <div className="w-full flex justify-end items-center px-6 py-4 shrink-0 bg-white/20">
@@ -743,28 +743,28 @@ export default function OraculoJornada() {
             )}
             {modalAberto !== 'mensagem_ampliada' && (
               <>
-                <div className="p-5 border-b border-[#E5D9C3]/30 flex justify-between items-center bg-white/50">
+                <div className="p-5 border-b border-[#E5D9C3]/30 flex justify-between items-center bg-white/30 backdrop-blur-sm">
                   <h3 className="text-xl font-serif text-[#C4A484]">{modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Guia de Sintonização' : 'Pacto de Luz')}</h3>
                   <button onClick={() => setModalAberto(null)} className="p-2"><X className="w-5 h-5 text-[#C4A484]" /></button>
                 </div>
                 <div className="p-6 overflow-y-auto">
                   {modalAberto === 'assinatura' && (
                     <div className="space-y-6 text-center">
-                      <div className="w-20 h-20 bg-[#C4A484]/5 rounded-full flex items-center justify-center mx-auto p-3">
-                        <img src="/assets/brand/mandala-login.png" alt="Logo" className="w-full h-full object-contain animate-spin-slow opacity-80" />
+                      <div className="w-20 h-20 bg-[#C4A484]/5 rounded-full flex items-center justify-center mx-auto p-3 shadow-inner">
+                        <img src="/assets/brand/mandala-login.png" alt="Logo" className="w-full h-full object-contain animate-spin-slow" />
                       </div>
                       <div className="space-y-2">
                         <h4 className="text-lg font-bold text-[#5C4D3C]">Acesso Premium</h4>
                         <p className="text-[10px] leading-relaxed text-[#8B735B]">Experimente <span className="font-bold">grátis por 24 horas</span>.<br/>Após o período, assine para continuar sua jornada.</p>
                       </div>
-                      <div className="bg-white/50 backdrop-blur-sm rounded-3xl border border-[#E5D9C3] p-6 shadow-sm space-y-4">
+                      <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-[#E5D9C3]/50 p-6 shadow-sm space-y-4">
                         <div className="space-y-1">
                           <div className="text-3xl font-black text-[#C4A484]">R$ 89,00<span className="text-xs opacity-60 ml-1">/ano</span></div>
                           <p className="text-[9px] uppercase tracking-widest font-bold text-[#8B735B]/70">Plano Anual Soul</p>
                         </div>
                         <div className="space-y-2 pt-2 border-t border-[#E5D9C3]/50">
-                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">Salmos e Cânticos da Bíblia</span></div>
-                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">Psico Conselhos Exclusivos</span></div>
+                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Salmos e Cânticos da Bíblia</span></div>
+                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Psico Conselhos Inclusos</span></div>
                           <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">Acesso Total a todos os Decks</span></div>
                           <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">5 Tiragens Completas Diárias</span></div>
                         </div>
