@@ -208,6 +208,8 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
           jsonResponse.leitura_caminho.veredito_direto = 'NÃO';
         } else if (v === 'YES' || v.includes('YES')) {
           jsonResponse.leitura_caminho.veredito_direto = 'SIM';
+        } else if (v === 'MAYBE' || v.includes('MAYBE')) {
+          jsonResponse.leitura_caminho.veredito_direto = 'TALVEZ';
         }
       }
     } catch (parseError: any) {
