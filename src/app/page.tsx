@@ -373,10 +373,14 @@ export default function OraculoJornada() {
               <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
               
               {mensagemDia && (
-                <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-3 bg-white/30 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
-                  <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
-                  <p className="text-[12px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2">"{mensagemDia.texto}"</p>
-                  <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
+                <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-4 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-2 animate-in zoom-in duration-1000">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={12} className="text-[#C4A484] animate-pulse" />
+                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span>
+                    <Sparkles size={12} className="text-[#C4A484] animate-pulse" />
+                  </div>
+                  <p className="text-[13px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3 px-2 font-medium">"{mensagemDia.texto}"</p>
+                  <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 group-hover:text-[#C4A484] transition-colors">Toque para ler a mensagem completa ✨</span>
                 </div>
               )}
             </div>
@@ -765,6 +769,8 @@ export default function OraculoJornada() {
                         <div className="space-y-2 pt-2 border-t border-[#E5D9C3]/50">
                           <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Salmos e Cânticos da Bíblia</span></div>
                           <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Psico Conselhos Inclusos</span></div>
+                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Simpatias e Banhos Místicos</span></div>
+                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Mantras e Meditações Sagradas</span></div>
                           <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">Acesso Total a todos os Decks</span></div>
                           <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">5 Tiragens Completas Diárias</span></div>
                         </div>
