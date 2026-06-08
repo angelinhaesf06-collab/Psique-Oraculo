@@ -36,8 +36,31 @@ export async function POST(req: Request) {
     console.log("Tipo Leitura:", tipoLeitura);
     console.log("Tema:", tema);
 
-    // 2. Validação e Consumo de Créditos (TEMPORARIAMENTE DESATIVADO PARA TESTES)
-    let creditStatus = { allowed: true, type: "test_mode" };
+    // 2. Validação e Consumo de Créditos
+    let creditStatus = { allowed: true, type: "anonymous" };
+    
+    if (userId) {
+      const { data: checkData, error: checkError } = await supabaseAdmin.rpc('check_and_consume_reading', {
+        p_user_id: userId
+      });
+
+      if (checkError) {
+        console.error("Erro ao validar créditos:", checkError);
+        throw new Error("Erro ao validar créditos.");
+      }
+
+      creditStatus = checkData;
+
+      if (!creditStatus.allowed) {
+        return NextResponse.json({ 
+          error: creditStatus.message || "Créditos esgotados.", 
+          reason: creditStatus.reason || "credits_exhausted" 
+        }, { status: 403 });
+      }
+    } else {
+      // Opcional: Permitir algumas leituras anônimas ou bloquear
+      // Para este projeto, o login é obrigatório conforme as telas mostradas
+    }
 
     // 3. Inicialização do Modelo Gemini
     console.log("Sintonizando com o Modelo Gemini...");

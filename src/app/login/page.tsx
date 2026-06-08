@@ -138,16 +138,16 @@ export default function LoginPage() {
     <div className="h-[100dvh] w-full bg-transparent flex flex-col items-center relative overflow-hidden">
       <DecorationOverlay />
       
-      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-between px-6 py-8 text-center">
+      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-start px-6 py-8 text-center gap-12">
         
-        <div className="flex flex-col items-center gap-6 w-full pt-4">
-          {/* Logo/Mandala Superior */}
-          <div className="w-24 h-24 md:w-32 md:h-32 animate-in zoom-in duration-1000 p-2 shrink-0">
-            <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
+        <div className="flex flex-col items-center gap-4 w-full pt-2">
+          {/* Logo/Mandala Superior - Nitidez Corrigida */}
+          <div className="w-20 h-20 md:w-28 md:h-28 animate-in zoom-in duration-1000 p-1 shrink-0">
+            <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow [image-rendering:-webkit-optimize-contrast]" />
           </div>
 
           <div className="flex flex-col gap-1 drop-shadow-md">
-            <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484] leading-tight">
+            <h1 className="text-3xl md:text-4xl font-serif text-[#C4A484] leading-tight">
               Psiquê Oráculo
             </h1>
             <div className="space-y-1">
@@ -161,11 +161,11 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="w-full space-y-4 pb-4">
+        <div className="w-full space-y-4 pt-4">
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
-            className="w-full h-16 bg-white/70 backdrop-blur-md border-2 border-[#E5D9C3] rounded-[24px] flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all disabled:opacity-50"
+            className="w-full h-16 bg-white/40 backdrop-blur-md border-2 border-[#E5D9C3] rounded-[24px] flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all disabled:opacity-50"
           >
             <Fingerprint className="w-6 h-6 text-[#C4A484]" strokeWidth={1.5} />
             <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#8B735B]">Entrar com Digital</span>
@@ -185,7 +185,7 @@ export default function LoginPage() {
                   placeholder="SEU E-MAIL"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 bg-[#FDFBF7]/70 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
+                  className="w-full h-12 bg-[#FDFBF7]/40 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
                 />
              </div>
              <div className="relative">
@@ -195,7 +195,7 @@ export default function LoginPage() {
                   placeholder="SUA SENHA"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
-                  className="w-full h-12 bg-[#FDFBF7]/70 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
+                  className="w-full h-12 bg-[#FDFBF7]/40 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
                 />
              </div>
              
@@ -211,7 +211,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-auto pb-4">
           <p className="text-[8px] font-bold text-[#C4A484]/40 tracking-[0.5em] uppercase">
             Luxo • Misticismo • Psicologia
           </p>

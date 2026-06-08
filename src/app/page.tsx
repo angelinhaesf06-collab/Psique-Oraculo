@@ -96,6 +96,40 @@ export default function OraculoJornada() {
   const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | 'mensagem_ampliada' | null>(null);
   const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
 
+  const handleSubscribe = async () => {
+    try {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('Faça login para iniciar sua jornada premium.');
+        router.push('/login');
+        return;
+      }
+
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: session.user.id,
+          email: session.user.email,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Erro ao iniciar checkout');
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Não foi possível abrir o portal de pagamento agora.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchMensagemDia = async () => {
       try {
@@ -196,7 +230,18 @@ export default function OraculoJornada() {
       console.log("RESPOSTA DO SERVIDOR:", textResponse);
 
       if (!res.ok) {
-        let errorSnippet = textResponse.substring(0, 200).replace(/<[^>]*>?/gm, ''); // Pega o começo do erro removendo HTML
+        let dataErr;
+        try {
+          dataErr = JSON.parse(textResponse);
+        } catch (e) {}
+
+        if (res.status === 403 && dataErr?.reason === 'paywall') {
+          setModalAberto('assinatura');
+          toast.info(dataErr.error || 'Seu período de teste expirou. Assine para continuar.');
+          return;
+        }
+
+        let errorSnippet = textResponse.substring(0, 200).replace(/<[^>]*>?/gm, ''); 
         if (!errorSnippet.trim()) errorSnippet = textResponse.substring(0, 100);
         throw new Error(`Erro do Servidor (${res.status}): ${errorSnippet}`);
       }
@@ -328,7 +373,7 @@ export default function OraculoJornada() {
               <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
               
               {mensagemDia && (
-                <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-3 bg-white/60 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
+                <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-3 bg-white/30 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3]/50 shadow-md relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
                   <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[#C4A484]/70">Sintonização do Dia</span>
                   <p className="text-[12px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2">"{mensagemDia.texto}"</p>
                   <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#C4A484]/40 group-hover:text-[#C4A484] transition-colors">Toque para ampliar ✨</span>
@@ -342,8 +387,8 @@ export default function OraculoJornada() {
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/60 backdrop-blur-md border border-[#E5D9C3] p-2.5 md:p-3 rounded-[28px] md:rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/80">
-                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white rounded-[16px] md:rounded-[20px] border border-[#E5D9C3]/50 p-1 overflow-hidden shrink-0 shadow-md group-hover:rotate-2 transition-transform duration-500">
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/20 backdrop-blur-md border border-[#E5D9C3]/30 p-2.5 md:p-3 rounded-[28px] md:rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/40">
+                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white/50 rounded-[16px] md:rounded-[20px] border border-[#E5D9C3]/50 p-1 overflow-hidden shrink-0 shadow-md group-hover:rotate-2 transition-transform duration-500">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[12px] md:rounded-[16px]" />
                   </div>
                   <div className="flex flex-col text-left space-y-0.5">
@@ -379,10 +424,10 @@ export default function OraculoJornada() {
             
             <div className="flex flex-col gap-2.5 w-full max-w-[340px] shrink-0 justify-center py-2">
               {TEMAS.map((t) => (
-                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/40 backdrop-blur-md border border-[#E5D9C3]/50 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
+                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/10 backdrop-blur-md border border-[#E5D9C3]/30 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
                   <div className="w-full h-full bg-transparent rounded-[20px] flex items-center justify-between px-6">
                     <div className="flex items-center gap-4">
-                      <div className={`p-1.5 rounded-full bg-white shadow-sm ${t.color}`}>
+                      <div className={`p-1.5 rounded-full bg-white/50 shadow-sm ${t.color}`}>
                         <t.icon className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
                       </div>
                       <span className={`text-sm font-bold tracking-[0.2em] uppercase ${t.color}`}>{t.label}</span>
@@ -406,7 +451,7 @@ export default function OraculoJornada() {
             </div>
             
             <div className="w-full max-w-[340px] flex flex-col justify-center shrink-0 py-2">
-              <div className="bg-white/10 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/40 p-6 shadow-sm w-full space-y-4">
+              <div className="bg-white/5 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/40 p-6 shadow-sm w-full space-y-4">
                 <textarea 
                   value={desabafo} 
                   onChange={(e) => setDesabafo(e.target.value)} 
@@ -501,7 +546,7 @@ export default function OraculoJornada() {
               </div>
 
               <div className="w-full space-y-6 pb-6">
-                 <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden">
+                 <div className="bg-[#2C2420]/85 rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden backdrop-blur-sm">
                     <h3 className="text-[#C4A484] font-serif text-xl mb-4">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
                     <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-justify">{resultado.leitura_caminho?.analise_detalhada}</p>
                     {resultado.leitura_caminho?.veredito_direto && !(tipoOraculo === 'Tarô') && (
@@ -509,36 +554,61 @@ export default function OraculoJornada() {
                     )}
                  </div>
 
+                 {/* Acolhimento Psicólogo - Integrado no final da leitura */}
+                 {resultado.acolhimento_psicologico && (
+                   <div className="bg-white/20 backdrop-blur-md rounded-[32px] border border-[#C4A484]/30 p-8 text-center shadow-lg space-y-4 animate-in fade-in duration-1000">
+                     <div className="w-12 h-12 bg-[#2C2420] rounded-full flex items-center justify-center mx-auto text-[#C4A484] shadow-md">
+                       <Users size={24} />
+                     </div>
+                     <div className="space-y-2">
+                       <h4 className="text-[#C4A484] font-serif text-lg">{resultado.acolhimento_psicologico.titulo || "O Olhar Clínico"}</h4>
+                       <p className="text-xs text-[#5C4D3C]/80 leading-relaxed italic line-clamp-3">
+                         {resultado.acolhimento_psicologico.conteudo}
+                       </p>
+                     </div>
+                     <button 
+                       onClick={() => setPasso(5)} 
+                       className="text-[9px] font-black uppercase tracking-[0.3em] text-white py-3 px-8 bg-[#2C2420] rounded-full shadow-md active:scale-95 transition-all hover:bg-[#4A3B28]"
+                     >
+                       Ler Conselho Completo 👨‍⚕️
+                     </button>
+                   </div>
+                 )}
+
                  {resultado.ancoragem_rituais && (
-                   <div className="bg-white/70 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-6">
+                   <div className="bg-white/20 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-6">
                      <h3 className="text-[#C4A484] font-serif text-xl text-center">
-                       {tipoOraculo === 'Tarô dos Anjos' ? 'Luz e Proteção' : (tipoOraculo === 'Tarô' ? 'Sintonização' : 'Ancoragem e Rituais')}
+                       {tipoOraculo === 'Tarô dos Anjos' ? 'Salmos e Luz' : (tipoOraculo === 'Tarô' ? 'Cânticos e Mantras' : 'Ancoragem e Rituais')}
                      </h3>
                      <div className="grid grid-cols-1 gap-5">
-                       {/* Mantra - Exclusivo para Tarô Clássico */}
-                       {resultado.ancoragem_rituais.mantra && tipoOraculo === 'Tarô' && (
+                       {/* Mantra/Cântico - Para todos os oráculos se disponível */}
+                       {resultado.ancoragem_rituais.mantra && (
                          <div className="flex items-start gap-4">
                            <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
                              <Sparkles size={14} />
                            </div>
                            <div className="space-y-0.5">
-                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">Mantra da Alma</span>
+                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
+                               {tipoOraculo === 'Tarô' ? 'Mantra da Alma' : 'Cântico Sagrado'}
+                             </span>
                              <p className="text-xs italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p>
                            </div>
                          </div>
                        )}
 
-                       {/* Salmo - Apenas para Tarô dos Anjos e Cigano */}
-                       {resultado.ancoragem_rituais.salmo && tipoOraculo !== 'Tarô' && (
+                       {/* Salmo - Prioridade para Tarô dos Anjos */}
+                       {resultado.ancoragem_rituais.salmo && (
                          <div className="flex items-start gap-4">
                            <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
                              <ShieldCheck size={14} />
                            </div>
                            <div className="space-y-0.5">
                              <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
-                               {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo' : (tipoOraculo === 'Baralho Cigano' ? 'Dica da Cigana' : 'Orientação')}
+                               {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Protetor' : 'Orientação Mística'}
                              </span>
-                             <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">{resultado.ancoragem_rituais.salmo}</p>
+                             <p className="text-xs text-[#5C4D3C]/80 leading-relaxed font-serif italic">
+                               {resultado.ancoragem_rituais.salmo}
+                             </p>
                            </div>
                          </div>
                        )}
@@ -696,7 +766,13 @@ export default function OraculoJornada() {
                           <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">Rituais e Banhos exclusivos</span></div>
                         </div>
                       </div>
-                      <button className="w-full py-5 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-[32px] font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all">Iniciar 24h Grátis</button>
+                      <button 
+                        onClick={handleSubscribe}
+                        disabled={loading}
+                        className="w-full py-5 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-[32px] font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        {loading ? 'Preparando Portal...' : 'Iniciar 24h Grátis'}
+                      </button>
                       <p className="text-[8px] text-[#8B735B]/50 px-4">Cancele a qualquer momento antes do fim do período de teste.</p>
                     </div>
                   )}
