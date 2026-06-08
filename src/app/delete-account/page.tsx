@@ -68,7 +68,7 @@ export default function DeleteAccount() {
           </p>
         </header>
 
-        <div className="bg-white rounded-[32px] border border-[#E5D9C3] p-8 shadow-sm space-y-6">
+        <div className="bg-white/70 backdrop-blur-md rounded-[32px] border border-[#E5D9C3] p-8 shadow-sm space-y-6">
           <div className="flex items-start gap-4 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-700">
             <AlertTriangle size={20} className="shrink-0" />
             <div className="space-y-1">

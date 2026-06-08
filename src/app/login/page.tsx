@@ -143,7 +143,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-6 w-full pt-4">
           {/* Logo/Mandala Superior */}
           <div className="w-24 h-24 md:w-32 md:h-32 animate-in zoom-in duration-1000 p-2 shrink-0">
-            <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
+            <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
           </div>
 
           <div className="flex flex-col gap-1 drop-shadow-md">
@@ -165,7 +165,7 @@ export default function LoginPage() {
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
-            className="w-full h-16 bg-white border-2 border-[#E5D9C3] rounded-[24px] flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all disabled:opacity-50"
+            className="w-full h-16 bg-white/70 backdrop-blur-md border-2 border-[#E5D9C3] rounded-[24px] flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all disabled:opacity-50"
           >
             <Fingerprint className="w-6 h-6 text-[#C4A484]" strokeWidth={1.5} />
             <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#8B735B]">Entrar com Digital</span>
@@ -185,7 +185,7 @@ export default function LoginPage() {
                   placeholder="SEU E-MAIL"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 bg-[#FDFBF7]/90 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
+                  className="w-full h-12 bg-[#FDFBF7]/70 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
                 />
              </div>
              <div className="relative">
@@ -195,7 +195,7 @@ export default function LoginPage() {
                   placeholder="SUA SENHA"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
-                  className="w-full h-12 bg-[#FDFBF7]/90 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
+                  className="w-full h-12 bg-[#FDFBF7]/70 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
                 />
              </div>
              

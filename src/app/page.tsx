@@ -359,12 +359,12 @@ export default function OraculoJornada() {
 
             <div className="flex flex-col items-center gap-2 w-full shrink-0 pb-1 pt-2">
                <div className="flex items-center gap-2 w-full justify-center flex-wrap px-1">
-                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white px-3 py-1.5 shadow-sm active:scale-95 transition-all group">
+                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-3 py-1.5 shadow-sm active:scale-95 transition-all group">
                     <Crown className="w-3.5 h-3.5 text-[#C4A484]" />
                     <span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
                   </button>
-                  <button onClick={() => setModalAberto('ajuda')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-3 py-1.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Ajuda</button>
-                  <button onClick={() => setModalAberto('politicas')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white px-3 py-1.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Políticas</button>
+                  <button onClick={() => setModalAberto('ajuda')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white/70 px-3 py-1.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Ajuda</button>
+                  <button onClick={() => setModalAberto('politicas')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white/70 px-3 py-1.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Políticas</button>
                   <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-3 py-1.5 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
                </div>
             </div>
@@ -510,7 +510,7 @@ export default function OraculoJornada() {
                  </div>
 
                  {resultado.ancoragem_rituais && (
-                   <div className="bg-white/90 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-6">
+                   <div className="bg-white/70 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-6">
                      <h3 className="text-[#C4A484] font-serif text-xl text-center">
                        {tipoOraculo === 'Tarô dos Anjos' ? 'Luz e Proteção' : (tipoOraculo === 'Tarô' ? 'Sintonização' : 'Ancoragem e Rituais')}
                      </h3>
@@ -615,7 +615,7 @@ export default function OraculoJornada() {
                <p className="text-[9px] font-bold uppercase tracking-widest text-[#8B735B]/60">Sua jornada emocional</p>
             </div>
             <div className="flex-1 w-full overflow-y-auto px-1 custom-scrollbar pb-10">
-               <div className="bg-white/80 backdrop-blur-md rounded-[40px] border border-[#E5D9C3] p-8 shadow-2xl space-y-6 relative overflow-hidden">
+               <div className="bg-white/60 backdrop-blur-md rounded-[40px] border border-[#E5D9C3] p-8 shadow-2xl space-y-6 relative overflow-hidden">
                   <div className="absolute -top-10 -left-10 opacity-[0.03] rotate-12"><Users size={200} className="text-[#C4A484]" /></div>
                   <h3 className="text-xl font-serif text-[#5C4D3C] text-center border-b border-[#E5D9C3]/30 pb-4">{resultado.acolhimento_psicologico.titulo}</h3>
                   <div className="space-y-4"><p className="text-sm md:text-base leading-relaxed text-[#5C4D3C]/90 font-sans font-light text-justify first-letter:text-3xl first-letter:font-serif first-letter:text-[#C4A484] first-letter:mr-2">{resultado.acolhimento_psicologico.conteudo}</p></div>
