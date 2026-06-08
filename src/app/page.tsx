@@ -625,17 +625,12 @@ export default function OraculoJornada() {
 
         {loading && (
           <div className="fixed inset-0 bg-[#FDFBF7]/95 z-[100] flex flex-col items-center justify-center overflow-hidden">
-            <div className="absolute inset-0 flex items-center justify-center opacity-[0.25] pointer-events-none mix-blend-multiply">
-              <div className="w-[180vw] md:w-[120vw] aspect-square flex items-center justify-center">
-                <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
-              </div>
-            </div>
-            <div className="relative z-10 flex flex-col items-center gap-8">
+            <div className="relative z-10 flex flex-col items-center gap-12">
               <div className="w-40 h-40 md:w-48 md:h-48 relative flex items-center justify-center">
                 <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full animate-spin opacity-90 drop-shadow-lg" />
                 <div className="absolute -inset-6 border-t-[3px] border-b-[3px] border-[#C4A484] rounded-full animate-spin-slow shadow-[0_0_30px_rgba(196,164,132,0.4)]" />
               </div>
-              <div className="flex flex-col items-center gap-2 mt-4 bg-white/40 backdrop-blur-md px-8 py-4 rounded-full border border-[#E5D9C3]/50 shadow-sm">
+              <div className="flex flex-col items-center justify-center text-center">
                 <p className="text-[12px] font-black uppercase tracking-[0.5em] text-[#8B735B] animate-pulse">Sintonizando Essência...</p>
               </div>
             </div>
