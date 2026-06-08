@@ -74,29 +74,36 @@ export default function LoginPage() {
     
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Tenta login primeiro
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password: senha,
       });
 
-      if (error) {
-        // Se o usuário não existir, vamos tentar criar a conta (Signup implícito)
-        if (error.message.includes('Invalid login credentials')) {
-          const { error: signUpError } = await supabase.auth.signUp({
-            email,
-            password: senha,
-          });
-          
-          if (!signUpError) {
-             toast.success('Alma registrada! Portal aberto.');
-             await saveCredentials(email, senha);
-             router.push('/');
-             return;
-          }
+      if (signInError) {
+        // Se falhar o login, tenta criar a conta silenciosamente
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password: senha,
+        });
+        
+        if (signUpError) {
+           // Se a criação falhar porque o e-mail já existe, a senha do login estava incorreta.
+           if (signUpError.message.includes('already registered')) {
+              throw new Error('Senha incorreta para esta alma.');
+           }
+           // Outros erros de criação (senha fraca, email inválido)
+           throw signUpError;
         }
-        throw error;
+
+        // Se signUp teve sucesso:
+        toast.success('Alma registrada! Portal aberto.');
+        await saveCredentials(email, senha);
+        router.push('/');
+        return;
       }
 
+      // Se signIn teve sucesso:
       toast.success('Portal Aberto!');
       await saveCredentials(email, senha);
       router.push('/');
