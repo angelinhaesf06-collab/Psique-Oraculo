@@ -159,7 +159,7 @@ export async function POST(req: Request) {
 
     let model;
     try {
-      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction);
+      model = getGeminiModel("gemini-1.5-flash", systemInstruction);
     } catch (e: any) {
       console.error("Erro ao obter modelo Gemini:", e.message);
       throw new Error("Configuração da IA inválida.");

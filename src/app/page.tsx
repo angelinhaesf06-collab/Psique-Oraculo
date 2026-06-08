@@ -237,7 +237,7 @@ export default function OraculoJornada() {
 
         if (res.status === 403 && dataErr?.reason === 'paywall') {
           setModalAberto('assinatura');
-          toast.info(dataErr.error || 'Seu período de teste expirou. Assine para continuar.');
+          toast.info(dataErr.error || 'Seu primeiro ciclo gratuito se completou. Sintonize-se com o Plano Anual para continuar recebendo luz em seu caminho! ✨');
           return;
         }
 
