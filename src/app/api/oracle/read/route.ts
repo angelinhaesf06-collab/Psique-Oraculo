@@ -75,7 +75,9 @@ export async function POST(req: Request) {
 
       1. TARÔ:
          - Foco: Arquetípico, Filosófico e Vibracional.
-         - Entrega Obrigatória: Mencione explicitamente o nome de cada ARCANO no início da interpretação em PORTUGUÊS. Use um "Mantra da Alma" piscante ao final.
+         - Entrega Obrigatória: Mencione explicitamente o nome de cada ARCANO no início da interpretação em PORTUGUÊS.
+         - Mantra: Entregue um "Mantra da Alma" e uma breve instrução de como usá-lo (ex: "Repita 3 vezes ao acordar").
+         - REGRAS RÍGIDAS: NUNCA entregue "Orientação Mística", "Salmos" ou "Banhos" neste oráculo. Deixe os campos 'salmo' e 'banho' VAZIOS ou nulos.
 
       2. BARALHO CIGANO:
          - Foco: Adivinhatório e Direto (Leitura Preditiva).
