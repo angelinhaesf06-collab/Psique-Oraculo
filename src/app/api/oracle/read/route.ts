@@ -120,30 +120,20 @@ export async function POST(req: Request) {
     let responseText = "";
     let attempts = 0;
     const maxAttempts = 3;
-    let currentModelName = "gemini-3.1-flash-lite";
+    let currentModelName = "gemini-1.5-flash-latest";
 
     while (attempts < maxAttempts) {
       try {
         console.log(`Tentativa ${attempts + 1} com o modelo: ${currentModelName}`);
         
-        // Configurações avançadas do Gemini 3.1 (Thinking + Google Search)
-        const tools = [
-          {
-            googleSearch: {}
-          }
-        ];
-
+        // Configurações otimizadas para o Flash
         const generationConfig = {
           responseMimeType: "application/json",
           temperature: 0.8,
-          maxOutputTokens: 2000,
-          // Thinking Config: Permite que o modelo 3.1 realize um raciocínio interno antes de responder
-          thinkingConfig: {
-            thinkingLevel: "MINIMAL", // Equilíbrio entre profundidade e velocidade
-          }
+          maxOutputTokens: 2000
         };
 
-        const currentModel = getGeminiModel(currentModelName, systemInstruction, tools);
+        const currentModel = getGeminiModel(currentModelName, systemInstruction);
         
         const result = await currentModel.generateContent({
           contents: [{ role: "user", parts }],
@@ -163,9 +153,9 @@ export async function POST(req: Request) {
           continue;
         }
 
-        if (attempts >= maxAttempts && currentModelName === "gemini-3.1-flash-lite") {
-          console.warn("Falha persistente no 3.1. Tentando fallback para 1.5-flash...");
-          currentModelName = "gemini-1.5-flash";
+        if (attempts >= maxAttempts && currentModelName === "gemini-1.5-flash-latest") {
+          console.warn("Falha persistente no Flash-Latest. Tentando fallback para 1.5-pro...");
+          currentModelName = "gemini-1.5-pro";
           attempts = 0; 
           continue;
         }
