@@ -131,7 +131,17 @@ export async function POST(req: Request) {
       responseText = result.response.text();
     } catch (aiError: any) {
       console.error("ERRO CRÍTICO NA IA:", aiError);
-      throw new Error(`Erro na IA: ${aiError.status === 429 ? "A cota do Google foi atingida. Verifique o Google Cloud Console." : aiError.message}`);
+      const status = aiError.status || 500;
+      const errorMsg = aiError.message || "Erro desconhecido na IA";
+      
+      let finalMsg = `IA Falhou (${status}): ${errorMsg}`;
+      if (status === 429) {
+        finalMsg = `Cota Excedida (429): Embora sua chave seja paga, o Google pode ter limitado este modelo específico (Gemini 3.1) em sua região ou projeto. Detalhe: ${errorMsg}`;
+      } else if (status === 400) {
+        finalMsg = `Requisição Inválida (400): Verifique se o conteúdo enviado (imagem/texto) viola as políticas do Google ou se o modelo Gemini 3.1 está disponível.`;
+      }
+      
+      throw new Error(finalMsg);
     }
 
     let jsonResponse;
