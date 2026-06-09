@@ -36,31 +36,8 @@ export async function POST(req: Request) {
     console.log("Tipo Leitura:", tipoLeitura);
     console.log("Tema:", tema);
 
-    // 2. Validação e Consumo de Créditos
-    let creditStatus: { allowed: boolean; type: string; message?: string; reason?: string } = { allowed: true, type: "anonymous" };
-    
-    if (userId) {
-      const { data: checkData, error: checkError } = await supabaseAdmin.rpc('check_and_consume_reading', {
-        p_user_id: userId
-      });
-
-      if (checkError) {
-        console.error("Erro ao validar créditos:", checkError);
-        throw new Error("Erro ao validar créditos.");
-      }
-
-      creditStatus = checkData;
-
-      if (!creditStatus.allowed) {
-        return NextResponse.json({ 
-          error: creditStatus.message || "Créditos esgotados.", 
-          reason: creditStatus.reason || "credits_exhausted" 
-        }, { status: 403 });
-      }
-    } else {
-      // Opcional: Permitir algumas leituras anônimas ou bloquear
-      // Para este projeto, o login é obrigatório conforme as telas mostradas
-    }
+    // 2. Validação e Consumo de Créditos (TEMPORARIAMENTE DESATIVADO PARA TESTES)
+    let creditStatus = { allowed: true, type: "test_mode" };
 
     // 3. Inicialização do Modelo Gemini
     console.log("Sintonizando com o Modelo Gemini...");
@@ -82,9 +59,7 @@ export async function POST(req: Request) {
       Você é o "Psiquê Oráculo", um mentor de alma e autoridade mística.
       Sua voz é sofisticada, empática e poética. Você integra a sabedoria dos oráculos com a Psicologia Analítica.
       Responda RIGOROSAMENTE em PORTUGUÊS DO BRASIL.
-      Responda EXCLUSIVAMENTE em formato JSON puro. 
-      NÃO adicione saudações, introduções, "Okay", ou qualquer texto fora do objeto JSON.
-      NÃO use marcações de markdown como \`\`\`json.
+      Responda SEMPRE em formato JSON puro, sem marcações de markdown.
 
       ORÁCULO ATUAL: ${tipoOraculo}
       TIPO DE LEITURA: ${tipoLeitura}
@@ -109,29 +84,28 @@ export async function POST(req: Request) {
       INSTRUÇÕES DE TIRAGEM (3 CARTAS - Situação/Conselho/Resultado):
       - PROFUNDIDADE: Esta é uma leitura densa e narrativa. Não seja objetivo aqui. Explore os símbolos, as cores e as conexões entre as cartas. Cada parágrafo deve ter pelo menos 4 a 5 frases ricas. 
       - IDENTIFICAÇÃO: Inicie cada interpretação com: "[NOME DO ARCANO EM PORTUGUÊS]: [Sua análise profunda...]".
-      - VISÃO FÍSICA (FOTO): Se o TIPO DE LEITURA for 'foto', o campo "carta" de cada posição ('situacao_atual', 'caminho_acao', 'resultado_conselho') DEVE CONTER O NOME EXATO DA CARTA que você identificou na imagem enviada. NÃO invente nomes.
 
       INSTRUÇÕES DE TIRAGEM (1 CARTA - SIM OU NÃO):
       - OBJETIVIDADE: Esta sim deve ser direta e rápida. 
       - VEREDITO: No campo "veredito_direto", use APENAS as palavras: "SIM", "NÃO" ou "TALVEZ". NUNCA use "YES" ou "NO".
-      - MOTIVO: 2 frases preditivas em português mencionando o nome da carta, respondendo DIRETAMENTE à pergunta do consulente.
+      - MOTIVO: 2 frases preditivas em português mencionando o nome da carta.
 
       CONSELHO DO PSICÓLOGO (TOM HUMANISTA E ACOLHEDOR):
       - Imagine um psicólogo de renome que é, acima de tudo, um ser humano profundamente empático e gentil.
       - O tom deve ser um "Abraço em Palavras". Use uma linguagem suave, acolhedora e validadora em PORTUGUÊS. 
-      - Fale diretamente ao coração do consulente sobre sua questão ou pergunta específica.
+      - Fale diretamente ao coração do consulente sobre sua questão ("Abra o seu Coração").
       - Use conceitos de "possibilidades" e "vibração" de forma sutil e poética, sem ser excessivamente técnico ou frio.
       - O objetivo principal é fazer a pessoa se sentir ouvida, compreendida e amparada emocionalmente. 
-      - Evite termos complexos da física; foque na jornada da alma, no autocuidado e na paz interior.
+      - Evite termos complexos da física; focque na jornada da alma, no autocuidado e na paz interior.
 
       ESTRUTURA JSON OBRIGATÓRIA (Mantenha todos os valores em PORTUGUÊS):
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "NOME DO ARCANO DA FOTO OU SORTEIO", "interpretacao": "ANÁLISE PROFUNDA E EXTENSA" },
-        "caminho_acao": { "carta": "NOME DO ARCANO DA FOTO OU SORTEIO", "interpretacao": "CONSELHO PRÁTICO E PROFUNDO" },
-        "resultado_conselho": { "carta": "NOME DO ARCANO DA FOTO OU SORTEIO", "interpretacao": "DESDOBRAMENTO NARRATIVO E RICO" },
-        "carta_sorteada": { "carta": "NOME DO ARCANO", "interpretacao": "MOTIVO DIRETO E RESPOSTA À PERGUNTA" },
+        "situacao_atual": { "carta": "NOME DO ARCANO", "interpretacao": "ANÁLISE PROFUNDA E EXTENSA" },
+        "caminho_acao": { "carta": "NOME DO ARCANO", "interpretacao": "CONSELHO PRÁTICO E PROFUNDO" },
+        "resultado_conselho": { "carta": "NOME DO ARCANO", "interpretacao": "DESDOBRAMENTO NARRATIVO E RICO" },
+        "carta_sorteada": { "carta": "NOME DO ARCANO", "interpretacao": "MOTIVO DIRETO" },
         "leitura_caminho": { 
           "titulo": "Título", 
           "analise_detalhada": "SÍNTESE NARRATIVA RICA E CONECTADA DAS 3 CARTAS", 
@@ -159,7 +133,9 @@ export async function POST(req: Request) {
 
     let model;
     try {
-      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction);
+      // Ativando Google Search como ferramenta de sintonização com o mundo
+      const tools = [{ googleSearch: {} }];
+      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction, tools);
     } catch (e: any) {
       console.error("Erro ao obter modelo Gemini:", e.message);
       throw new Error("Configuração da IA inválida.");
@@ -202,7 +178,12 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
         generationConfig: {
           responseMimeType: "application/json",
           temperature: 0.9,
-          maxOutputTokens: 2000
+          maxOutputTokens: 2000, // Aumentado para acomodar leituras mais densas
+          // Configuração de Pensamento (Thinking) conforme solicitado
+          thinkingConfig: {
+             includeThoughts: true,
+             thinkingLevel: "MINIMAL"
+          }
         } as any
       });
 
