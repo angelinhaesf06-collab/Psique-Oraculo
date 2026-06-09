@@ -10,6 +10,7 @@ import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import DecorationOverlay from '../DecorationOverlay';
 
 export default function LoginPage() {
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,13 +44,15 @@ export default function LoginPage() {
       });
 
       if (credentials && credentials.username && credentials.password) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error, data } = await supabase.auth.signInWithPassword({
           email: credentials.username,
           password: credentials.password,
         });
 
         if (!error) {
+          const userFullName = data.user?.user_metadata?.full_name || credentials.username.split('@')[0];
           toast.success('Portal aberto via Biometria!');
+          localStorage.setItem('psique_user_name', userFullName);
           router.push('/');
         } else {
           toast.error('Suas credenciais biométricas expiraram. Faça login manual.');
@@ -85,6 +88,11 @@ export default function LoginPage() {
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email,
           password: senha,
+          options: {
+            data: {
+              full_name: nome || email.split('@')[0],
+            }
+          }
         });
         
         if (signUpError) {
@@ -97,15 +105,17 @@ export default function LoginPage() {
         }
 
         // Se signUp teve sucesso:
+        const userFullName = nome || email.split('@')[0];
         toast.success('Alma registrada! Portal aberto.');
-        await saveCredentials(email, senha);
+        await saveCredentials(email, senha, userFullName);
         router.push('/');
         return;
       }
 
       // Se signIn teve sucesso:
+      const userFullName = nome || signInData.user?.user_metadata?.full_name || email.split('@')[0];
       toast.success('Portal Aberto!');
-      await saveCredentials(email, senha);
+      await saveCredentials(email, senha, userFullName);
       router.push('/');
     } catch (error: any) {
       console.error("Erro Geral no Login:", error);
@@ -115,7 +125,7 @@ export default function LoginPage() {
     }
   };
 
-  const saveCredentials = async (userEmail: string, userPass: string) => {
+  const saveCredentials = async (userEmail: string, userPass: string, userName: string) => {
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
       if (isNative) {
          try {
@@ -131,14 +141,14 @@ export default function LoginPage() {
            console.log("Não foi possível salvar biometria silenciosamente.", e);
          }
       }
-      localStorage.setItem('psique_user_name', userEmail.split('@')[0]);
+      localStorage.setItem('psique_user_name', userName);
   };
 
   return (
     <div className="h-[100dvh] w-full bg-transparent flex flex-col items-center relative overflow-hidden">
       <DecorationOverlay />
       
-      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-start px-6 py-8 text-center gap-12">
+      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-start px-6 py-8 text-center gap-8">
         
         <div className="flex flex-col items-center gap-4 w-full pt-2">
           {/* Logo/Mandala Superior - Nitidez Corrigida */}
@@ -161,7 +171,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="w-full space-y-4 pt-4">
+        <div className="w-full space-y-4 pt-2">
           <button
             onClick={handleBiometricLogin}
             disabled={loading}
@@ -178,6 +188,16 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleEmailLogin} className="space-y-3">
+             <div className="relative">
+                <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C4A484]" />
+                <input
+                  type="text"
+                  placeholder="COMO DEVEMOS TE CHAMAR?"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  className="w-full h-12 bg-[#FDFBF7]/40 backdrop-blur-md rounded-xl border border-[#E5D9C3] pl-10 pr-4 text-[10px] font-bold tracking-widest uppercase focus:border-[#C4A484] outline-none transition-colors text-[#5C4D3C] placeholder:text-[#8B735B]/50"
+                />
+             </div>
              <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C4A484]" />
                 <input
