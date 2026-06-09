@@ -117,18 +117,10 @@ export async function POST(req: Request) {
       try {
         console.log(`Tentativa ${attempts + 1} com o modelo exclusivo: ${modelName}`);
         
-        const generationConfig = {
-          responseMimeType: "application/json",
-          temperature: 0.8,
-          maxOutputTokens: 2000
-        };
-
         const currentModel = getGeminiModel(modelName, systemInstruction);
         
-        const result = await currentModel.generateContent({
-          contents: [{ role: "user", parts }],
-          generationConfig: generationConfig as any
-        });
+        // Chamada simplificada para máxima compatibilidade
+        const result = await currentModel.generateContent(prompt);
 
         responseText = result.response.text();
         break; 
@@ -137,7 +129,7 @@ export async function POST(req: Request) {
         console.error(`Falha na tentativa ${attempts}:`, aiError.message);
 
         if (attempts >= maxAttempts) {
-          throw new Error(`O Portal ${modelName} está temporariamente indisponível. Detalhes: ${aiError.message}`);
+          throw new Error(`Portal ${modelName} instável. Detalhes: ${aiError.message}`);
         }
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
