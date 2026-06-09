@@ -19,11 +19,17 @@ export async function POST(req: Request) {
     const authHeader = req.headers.get("Authorization");
     let userId = null;
 
-    if (authHeader && authHeader.startsWith("Bearer ") && authHeader !== "Bearer undefined" && authHeader !== "Bearer null") {
+    if (authHeader && authHeader.startsWith("Bearer ") && authHeader !== "Bearer undefined" && authHeader !== "Bearer null" && authHeader.length > 15) {
       const token = authHeader.split(" ")[1];
-      const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-      if (!authError && user) {
-        userId = user.id;
+      try {
+        const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+        if (!authError && user) {
+          userId = user.id;
+        } else {
+          console.warn("Token inválido ou expirado:", authError?.message);
+        }
+      } catch (e) {
+        console.error("Erro ao validar token:", e);
       }
     }
 
@@ -31,12 +37,12 @@ export async function POST(req: Request) {
     const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl } = body;
 
     console.log("--- INÍCIO DA REQUISIÇÃO ORÁCULO ---");
-    console.log("Usuário ID:", userId);
+    console.log("Usuário ID Identificado:", userId);
     console.log("Tipo Oráculo:", tipoOraculo);
     console.log("Tipo Leitura:", tipoLeitura);
     console.log("Tema:", tema);
 
-    // 2. Validação e Consumo de Créditos (TEMPORARIAMENTE DESATIVADO PARA TESTES)
+    // 2. Validação e Consumo de Créditos (Sempre permitir por enquanto)
     let creditStatus = { allowed: true, type: "test_mode" };
 
     // 3. Inicialização do Modelo Gemini
