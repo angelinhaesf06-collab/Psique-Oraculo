@@ -133,8 +133,8 @@ export async function POST(req: Request) {
 
     let model;
     try {
-      // Ferramentas removidas para maximizar velocidade e evitar erro 429 de cota
-      model = getGeminiModel("gemini-flash-lite-latest", systemInstruction);
+      // Usando Gemini 2.0 Flash: O modelo mais moderno, rápido e estável para evitar erros de cota
+      model = getGeminiModel("gemini-2.0-flash", systemInstruction);
     } catch (e: any) {
       console.error("Erro ao obter modelo Gemini:", e.message);
       throw new Error("Configuração da IA inválida.");
@@ -144,22 +144,12 @@ export async function POST(req: Request) {
       ? cartas.map(c => typeof c === 'string' ? c : (c.name || c.carta)).join(", ") 
       : (typeof cartas === 'string' ? cartas : "Aguardando identificação via Imagem...");
 
-    // Construção do prompt mais clara para a IA separar pergunta de metadados
-    const prompt = `DADOS DA CONSULTA:
-Consulente: ${body.userName || "Alma Querida"}
-Tema: ${tema}
-Pergunta/Desabafo: "${pergunta || "Sintonização Geral"}"
-Cartas Sorteada: ${nomesDasCartas}
-Método: ${tipoLeitura}
-Semente Energética: ${Math.random().toString(36).substring(7)}
+    const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada: ${nomesDasCartas}. Método: ${tipoLeitura}.`;
 
-Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e responda no formato JSON solicitado. IDENTIFIQUE AS CARTAS CORRETAMENTE PELO NOME EM PORTUGUÊS NO JSON.`;
-
-    console.log("Enviando prompt para a IA (Modo Ultra Rápido)...");
+    console.log("Enviando requisição otimizada para o Portal...");
     const parts: any[] = [{ text: prompt }];
     
     if (imagem && imagem.includes("base64,")) {
-      console.log("Adicionando imagem ao prompt...");
       const base64Data = imagem.split("base64,")[1];
       const mimeType = imagem.split(";")[0].split(":")[1];
       parts.push({
@@ -176,29 +166,15 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
         contents: [{ role: "user", parts }],
         generationConfig: {
           responseMimeType: "application/json",
-          temperature: 0.9,
-          maxOutputTokens: 2000 // Aumentado para acomodar leituras mais densas
+          temperature: 0.8,
+          maxOutputTokens: 2000
         } as any
       });
 
-      console.log("Resposta recebida da IA.");
       responseText = result.response.text();
-      
-      // Validação extra para Mensagem do Dia
-      if (tipoLeitura === 'mensagem_dia' && (!responseText || responseText.length < 10)) {
-         throw new Error("A IA não gerou conteúdo suficiente para a Mensagem do Dia.");
-      }
     } catch (aiError: any) {
-      console.error("ERRO DETALHADO NA IA:", {
-        status: aiError.status,
-        message: aiError.message,
-        details: aiError.details,
-        reason: aiError.reason
-      });
-      
-      // Mensagem de erro mais técnica para diagnóstico
-      const techDetail = aiError.status === 429 ? "Limite de cota atingido (429). Verifique o faturamento no Google Cloud." : aiError.message;
-      throw new Error(`Erro na IA: ${techDetail}`);
+      console.error("ERRO CRÍTICO NA IA:", aiError);
+      throw new Error(`Erro na IA: ${aiError.status === 429 ? "A cota do Google foi atingida. Verifique o Google Cloud Console." : aiError.message}`);
     }
 
     let jsonResponse;
