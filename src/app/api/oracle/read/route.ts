@@ -190,11 +190,21 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
       console.log("Resposta recebida da IA.");
       responseText = result.response.text();
       
-      // Log da resposta bruta para depuração (pode ser visto nos logs do servidor)
-      console.log("Conteúdo bruto da resposta:", responseText.substring(0, 200) + "...");
+      // Validação extra para Mensagem do Dia
+      if (tipoLeitura === 'mensagem_dia' && (!responseText || responseText.length < 10)) {
+         throw new Error("A IA não gerou conteúdo suficiente para a Mensagem do Dia.");
+      }
     } catch (aiError: any) {
-      console.error("ERRO CRÍTICO NA IA:", aiError);
-      throw new Error(`Erro na IA (${aiError.status || 'IA-Error'}): ${aiError.message}`);
+      console.error("ERRO DETALHADO NA IA:", {
+        status: aiError.status,
+        message: aiError.message,
+        details: aiError.details,
+        reason: aiError.reason
+      });
+      
+      // Mensagem de erro mais técnica para diagnóstico
+      const techDetail = aiError.status === 429 ? "Limite de cota atingido (429). Verifique o faturamento no Google Cloud." : aiError.message;
+      throw new Error(`Erro na IA: ${techDetail}`);
     }
 
     let jsonResponse;
