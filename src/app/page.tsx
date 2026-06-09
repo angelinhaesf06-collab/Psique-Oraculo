@@ -576,78 +576,79 @@ export default function OraculoJornada() {
                  )}
 
                  {resultado.ancoragem_rituais && (
-                   <div className="bg-white/20 backdrop-blur-sm rounded-[32px] border border-[#E5D9C3] p-8 shadow-xl space-y-6">
-                     <h3 className="text-[#C4A484] font-serif text-xl text-center">
+                   <div className="space-y-4 w-full">
+                     <h3 className="text-[#C4A484] font-serif text-xl text-center mb-2">
                        {tipoOraculo === 'Tarô dos Anjos' ? 'Salmos e Luz' : (tipoOraculo === 'Tarô' ? 'Cânticos e Mantras' : 'Ancoragem e Rituais')}
                      </h3>
-                     <div className="grid grid-cols-1 gap-5">
-                       {/* Mantra/Cântico - Para todos os oráculos se disponível */}
+                     
+                     <div className="space-y-3">
+                       {/* Mantra/Cântico */}
                        {resultado.ancoragem_rituais.mantra && (
-                         <div className="flex items-start gap-4">
-                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
-                             <Sparkles size={14} />
-                           </div>
-                           <div className="space-y-0.5">
-                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
+                         <div className="bg-white/40 backdrop-blur-md rounded-[24px] border border-[#E5D9C3] p-5 shadow-sm hover:shadow-md transition-shadow">
+                           <div className="flex items-center gap-3 mb-2">
+                             <div className="w-8 h-8 rounded-full bg-[#C4A484] flex items-center justify-center shrink-0 text-white shadow-sm">
+                               <Sparkles size={16} />
+                             </div>
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5C4D3C]">
                                {tipoOraculo === 'Tarô' ? 'Mantra da Alma' : 'Cântico Sagrado'}
                              </span>
-                             <p className="text-xs italic text-[#5C4D3C] font-medium leading-relaxed">"{resultado.ancoragem_rituais.mantra}"</p>
                            </div>
+                           <p className="text-[13px] italic text-[#2C2420] font-bold leading-relaxed px-1">
+                             "{resultado.ancoragem_rituais.mantra}"
+                           </p>
                          </div>
                        )}
 
-                       {/* Salmo - Prioridade para Tarô dos Anjos */}
+                       {/* Salmo */}
                        {resultado.ancoragem_rituais.salmo && (
-                         <div className="flex items-start gap-4">
-                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
-                             <ShieldCheck size={14} />
-                           </div>
-                           <div className="space-y-0.5">
-                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
+                         <div className="bg-white/40 backdrop-blur-md rounded-[24px] border border-[#E5D9C3] p-5 shadow-sm hover:shadow-md transition-shadow">
+                           <div className="flex items-center gap-3 mb-2">
+                             <div className="w-8 h-8 rounded-full bg-[#8B735B] flex items-center justify-center shrink-0 text-white shadow-sm">
+                               <ShieldCheck size={16} />
+                             </div>
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5C4D3C]">
                                {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Protetor' : 'Orientação Mística'}
                              </span>
-                             <p className="text-xs text-[#5C4D3C]/80 leading-relaxed font-serif italic">
-                               {resultado.ancoragem_rituais.salmo}
-                             </p>
                            </div>
+                           <p className="text-[13px] text-[#2C2420] leading-relaxed font-serif font-medium bg-[#F5F2EA]/50 p-3 rounded-xl border border-[#E5D9C3]/30">
+                             {resultado.ancoragem_rituais.salmo}
+                           </p>
                          </div>
                        )}
 
-                       {/* Banho/Bíblia - Conforme o deck */}
+                       {/* Banho/Bíblia */}
                        {((tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.biblia) || (tipoOraculo === 'Baralho Cigano' && resultado.ancoragem_rituais.banho)) && (
-                         <div className="flex items-start gap-4">
-                           <div className="w-6 h-6 rounded-full bg-[#C4A484]/10 flex items-center justify-center shrink-0 text-[#C4A484]">
-                             <Activity size={14} />
-                           </div>
-                           <div className="space-y-0.5">
-                             <span className="text-[7px] font-black uppercase tracking-widest text-[#C4A484]/60">
+                         <div className="bg-white/40 backdrop-blur-md rounded-[24px] border border-[#E5D9C3] p-5 shadow-sm hover:shadow-md transition-shadow">
+                           <div className="flex items-center gap-3 mb-2">
+                             <div className="w-8 h-8 rounded-full bg-[#C5A059] flex items-center justify-center shrink-0 text-white shadow-sm">
+                               <Activity size={16} />
+                             </div>
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5C4D3C]">
                                {tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}
                              </span>
-                             <p className="text-xs text-[#5C4D3C]/80 leading-relaxed">
-                               {tipoOraculo === 'Tarô dos Anjos' 
-                                 ? (resultado.ancoragem_rituais.biblia?.toLowerCase().includes('banho') || resultado.ancoragem_rituais.biblia?.toLowerCase().includes('erva') ? 'Mentalize a luz angelical protetora em sua jornada.' : resultado.ancoragem_rituais.biblia)
-                                 : resultado.ancoragem_rituais.banho}
-                             </p>
                            </div>
+                           <p className="text-[13px] text-[#2C2420] font-bold leading-relaxed px-1">
+                             {tipoOraculo === 'Tarô dos Anjos' 
+                               ? (resultado.ancoragem_rituais.biblia?.toLowerCase().includes('banho') || resultado.ancoragem_rituais.biblia?.toLowerCase().includes('erva') ? 'Mentalize a luz angelical protetora em sua jornada.' : resultado.ancoragem_rituais.biblia)
+                               : resultado.ancoragem_rituais.banho}
+                           </p>
                          </div>
                        )}
 
-                       {/* Dica Angelical - Novo Bloco */}
+                       {/* Dica Angelical */}
                        {tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.dica_angelical && (
-                         <div className="mt-4 p-5 bg-[#FDFBF7] rounded-[24px] border border-[#E5D9C3] shadow-inner space-y-3">
-                           <div className="flex items-center gap-2 mb-1">
-                             <Sparkles className="w-4 h-4 text-[#C4A484]" />
-                             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C4A484]">✨ Dica Angelical</h4>
+                         <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[28px] border-2 border-[#C4A484]/30 p-6 shadow-lg space-y-4">
+                           <div className="flex items-center gap-2 justify-center mb-1">
+                             <Sparkles className="w-5 h-5 text-[#C4A484] animate-pulse" />
+                             <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#C4A484]">Ritual de Luz</h4>
                            </div>
-                           <div className="space-y-3">
-                             <p className="text-[11px] text-[#5C4D3C] leading-relaxed italic">
-                               "Para trabalhar a energia de <span className="font-bold text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.foco_oracao}</span>, 
-                               acenda uma vela <span className="font-bold text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.vela_cor}</span> em um lugar seguro e acima da altura da sua cabeça. 
-                               Faça a sua oração voltada a essa intenção durante <span className="font-bold text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.ritual_dias}</span>, 
-                               mentalizando o seu pedido."
+                           <div className="space-y-3 text-center">
+                             <p className="text-[12px] text-[#2C2420] font-medium leading-relaxed italic">
+                               "Para sintonizar <span className="font-black text-[#C4A484] uppercase tracking-wider">{resultado.ancoragem_rituais.dica_angelical.foco_oracao}</span>, 
+                               acenda uma vela <span className="font-black text-[#C4A484] underline underline-offset-4 decoration-[#C4A484]/30">{resultado.ancoragem_rituais.dica_angelical.vela_cor}</span> acima da sua cabeça por <span className="font-black text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.ritual_dias}</span>."
                              </p>
-                             <div className="w-8 h-[1px] bg-[#C4A484]/20 mx-auto" />
-                             <p className="text-[11px] text-[#5C4D3C]/80 leading-relaxed text-center">
+                             <div className="w-12 h-[1px] bg-[#C4A484]/30 mx-auto" />
+                             <p className="text-[11px] text-[#5C4D3C] leading-relaxed font-bold">
                                {resultado.ancoragem_rituais.dica_angelical.dica_texto}
                              </p>
                            </div>
