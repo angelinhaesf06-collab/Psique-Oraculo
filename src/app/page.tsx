@@ -383,8 +383,12 @@ export default function OraculoJornada() {
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-[#E5D9C3]/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20">
-                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white/40 rounded-[18px] border border-[#E5D9C3]/40 p-1 overflow-hidden shrink-0 shadow-sm group-hover:rotate-2 transition-transform duration-500">
+                <button 
+                  key={o.id} 
+                  onClick={() => { setTipoOraculo(o.id); nextPasso(); }} 
+                  className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-[#E5D9C3]/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20"
+                >
+                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white/30 rounded-[18px] border border-[#E5D9C3]/40 p-1 overflow-hidden shrink-0 shadow-sm group-hover:rotate-2 transition-transform duration-500">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
                   </div>
                   <div className="flex flex-col text-left space-y-0.5">
@@ -653,7 +657,7 @@ export default function OraculoJornada() {
                    </div>
                  )}
 
-                 {resultado.acolhimento_quantum && tipoOraculo !== 'Tarô dos Anjos' && tipoOraculo !== 'Tarô' && (
+                 {resultado.acolhimento_quantum && tipoOraculo === 'Geral' && (
                    <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic">
                      <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} /></div>
                      <h4 className="text-[#C4A484] font-serif text-lg mb-2">{resultado.acolhimento_quantum.titulo}</h4>
