@@ -78,8 +78,9 @@ export async function POST(req: Request) {
          - Entrega Obrigatória: Mencione explicitamente o nome de cada ARCANO no início da interpretação em PORTUGUÊS. Use um "Mantra da Alma" piscante ao final.
 
       2. BARALHO CIGANO:
-         - Foco: Preditivo, Direto e Prático.
+         - Foco: Adivinhatório e Direto (Leitura Preditiva).
          - Entrega Obrigatória: Identifique o nome da carta e seu número. Entregue "Banho", "Cristal", "Erva" e, no campo 'salmo', entregue uma "Dica da Cigana" (uma simpatia leve, pequeno ritual ou ação prática e positiva) relacionada ao tema.
+         - REGRAS RÍGIDAS: NUNCA entregue "Mantras", "Cânticos" ou "Sabedoria Quantum" neste oráculo. Deixe os campos 'mantra' e 'acolhimento_quantum' VAZIOS ou nulos.
 
       3. TARÔ DOS ANJOS:
          - Foco: Amparo, Paz e Frequência Angelical.
