@@ -118,30 +118,46 @@ export async function POST(req: Request) {
     }
 
     let responseText = "";
-    try {
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.8,
-          maxOutputTokens: 2000
-        } as any
-      });
+    let attempts = 0;
+    const maxAttempts = 3;
+    let currentModelName = "gemini-3.1-flash-lite";
 
-      responseText = result.response.text();
-    } catch (aiError: any) {
-      console.error("ERRO CRÍTICO NA IA:", aiError);
-      const status = aiError.status || 500;
-      const errorMsg = aiError.message || "Erro desconhecido na IA";
-      
-      let finalMsg = `IA Falhou (${status}): ${errorMsg}`;
-      if (status === 429) {
-        finalMsg = `Cota Excedida (429): Embora sua chave seja paga, o Google pode ter limitado este modelo específico (Gemini 3.1) em sua região ou projeto. Detalhe: ${errorMsg}`;
-      } else if (status === 400) {
-        finalMsg = `Requisição Inválida (400): Verifique se o conteúdo enviado (imagem/texto) viola as políticas do Google ou se o modelo Gemini 3.1 está disponível.`;
+    while (attempts < maxAttempts) {
+      try {
+        console.log(`Tentativa ${attempts + 1} com o modelo: ${currentModelName}`);
+        const currentModel = getGeminiModel(currentModelName, systemInstruction);
+        const result = await currentModel.generateContent({
+          contents: [{ role: "user", parts }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.8,
+            maxOutputTokens: 2000
+          } as any
+        });
+
+        responseText = result.response.text();
+        break; // Sucesso! Sai do loop.
+      } catch (aiError: any) {
+        attempts++;
+        const status = aiError.status || 500;
+        console.error(`Falha na tentativa ${attempts}:`, aiError.message);
+
+        if (status === 429 && attempts < maxAttempts) {
+          console.warn("Erro de cota detectado. Aguardando 1s para re-tentar...");
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+
+        if (attempts >= maxAttempts && currentModelName === "gemini-3.1-flash-lite") {
+          console.warn("Falha persistente no 3.1. Tentando fallback para 1.5-flash...");
+          currentModelName = "gemini-1.5-flash-latest";
+          attempts = 0; // Reinicia tentativas para o modelo de fallback
+          continue;
+        }
+
+        const errorMsg = aiError.message || "Erro desconhecido na IA";
+        throw new Error(`IA Falhou (${status}): ${errorMsg}`);
       }
-      
-      throw new Error(finalMsg);
     }
 
     let jsonResponse;
