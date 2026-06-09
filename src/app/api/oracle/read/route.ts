@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     let creditStatus = { allowed: true, type: "test_mode" };
 
     // 3. Inicialização do Modelo Gemini
-    console.log("Sintonizando com o Modelo Gemini...");
+    console.log("Sintonizando com o Modelo Gemini 3.1 Flash-Lite...");
     
     // Customizar instruções baseado no tipo de leitura
     let instrucaoEspecifica = "";
@@ -88,15 +88,6 @@ export async function POST(req: Request) {
       }
     `;
 
-    let model;
-    try {
-      // Gemini 3.1 Flash-Lite: O ápice da velocidade e inteligência para oráculos em tempo real.
-      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction);
-    } catch (e: any) {
-      console.error("Erro ao obter modelo Gemini:", e.message);
-      throw new Error("Configuração da IA inválida.");
-    }
-
     const nomesDasCartas = Array.isArray(cartas) 
       ? cartas.map(c => typeof c === 'string' ? c : (c.name || c.carta)).join(", ") 
       : (typeof cartas === 'string' ? cartas : "Aguardando identificação via Imagem...");
@@ -120,11 +111,11 @@ export async function POST(req: Request) {
     let responseText = "";
     let attempts = 0;
     const maxAttempts = 3;
-    let currentModelName = "gemini-1.5-flash-latest";
+    const modelName = "gemini-3.1-flash-lite";
 
     while (attempts < maxAttempts) {
       try {
-        console.log(`Tentativa ${attempts + 1} com o modelo: ${currentModelName}`);
+        console.log(`Tentativa ${attempts + 1} com o modelo exclusivo: ${modelName}`);
         
         // Configurações otimizadas para o Flash
         const generationConfig = {
@@ -133,7 +124,7 @@ export async function POST(req: Request) {
           maxOutputTokens: 2000
         };
 
-        const currentModel = getGeminiModel(currentModelName, systemInstruction);
+        const currentModel = getGeminiModel(modelName, systemInstruction);
         
         const result = await currentModel.generateContent({
           contents: [{ role: "user", parts }],
@@ -153,15 +144,10 @@ export async function POST(req: Request) {
           continue;
         }
 
-        if (attempts >= maxAttempts && currentModelName === "gemini-1.5-flash-latest") {
-          console.warn("Falha persistente no Flash-Latest. Tentando fallback para 1.5-pro...");
-          currentModelName = "gemini-1.5-pro";
-          attempts = 0; 
-          continue;
+        if (attempts >= maxAttempts) {
+          const errorMsg = aiError.message || "Erro desconhecido na IA";
+          throw new Error(`IA Falhou após ${maxAttempts} tentativas com o modelo 3.1-flash-lite: ${errorMsg}`);
         }
-
-        const errorMsg = aiError.message || "Erro desconhecido na IA";
-        throw new Error(`IA Falhou (${status}): ${errorMsg}`);
       }
     }
 
