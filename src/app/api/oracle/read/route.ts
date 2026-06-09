@@ -125,14 +125,29 @@ export async function POST(req: Request) {
     while (attempts < maxAttempts) {
       try {
         console.log(`Tentativa ${attempts + 1} com o modelo: ${currentModelName}`);
-        const currentModel = getGeminiModel(currentModelName, systemInstruction);
+        
+        // Configurações avançadas do Gemini 3.1 (Thinking + Google Search)
+        const tools = [
+          {
+            googleSearch: {}
+          }
+        ];
+
+        const generationConfig = {
+          responseMimeType: "application/json",
+          temperature: 0.8,
+          maxOutputTokens: 2000,
+          // Thinking Config: Permite que o modelo 3.1 realize um raciocínio interno antes de responder
+          thinkingConfig: {
+            thinkingLevel: "MINIMAL", // Equilíbrio entre profundidade e velocidade
+          }
+        };
+
+        const currentModel = getGeminiModel(currentModelName, systemInstruction, tools);
+        
         const result = await currentModel.generateContent({
           contents: [{ role: "user", parts }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.8,
-            maxOutputTokens: 2000
-          } as any
+          generationConfig: generationConfig as any
         });
 
         responseText = result.response.text();
