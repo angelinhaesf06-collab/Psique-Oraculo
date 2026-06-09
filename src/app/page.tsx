@@ -294,7 +294,8 @@ export default function OraculoJornada() {
       }
       setResultado(data); setPasso(4); 
     } catch (error: any) { 
-      toast.error(error.message || "As energias do universo não puderam ser canalizadas agora.", { duration: 5000 }); 
+      console.error("Erro na canalização:", error);
+      toast.info("As energias estão se recalibrando. O portal está sendo purificado para sua próxima consulta. Respire fundo e tente novamente em um momento de paz. ✨", { duration: 8000 }); 
     } finally { setLoading(false); }
   };
 
@@ -381,7 +382,7 @@ export default function OraculoJornada() {
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma', glass: 'bg-amber-900/10 border-amber-200/20' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas', glass: 'bg-red-900/10 border-red-200/20' },
-                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial', glass: 'bg-teal-900/10 border-teal-200/20' }
+                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial', glass: 'bg-[#4FD1C5]/10 border-[#4FD1C5]/20' }
               ].map((o) => (
                 <button 
                   key={o.id} 
@@ -557,8 +558,8 @@ export default function OraculoJornada() {
                  {/* Acolhimento Psicólogo - Integrado no final da leitura */}
                  {resultado.acolhimento_psicologico && (
                    <div className="bg-white/20 backdrop-blur-md rounded-[32px] border border-[#C4A484]/30 p-8 text-center shadow-lg space-y-4 animate-in fade-in duration-1000">
-                     <div className="w-10 h-10 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto text-[#C4A484] border border-[#C4A484]/20 shadow-sm">
-                       <Heart size={20} strokeWidth={1.5} />
+                     <div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center mx-auto border border-[#C4A484]/20 shadow-sm p-1.5">
+                       <img src="/assets/brand/mandala-login.png" alt="Oráculo" className="w-full h-full object-contain animate-spin-slow opacity-90" />
                      </div>
                      <div className="space-y-2">
                        <h4 className="text-[#C4A484] font-serif text-lg tracking-tight">{resultado.acolhimento_psicologico.titulo || "O Olhar Clínico"}</h4>
@@ -584,16 +585,16 @@ export default function OraculoJornada() {
                      <div className="space-y-3">
                        {/* Mantra/Cântico */}
                        {resultado.ancoragem_rituais.mantra && (
-                         <div className="bg-white/40 backdrop-blur-md rounded-[24px] border border-[#E5D9C3] p-5 shadow-sm hover:shadow-md transition-shadow">
-                           <div className="flex items-center gap-3 mb-2">
-                             <div className="w-8 h-8 rounded-full bg-[#C4A484] flex items-center justify-center shrink-0 text-white shadow-sm">
+                         <div className="bg-red-500/5 backdrop-blur-md rounded-[24px] border border-red-200/30 p-5 shadow-sm hover:shadow-md transition-shadow">
+                           <div className="flex flex-col items-center gap-2 mb-3">
+                             <div className="w-8 h-8 rounded-full bg-red-800/80 flex items-center justify-center shrink-0 text-white shadow-sm">
                                <Sparkles size={16} />
                              </div>
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5C4D3C]">
+                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-900/60">
                                {tipoOraculo === 'Tarô' ? 'Mantra da Alma' : 'Cântico Sagrado'}
                              </span>
                            </div>
-                           <p className="text-[13px] italic text-[#2C2420] font-bold leading-relaxed px-1">
+                           <p className="text-[14px] italic text-[#2C2420] font-bold leading-relaxed px-1 text-center">
                              "{resultado.ancoragem_rituais.mantra}"
                            </p>
                          </div>
