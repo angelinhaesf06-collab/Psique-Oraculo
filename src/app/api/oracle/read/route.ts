@@ -135,7 +135,7 @@ export async function POST(req: Request) {
     try {
       // Ativando Google Search como ferramenta de sintonização com o mundo
       const tools = [{ googleSearch: {} }];
-      model = getGeminiModel("gemini-1.5-flash", systemInstruction, tools);
+      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction, tools);
     } catch (e: any) {
       console.error("Erro ao obter modelo Gemini:", e.message);
       throw new Error("Configuração da IA inválida.");
