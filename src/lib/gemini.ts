@@ -4,13 +4,14 @@ const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_AP
 
 const genAI = new GoogleGenerativeAI(apiKey || "");
 
-export const getGeminiModel = (modelName: string = "gemini-3.1-flash-lite", customSystemInstruction?: string) => {
+export const getGeminiModel = (modelName: string = "gemini-3.1-flash-lite", customSystemInstruction?: string, tools?: any[]) => {
   if (!apiKey) throw new Error("Chave de API não configurada.");
   
   console.log("Sintonizando Oráculo com:", modelName);
 
   return genAI.getGenerativeModel({ 
     model: modelName,
-    systemInstruction: customSystemInstruction
+    systemInstruction: customSystemInstruction,
+    tools: tools
   });
 };
