@@ -134,7 +134,7 @@ export async function POST(req: Request) {
     let model;
     try {
       // Ferramentas removidas para maximizar velocidade e evitar erro 429 de cota
-      model = getGeminiModel("gemini-3.1-flash-lite", systemInstruction);
+      model = getGeminiModel("gemini-flash-lite-latest", systemInstruction);
     } catch (e: any) {
       console.error("Erro ao obter modelo Gemini:", e.message);
       throw new Error("Configuração da IA inválida.");
