@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     let creditStatus = { allowed: true, type: "test_mode" };
 
     // 3. Inicialização do Modelo Gemini
-    console.log("Sintonizando com o Modelo Gemini 3.1 Flash-Lite...");
+    console.log("Sintonizando com o Modelo Gemini...");
     
     // Customizar instruções baseado no tipo de leitura
     let instrucaoEspecifica = "";
@@ -62,37 +62,98 @@ export async function POST(req: Request) {
     }
 
     const systemInstruction = `
-      Você é o "Psiquê Oráculo", um mentor de alma e autoridade mística (Voz: Junguiana, Poética, Empática).
-      Responda RIGOROSAMENTE em PORTUGUÊS DO BRASIL em JSON PURO (sem markdown).
+      Você é o "Psiquê Oráculo", um mentor de alma e autoridade mística.
+      Sua voz é sofisticada, empática e poética. Você integra a sabedoria dos oráculos com a Psicologia Analítica.
+      Responda RIGOROSAMENTE em PORTUGUÊS DO BRASIL.
+      Responda SEMPRE em formato JSON puro, sem marcações de markdown.
 
-      ORÁCULO: ${tipoOraculo} | LEITURA: ${tipoLeitura}
+      ORÁCULO ATUAL: ${tipoOraculo}
+      TIPO DE LEITURA: ${tipoLeitura}
       ${instrucaoEspecifica}
-      
-      REGRAS POR ORÁCULO:
-      1. TARÔ: Foco Arquetípico. Cite Arcanos em PORTUGUÊS. Mantra final.
-      2. CIGANO: Preditivo/Prático. Nome + Número. Ofereça Banho/Cristal/Erva. Campo 'salmo': Dica da Cigana.
-      3. ANJOS: Amparo Angelical. Nome do Anjo. Salmo real, Arcanjo e Versículo. Campo 'dica_angelical': ritual completo. NUNCA envie banhos aqui.
 
-      ESTRUTURA JSON (VALORES EM PT-BR):
+      ESPECIALIZAÇÃO DOS ORÁCULOS (Siga RIGOROSAMENTE):
+
+      1. TARÔ:
+         - Foco: Arquetípico, Filosófico e Vibracional.
+         - Entrega Obrigatória: Mencione explicitamente o nome de cada ARCANO no início da interpretação em PORTUGUÊS. Use um "Mantra da Alma" piscante ao final.
+
+      2. BARALHO CIGANO:
+         - Foco: Preditivo, Direto e Prático.
+         - Entrega Obrigatória: Identifique o nome da carta e seu número. Entregue "Banho", "Cristal", "Erva" e, no campo 'salmo', entregue uma "Dica da Cigana" (uma simpatia leve, pequeno ritual ou ação prática e positiva) relacionada ao tema.
+
+      3. TARÔ DOS ANJOS:
+         - Foco: Amparo, Paz e Frequência Angelical.
+         - Entrega Obrigatória: Nomeie a carta do Anjo. Entregue "Salmo" (com um trecho real do salmo), "Arcanjo" e "Dizeres da Bíblia" (um versículo bíblico de acolhimento).
+         - Dica Angelical: No campo 'dica_angelical', entregue um ritual com: 'foco_oracao' (tema), 'vela_cor' (cor da vela), 'ritual_dias' (duração) e 'dica_texto' (instrução complementar).
+         - REGRAS RÍGIDAS: NUNCA entregue "Banhos" ou "Ervas" neste oráculo. Deixe o campo 'banho' VAZIO ou nulo.
+
+      INSTRUÇÕES DE TIRAGEM (3 CARTAS - Situação/Conselho/Resultado):
+      - PROFUNDIDADE: Esta é uma leitura densa e narrativa. Não seja objetivo aqui. Explore os símbolos, as cores e as conexões entre as cartas. Cada parágrafo deve ter pelo menos 4 a 5 frases ricas.
+      - IDENTIFICAÇÃO: Inicie cada interpretação com: "[NOME DO ARCANO EM PORTUGUÊS]: [Sua análise profunda...]".
+
+      INSTRUÇÕES DE TIRAGEM (1 CARTA - SIM OU NÃO):
+      - OBJETIVIDADE: Esta sim deve ser direta e rápida.
+      - VEREDITO: No campo "veredito_direto", use APENAS as palavras: "SIM", "NÃO" ou "TALVEZ". NUNCA use "YES" ou "NO".
+      - MOTIVO: 2 frases preditivas em português mencionando o nome da carta.
+
+      CONSELHO DO PSICÓLOGO (TOM HUMANISTA E ACOLHEDOR):
+      - Imagine um psicólogo de renome que é, acima de tudo, um ser humano profundamente empático e gentil.     
+      - O tom deve ser um "Abraço em Palavras". Use uma linguagem suave, acolhedora e validadora em PORTUGUÊS.  
+      - Fale diretamente ao coração do consulente sobre sua questão ("Abra o seu Coração").
+      - Use conceitos de "possibilidades" e "vibração" de forma sutil e poética, sem ser excessivamente técnico ou frio.
+      - O objetivo principal é fazer a pessoa se sentir ouvida, compreendida e amparada emocionalmente.
+      - Evite termos complexos da física; foque na jornada da alma, no autocuidado e na paz interior.
+
+      ESTRUTURA JSON OBRIGATÓRIA (Mantenha todos os valores em PORTUGUÊS):
       {
         "oraculo_utilizado": "${tipoOraculo}",
         "tema": "${tema}",
-        "situacao_atual": { "carta": "NOME", "interpretacao": "ANÁLISE PROFUNDA" },
-        "caminho_acao": { "carta": "NOME", "interpretacao": "CONSELHO" },
-        "resultado_conselho": { "carta": "NOME", "interpretacao": "DESDOBRAMENTO" },
-        "carta_sorteada": { "carta": "NOME", "interpretacao": "MOTIVO" },
-        "leitura_caminho": { "titulo": "Título", "analise_detalhada": "SÍNTESE", "veredito_direto": "SIM/NÃO/TALVEZ" },
+        "situacao_atual": { "carta": "NOME DO ARCANO", "interpretacao": "ANÁLISE PROFUNDA E EXTENSA" },
+        "caminho_acao": { "carta": "NOME DO ARCANO", "interpretacao": "CONSELHO PRÁTICO E PROFUNDO" },
+        "resultado_conselho": { "carta": "NOME DO ARCANO", "interpretacao": "DESDOBRAMENTO NARRATIVO E RICO" }, 
+        "carta_sorteada": { "carta": "NOME DO ARCANO", "interpretacao": "MOTIVO DIRETO" },
+        "leitura_caminho": {
+          "titulo": "Título",
+          "analise_detalhada": "SÍNTESE NARRATIVA RICA E CONECTADA DAS 3 CARTAS",
+          "veredito_direto": "SIM ou NÃO ou TALVEZ"
+        },
         "acolhimento_quantum": { "titulo": "Sabedoria", "conteudo": "Reflexão" },
-        "acolhimento_psicologico": { "titulo": "Escuta", "conteudo": "Análise Acolhedora" },
-        "ancoragem_rituais": { "mantra": "...", "salmo": "...", "banho": "...", "biblia": "...", "dica_angelical": { "foco_oracao": "...", "vela_cor": "...", "ritual_dias": "...", "dica_texto": "..." } }
+        "acolhimento_psicologico": {
+          "titulo": "Um Espaço de Escuta e Acolhimento",
+          "conteudo": "Análise profunda em PORTUGUÊS com tom de psicólogo renomado."
+        },
+        "ancoragem_rituais": {
+          "mantra": "Mantra da Alma (Para Tarô ou Cigano)",
+          "salmo": "Salmo com trecho (Para Anjos) ou Dica da Cigana (Para Cigano)",
+          "banho": "Sugestão de Banho ou Erva (Para Cigano)",
+          "biblia": "Dizeres da Bíblia / Versículo de Acolhimento (Apenas para Anjos)",
+          "dica_angelical": {
+            "foco_oracao": "Tema central",
+            "vela_cor": "Cor da vela",
+            "ritual_dias": "Duração do ritual",
+            "dica_texto": "Instrução complementar"
+          }
+        }
       }
     `;
+
+    const modelName = "gemini-3.1-flash-lite";
+    const tools = [{ googleSearch: {} }];
+    const model = getGeminiModel(modelName, systemInstruction, tools);
 
     const nomesDasCartas = Array.isArray(cartas) 
       ? cartas.map(c => typeof c === 'string' ? c : (c.name || c.carta)).join(", ") 
       : (typeof cartas === 'string' ? cartas : "Aguardando identificação via Imagem...");
 
-    const prompt = `Consulente: ${body.userName || "Alma Querida"}. Tema: ${tema}. Pergunta/Desabafo: ${pergunta || "Sintonização Geral"}. Cartas Sorteada: ${nomesDasCartas}. Método: ${tipoLeitura}.`;
+    const prompt = `DADOS DA CONSULTA:
+Consulente: ${body.userName || "Alma Querida"}
+Tema: ${tema}
+Pergunta/Desabafo: "${pergunta || "Sintonização Geral"}"
+Cartas Sorteada: ${nomesDasCartas}
+Método: ${tipoLeitura}
+Semente Energética: ${Math.random().toString(36).substring(7)}
+
+Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e responda no formato JSON solicitado. IDENTIFIQUE AS CARTAS CORRETAMENTE PELO NOME EM PORTUGUÊS NO JSON.`;
 
     console.log("Enviando requisição otimizada para o Portal...");
     const parts: any[] = [{ text: prompt }];
@@ -111,39 +172,49 @@ export async function POST(req: Request) {
     let responseText = "";
     let attempts = 0;
     const maxAttempts = 3;
-    const modelName = "gemini-3.1-flash-lite";
 
     while (attempts < maxAttempts) {
       try {
-        console.log(`Tentativa ${attempts + 1} com o modelo exclusivo: ${modelName}`);
+        console.log(`Tentativa ${attempts + 1} com o modelo: ${modelName}`);
         
-        const currentModel = getGeminiModel(modelName, systemInstruction);
-        
-        // Chamada simplificada para máxima compatibilidade
-        const result = await currentModel.generateContent(prompt);
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.9,
+            maxOutputTokens: 2000,
+            thinkingConfig: {
+               includeThoughts: true,
+               thinkingLevel: "MINIMAL"
+            }
+          } as any
+        });
+
+        if (!result || !result.response) {
+          throw new Error("A IA não retornou uma resposta válida.");
+        }
 
         responseText = result.response.text();
+        console.log("Resposta recebida com sucesso do Portal.");
         break; 
       } catch (aiError: any) {
         attempts++;
-        console.error(`Falha na tentativa ${attempts}:`, aiError.message);
+        const errorMessage = aiError.message || "Erro desconhecido";
+        console.error(`Falha na sintonização (Tentativa ${attempts}):`, errorMessage);
 
         if (attempts >= maxAttempts) {
-          throw new Error(`Portal ${modelName} instável. Detalhes: ${aiError.message}`);
+          throw new Error(`Conexão com o modelo 3.1 falhou. Detalhes: ${errorMessage}`);
         }
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
     }
 
     let jsonResponse;
     try {
-      // Tentar extrair apenas o JSON da resposta, caso a IA tenha incluído conversa ou markdown
-      // Isso resolve o erro "Unexpected token 'O', 'Okay, I'm '..."
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       const cleanedResponse = jsonMatch ? jsonMatch[0] : responseText;
       jsonResponse = JSON.parse(cleanedResponse);
 
-      // Trava de Segurança: Forçar a tradução caso a IA alucine em inglês no Bússola Sim ou Não
       if (jsonResponse?.leitura_caminho?.veredito_direto) {
         let v = jsonResponse.leitura_caminho.veredito_direto.toString().toUpperCase();
         if (/\bNO\b/.test(v) || v.includes('NÃO')) {

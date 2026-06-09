@@ -348,8 +348,8 @@ export default function OraculoJornada() {
   };
 
   return (
-    <div className={`h-full w-full text-[#5C4D3C] font-sans flex flex-col items-center relative ${passo <= 3 ? 'overflow-hidden' : ''}`}>
-      <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 py-2 overflow-hidden">
+    <div className={`h-[100dvh] w-full text-[#5C4D3C] font-sans flex flex-col items-center relative ${passo <= 3 ? 'overflow-hidden' : ''}`}>
+      <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 pt-safe pb-safe overflow-hidden">
         
         {/* Cabeçalho Fixo - Equilibrado */}
         <div className="flex flex-col items-center mb-2 shrink-0">
@@ -377,15 +377,15 @@ export default function OraculoJornada() {
               )}
             </div>
 
-            <div className="flex flex-col gap-2.5 w-full max-w-[360px] shrink-0 justify-center py-2">
+            <div className="flex flex-col gap-3 w-full max-w-[360px] shrink-0 justify-center py-2">
               {[
                 { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma' },
                 { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
                 { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
               ].map((o) => (
-                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/20 backdrop-blur-md border border-[#E5D9C3]/30 p-2.5 md:p-3 rounded-[28px] md:rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/40">
-                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white/50 rounded-[16px] md:rounded-[20px] border border-[#E5D9C3]/50 p-1 overflow-hidden shrink-0 shadow-md group-hover:rotate-2 transition-transform duration-500">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[12px] md:rounded-[16px]" />
+                <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-[#E5D9C3]/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20">
+                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white/40 rounded-[18px] border border-[#E5D9C3]/40 p-1 overflow-hidden shrink-0 shadow-sm group-hover:rotate-2 transition-transform duration-500">
+                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
                   </div>
                   <div className="flex flex-col text-left space-y-0.5">
                     <div className="flex flex-col">
@@ -751,12 +751,12 @@ export default function OraculoJornada() {
                       </div>
                       <div className="space-y-2">
                         <h4 className="text-lg font-bold text-[#5C4D3C]">Acesso Premium</h4>
-                        <p className="text-[10px] leading-relaxed text-[#8B735B]">Experimente <span className="font-bold">grátis por 24 horas</span>.<br/>Após o período, assine para continuar sua jornada.</p>
+                        <p className="text-[10px] leading-relaxed text-[#8B735B]">Experimente <span className="font-bold">grátis por 24 horas</span>.<br/>Após o teste, pague apenas R$ 89,00 e use o <span className="font-bold">ano inteiro</span> sem mensalidades.</p>
                       </div>
                       <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-[#E5D9C3]/50 p-6 shadow-sm space-y-4">
                         <div className="space-y-1">
-                          <div className="text-3xl font-black text-[#C4A484]">R$ 89,00<span className="text-xs opacity-60 ml-1">/ano</span></div>
-                          <p className="text-[9px] uppercase tracking-widest font-bold text-[#8B735B]/70">Plano Anual Soul</p>
+                          <div className="text-3xl font-black text-[#C4A484]">R$ 89,00</div>
+                          <p className="text-[10px] uppercase tracking-widest font-bold text-[#8B735B]">Pagamento Único • Válido por 365 dias</p>
                         </div>
                         <div className="space-y-2 pt-2 border-t border-[#E5D9C3]/50">
                           <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Salmos e Cânticos da Bíblia</span></div>

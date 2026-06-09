@@ -148,7 +148,7 @@ export default function LoginPage() {
     <div className="h-[100dvh] w-full bg-transparent flex flex-col items-center relative overflow-hidden">
       <DecorationOverlay />
       
-      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-start px-6 py-8 text-center gap-8">
+      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-start px-6 pt-safe pb-safe text-center gap-8">
         
         <div className="flex flex-col items-center gap-4 w-full pt-2">
           {/* Logo/Mandala Superior - Nitidez Corrigida */}
