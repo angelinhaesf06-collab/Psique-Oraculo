@@ -120,7 +120,7 @@ export async function POST(req: Request) {
     let responseText = "";
     let attempts = 0;
     const maxAttempts = 3;
-    let currentModelName = "gemini-1.5-flash";
+    let currentModelName = "gemini-3.1-flash-lite";
 
     while (attempts < maxAttempts) {
       try {
@@ -148,9 +148,9 @@ export async function POST(req: Request) {
           continue;
         }
 
-        if (attempts >= maxAttempts && currentModelName === "gemini-1.5-flash") {
-          console.warn("Falha persistente no Flash. Tentando fallback para Pro...");
-          currentModelName = "gemini-1.5-pro";
+        if (attempts >= maxAttempts && currentModelName === "gemini-3.1-flash-lite") {
+          console.warn("Falha persistente no 3.1. Tentando fallback para 1.5-flash...");
+          currentModelName = "gemini-1.5-flash";
           attempts = 0; 
           continue;
         }
