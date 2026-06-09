@@ -117,7 +117,6 @@ export async function POST(req: Request) {
       try {
         console.log(`Tentativa ${attempts + 1} com o modelo exclusivo: ${modelName}`);
         
-        // Configurações otimizadas para o Flash
         const generationConfig = {
           responseMimeType: "application/json",
           temperature: 0.8,
@@ -132,22 +131,15 @@ export async function POST(req: Request) {
         });
 
         responseText = result.response.text();
-        break; // Sucesso! Sai do loop.
+        break; 
       } catch (aiError: any) {
         attempts++;
-        const status = aiError.status || 500;
         console.error(`Falha na tentativa ${attempts}:`, aiError.message);
 
-        if (status === 429 && attempts < maxAttempts) {
-          console.warn("Erro de cota detectado. Aguardando 1s para re-tentar...");
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          continue;
-        }
-
         if (attempts >= maxAttempts) {
-          const errorMsg = aiError.message || "Erro desconhecido na IA";
-          throw new Error(`IA Falhou após ${maxAttempts} tentativas com o modelo 3.1-flash-lite: ${errorMsg}`);
+          throw new Error(`O Portal ${modelName} está temporariamente indisponível. Detalhes: ${aiError.message}`);
         }
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
 
