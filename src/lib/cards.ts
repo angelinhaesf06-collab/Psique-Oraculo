@@ -144,6 +144,16 @@ export async function drawCards(deckName: string, count: number = 3) {
       if (minorPath) return `/assets/decks/${folder}/${minorPath}`;
     }
 
+    if (deckName === 'Tarô dos Anjos') {
+      const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '');
+      if (name === 'Lelahel') return `/assets/decks/anjos/lelahel.png`;
+      
+      const customAngels = ['vehuiah', 'jeliel', 'sitael', 'elemiah', 'mahasiah', 'achaiah'];
+      if (customAngels.includes(slug)) return `/assets/decks/anjos/${slug}.jpg`;
+      
+      return `/assets/decks/anjos/default-angel.jpg`;
+    }
+
     let filename = CIGANO_MAP[name] || CUSTOM_MAP[name] || `${name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '')}.jpg`;
     return `/assets/decks/${folder}/${filename}`;
   };

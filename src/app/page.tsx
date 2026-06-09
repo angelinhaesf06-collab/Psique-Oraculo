@@ -379,14 +379,14 @@ export default function OraculoJornada() {
 
             <div className="flex flex-col gap-3 w-full max-w-[360px] shrink-0 justify-center py-2">
               {[
-                { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma' },
-                { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
-                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
+                { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma', glass: 'bg-amber-900/10 border-amber-200/20' },
+                { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas', glass: 'bg-red-900/10 border-red-200/20' },
+                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial', glass: 'bg-teal-900/10 border-teal-200/20' }
               ].map((o) => (
                 <button 
                   key={o.id} 
                   onClick={() => { setTipoOraculo(o.id); nextPasso(); }} 
-                  className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-[#E5D9C3]/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20"
+                  className={`flex items-center gap-4 md:gap-5 group w-full ${o.glass} backdrop-blur-md border p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20`}
                 >
                   <div className="w-14 h-20 md:w-16 md:h-24 bg-white/30 rounded-[18px] border border-[#E5D9C3]/40 p-1 overflow-hidden shrink-0 shadow-sm group-hover:rotate-2 transition-transform duration-500">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
@@ -557,11 +557,11 @@ export default function OraculoJornada() {
                  {/* Acolhimento Psicólogo - Integrado no final da leitura */}
                  {resultado.acolhimento_psicologico && (
                    <div className="bg-white/20 backdrop-blur-md rounded-[32px] border border-[#C4A484]/30 p-8 text-center shadow-lg space-y-4 animate-in fade-in duration-1000">
-                     <div className="w-12 h-12 bg-[#2C2420] rounded-full flex items-center justify-center mx-auto text-[#C4A484] shadow-md">
-                       <Users size={24} />
+                     <div className="w-10 h-10 bg-[#C4A484]/10 rounded-full flex items-center justify-center mx-auto text-[#C4A484] border border-[#C4A484]/20 shadow-sm">
+                       <Heart size={20} strokeWidth={1.5} />
                      </div>
                      <div className="space-y-2">
-                       <h4 className="text-[#C4A484] font-serif text-lg">{resultado.acolhimento_psicologico.titulo || "O Olhar Clínico"}</h4>
+                       <h4 className="text-[#C4A484] font-serif text-lg tracking-tight">{resultado.acolhimento_psicologico.titulo || "O Olhar Clínico"}</h4>
                        <p className="text-xs text-[#5C4D3C]/80 leading-relaxed italic line-clamp-3">
                          {resultado.acolhimento_psicologico.conteudo}
                        </p>
