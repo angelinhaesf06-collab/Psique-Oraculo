@@ -10,6 +10,8 @@ import { Capacitor } from '@capacitor/core';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
+import { Browser } from '@capacitor/browser';
+import { App as CapacitorApp } from '@capacitor/app';
 
 const MandalaSmallIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
@@ -111,18 +113,27 @@ export default function OraculoJornada() {
         return;
       }
 
+      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: session.user.id,
           email: session.user.email,
+          isNative: isNative, // Passando isNative para a API gerar a URL correta (deep link ou web)
         }),
       });
 
       const data = await res.json();
       if (data.url) {
-        window.location.href = data.url;
+        if (isNative) {
+          // Se for aplicativo nativo, abre a URL do Stripe no navegador in-app
+          await Browser.open({ url: data.url, presentationStyle: 'popover' });
+        } else {
+          // Se for web, redireciona normalmente
+          window.location.href = data.url;
+        }
       } else {
         throw new Error(data.error || 'Erro ao iniciar checkout');
       }
@@ -133,6 +144,35 @@ export default function OraculoJornada() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const setupAppLinks = async () => {
+      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      if (isNative) {
+        // Escuta os deep links quando o navegador nativo (Stripe) redirecionar de volta
+        CapacitorApp.addListener('appUrlOpen', data => {
+          if (data.url.includes('checkout-return')) {
+            Browser.close(); // Fecha o navegador in-app
+            if (data.url.includes('success=true')) {
+              toast.success('Assinatura ativada com sucesso! ✨');
+              setModalAberto(null);
+              // Opcional: Atualizar status do usuário no banco de dados ou estado local
+            } else {
+              toast.error('Assinatura cancelada ou não concluída.');
+            }
+          }
+        });
+      }
+    };
+    setupAppLinks();
+    
+    return () => {
+      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      if (isNative) {
+        CapacitorApp.removeAllListeners();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const fetchMensagemDia = async () => {
