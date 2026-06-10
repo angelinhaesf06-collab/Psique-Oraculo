@@ -389,7 +389,7 @@ export default function OraculoJornada() {
                   onClick={() => { setTipoOraculo(o.id); nextPasso(); }} 
                   className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-white/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20"
                 >
-                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white/30 rounded-[18px] border border-[#E5D9C3]/40 p-1 overflow-hidden shrink-0 shadow-sm group-hover:rotate-2 transition-transform duration-500">
+                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white/20 rounded-[18px] border border-white/10 p-1 overflow-hidden shrink-0 shadow-sm group-hover:rotate-2 transition-transform duration-500">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
                   </div>
                   <div className="flex flex-col text-left space-y-0.5">
@@ -425,7 +425,7 @@ export default function OraculoJornada() {
             
             <div className="flex flex-col gap-2.5 w-full max-w-[340px] shrink-0 justify-center py-2">
               {TEMAS.map((t) => (
-                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/10 backdrop-blur-md border border-[#E5D9C3]/30 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
+                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/10 backdrop-blur-md border border-white/20 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
                   <div className="w-full h-full bg-transparent rounded-[20px] flex items-center justify-between px-6">
                     <div className="flex items-center gap-4">
                       <div className={`p-1.5 rounded-full bg-white/50 shadow-sm ${t.color}`}>
@@ -492,7 +492,7 @@ export default function OraculoJornada() {
                 { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, 
                 { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' }
               ].map((m) => (
-                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-16 flex items-center gap-5 bg-white/20 backdrop-blur-[2px] border border-[#E5D9C3]/40 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
+                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-16 flex items-center gap-5 bg-white/10 backdrop-blur-md border border-white/20 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
                   <div className={`w-10 h-10 ${m.color} rounded-[14px] flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-500`}>
                     <m.icon size={20} />
                   </div>
