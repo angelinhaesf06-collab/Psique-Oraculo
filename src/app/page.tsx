@@ -614,7 +614,7 @@ export default function OraculoJornada() {
                        {resultado.ancoragem_rituais.salmo && (
                          <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
                            <div className="flex items-center gap-4">
-                             <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden ${tipoOraculo === 'Tarô dos Anjos' ? 'bg-white/60' : 'bg-[#EF4444]/20'}`}>
+                             <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden ${tipoOraculo === 'Tarô dos Anjos' ? 'bg-[#FFD1DC]/40' : 'bg-[#EF4444]/20'}`}>
                                {tipoOraculo === 'Tarô dos Anjos' ? (
                                  <img src="/assets/brand/psalm-icon.jpg" alt="Salmo" className="w-full h-full object-cover" />
                                ) : (
@@ -637,7 +637,7 @@ export default function OraculoJornada() {
                        {((tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.biblia) || (tipoOraculo === 'Baralho Cigano' && resultado.ancoragem_rituais.banho)) && (
                          <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
                            <div className="flex items-center gap-4">
-                             <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden ${tipoOraculo === 'Baralho Cigano' ? 'bg-[#EF4444]/20' : 'bg-white/60'}`}>
+                             <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden ${tipoOraculo === 'Tarô dos Anjos' ? 'bg-[#F5F2EA]/60' : (tipoOraculo === 'Baralho Cigano' ? 'bg-[#EF4444]/20' : 'bg-white/60')}`}>
                                {tipoOraculo === 'Tarô dos Anjos' ? (
                                  <img src="/assets/brand/bible-icon.jpg" alt="Bíblia" className="w-full h-full object-cover" />
                                ) : (
