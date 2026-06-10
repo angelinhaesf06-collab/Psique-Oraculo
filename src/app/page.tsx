@@ -196,7 +196,11 @@ export default function OraculoJornada() {
         const { data: { session } } = await supabase.auth.getSession();
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
         
-        const res = await fetch('/api/oracle/read', { 
+        const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.() || Capacitor.isNativePlatform();
+        const siteUrl = 'https://www.pisiqueoraculo.com.br';
+        const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
+
+        const res = await fetch(apiUrl, { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) 
@@ -590,7 +594,7 @@ export default function OraculoJornada() {
                                if (/\bNO\b/.test(v)) return 'NÃO';
                                if (/\bYES\b/.test(v)) return 'SIM';
                                if (/\bMAYBE\b/.test(v)) return 'TALVEZ';
-                               return v.split(' ')[0].replace(/[^a-zA-ZáéíóúÁÉÍÓÚ]/g, '');
+                               return v.split(' ')[0].replace(/[^a-zA-ZáéíóúãõçÁÉÍÓÚÃÕÇ]/g, '');
                             })()}
                           </span>
                         </div>
