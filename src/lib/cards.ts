@@ -62,7 +62,7 @@ export async function drawCards(deckName: string, count: number = 3) {
   const folderMap: Record<string, string> = { 'Tarô': 'taro', 'Baralho Cigano': 'cigano', 'Tarô dos Anjos': 'anjos' };
   const folder = folderMap[deckName] || 'tarot';
 
-  // Mapeamento para Baralho Cigano (arquivos .jpg customizados)
+  // Mapeamento para Baralho Cigano (arquivos .jpg/.jpeg customizados)
   const CIGANO_MAP: Record<string, string> = {
     'O Cavaleiro': 'o-cavaleiro.jpg',
     'O Trevo': 'o-trevo.jpg',
@@ -72,7 +72,7 @@ export async function drawCards(deckName: string, count: number = 3) {
     'As Nuvens': 'as-nuvens.jpg',
     'A Serpente': 'a-serpente.jpg',
     'O Caixão': 'o-caixao.jpg',
-    'As Flores': 'o-buque.jpg', 
+    'As Flores': 'o-buque.jpeg', 
     'A Foice': 'a-foice.jpg',
     'O Chicote': 'o-chicote.jpg',
     'Os Pássaros': 'os-passaros.jpg',
@@ -86,13 +86,13 @@ export async function drawCards(deckName: string, count: number = 3) {
     'O Jardim': 'o-jardim.jpg',
     'A Montanha': 'a-montanha.jpg',
     'Caminhos': 'os-caminhos.jpg',
-    'O Rato': 'os-ratos.jpg',
+    'O Rato': 'os-ratos.jpeg',
     'O Coração': 'o-coracao.jpg',
     'O Anel': 'o-anel.jpg',
-    'Os Livros': 'o-livro.jpg',
+    'Os Livros': 'o-livro.jpeg',
     'A Carta': 'a-carta.jpg',
-    'O Homem': 'o-cigano.jpg',
-    'A Mulher': 'a-cigana.jpg',
+    'O Homem': 'o-cigano.jpeg',
+    'A Mulher': 'a-cigana.jpeg',
     'Os Lírios': 'os-lirios.jpg',
     'O Sol': 'o-sol.jpg',
     'A Lua': 'a-lua.jpg',
