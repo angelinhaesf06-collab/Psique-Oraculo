@@ -604,47 +604,43 @@ export default function OraculoJornada() {
                          </div>
                        )}
 
-                       {/* Salmo */}
+                       {/* Salmo / Orientação Mística */}
                        {resultado.ancoragem_rituais.salmo && (
-                         <div className={`backdrop-blur-md rounded-[24px] p-5 shadow-sm hover:shadow-md transition-shadow border ${
-                           tipoOraculo === 'Tarô dos Anjos' 
-                             ? 'bg-[#81D8D0]/20 border-[#81D8D0]/30' 
-                             : (tipoOraculo === 'Baralho Cigano' ? 'bg-orange-500/15 border-orange-200/30' : 'bg-white/40 border-[#E5D9C3]')
-                         }`}>
-                           <div className="flex items-center gap-3 mb-2">
-                             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white shadow-sm ${
-                               tipoOraculo === 'Tarô dos Anjos' ? 'bg-[#81D8D0]' : (tipoOraculo === 'Baralho Cigano' ? 'bg-orange-500' : 'bg-[#8B735B]')
-                             }`}>
-                               <ShieldCheck size={16} />
+                         <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
+                           <div className="flex items-center gap-4">
+                             <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20">
+                               <Eye className="w-7 h-7 text-[#C4A484]" strokeWidth={1.5} />
                              </div>
-                             <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${
-                               tipoOraculo === 'Tarô dos Anjos' ? 'text-[#004D40]' : (tipoOraculo === 'Baralho Cigano' ? 'text-orange-900' : 'text-[#5C4D3C]')
-                             }`}>
+                             <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#8B735B]">
                                {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Protetor' : 'Orientação Mística'}
                              </span>
                            </div>
-                           <p className="text-[13px] text-[#2C2420] leading-relaxed font-serif font-medium bg-[#F5F2EA]/50 p-3 rounded-xl border border-black/5 text-justify">
-                             {resultado.ancoragem_rituais.salmo}
-                           </p>
+                           <div className="bg-white/30 p-6 rounded-[24px] border border-white/20">
+                             <p className="text-[14px] text-[#2C2420] leading-relaxed font-serif font-medium text-justify">
+                               {resultado.ancoragem_rituais.salmo}
+                             </p>
+                           </div>
                          </div>
                        )}
 
-                       {/* Banho/Bíblia */}
+                       {/* Ação Mística / Banho / Dizeres */}
                        {((tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.biblia) || (tipoOraculo === 'Baralho Cigano' && resultado.ancoragem_rituais.banho)) && (
-                         <div className="bg-white/40 backdrop-blur-md rounded-[24px] border border-[#E5D9C3] p-5 shadow-sm hover:shadow-md transition-shadow">
-                           <div className="flex items-center gap-3 mb-2">
-                             <div className="w-8 h-8 rounded-full bg-[#C5A059] flex items-center justify-center shrink-0 text-white shadow-sm">
-                               <Activity size={16} />
+                         <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
+                           <div className="flex items-center gap-4">
+                             <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20">
+                               <Sparkles className="w-7 h-7 text-[#C4A484]" strokeWidth={1.5} />
                              </div>
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5C4D3C]">
-                               {tipoOraculo === 'Tarô dos Anjos' ? 'Dizeres da Bíblia' : 'Ação Mística'}
+                             <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#8B735B]">
+                               {tipoOraculo === 'Tarô dos Anjos' ? 'Ação de Luz' : 'Ação Mística'}
                              </span>
                            </div>
-                           <p className="text-[13px] text-[#2C2420] font-bold leading-relaxed px-1">
-                             {tipoOraculo === 'Tarô dos Anjos' 
-                               ? (resultado.ancoragem_rituais.biblia?.toLowerCase().includes('banho') || resultado.ancoragem_rituais.biblia?.toLowerCase().includes('erva') ? 'Mentalize a luz angelical protetora em sua jornada.' : resultado.ancoragem_rituais.biblia)
-                               : resultado.ancoragem_rituais.banho}
-                           </p>
+                           <div className="bg-white/30 p-6 rounded-[24px] border border-white/20">
+                             <p className="text-[14px] text-[#2C2420] leading-relaxed font-serif font-medium text-justify">
+                               {tipoOraculo === 'Tarô dos Anjos' 
+                                 ? (resultado.ancoragem_rituais.biblia?.toLowerCase().includes('banho') || resultado.ancoragem_rituais.biblia?.toLowerCase().includes('erva') ? 'Mentalize a luz angelical protetora em sua jornada.' : resultado.ancoragem_rituais.biblia)
+                                 : resultado.ancoragem_rituais.banho}
+                             </p>
+                           </div>
                          </div>
                        )}
 
