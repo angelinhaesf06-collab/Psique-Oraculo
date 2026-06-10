@@ -589,18 +589,24 @@ export default function OraculoJornada() {
                      <div className="space-y-3">
                        {/* Mantra/Cântico */}
                        {resultado.ancoragem_rituais.mantra && (
-                         <div className="bg-red-500/5 backdrop-blur-md rounded-[24px] border border-red-200/30 p-5 shadow-sm hover:shadow-md transition-shadow">
-                           <div className="flex flex-col items-center gap-2 mb-3">
-                             <div className="w-8 h-8 rounded-full bg-red-800/80 flex items-center justify-center shrink-0 text-white shadow-sm">
-                               <Sparkles size={16} />
+                         <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
+                           <div className="flex items-center gap-4">
+                             <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20">
+                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-[#C4A484]">
+                                 <path d="M12 22s-8-4.5-8-11.5S7.5 3 12 3s8 4.5 8 7.5S12 22 12 22z" />
+                                 <path d="M12 22c3.5-3.5 6-6.5 6-10.5S15.5 5 12 5s-6 3.5-6 6.5 2.5 7 6 10.5z" />
+                                 <circle cx="12" cy="12" r="2" />
+                               </svg>
                              </div>
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-900/60">
+                             <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#8B735B]">
                                {tipoOraculo === 'Tarô' ? 'Mantra da Alma' : 'Cântico Sagrado'}
                              </span>
                            </div>
-                           <p className="text-[14px] italic text-[#2C2420] font-bold leading-relaxed px-1 text-center">
-                             "{resultado.ancoragem_rituais.mantra}"
-                           </p>
+                           <div className="bg-white/30 p-6 rounded-[24px] border border-white/20">
+                             <p className="text-[14px] text-[#2C2420] leading-relaxed font-serif italic font-medium text-justify">
+                               "{resultado.ancoragem_rituais.mantra}"
+                             </p>
+                           </div>
                          </div>
                        )}
 
@@ -627,8 +633,12 @@ export default function OraculoJornada() {
                        {((tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.biblia) || (tipoOraculo === 'Baralho Cigano' && resultado.ancoragem_rituais.banho)) && (
                          <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
                            <div className="flex items-center gap-4">
-                             <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20">
-                               <Sparkles className="w-7 h-7 text-[#C4A484]" strokeWidth={1.5} />
+                             <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden">
+                               {tipoOraculo === 'Tarô dos Anjos' ? (
+                                 <img src="/assets/brand/bible-icon.jpg" alt="Bíblia" className="w-full h-full object-cover" />
+                               ) : (
+                                 <Sparkles className="w-7 h-7 text-[#C4A484]" strokeWidth={1.5} />
+                               )}
                              </div>
                              <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#8B735B]">
                                {tipoOraculo === 'Tarô dos Anjos' ? 'Ação de Luz' : 'Ação Mística'}
