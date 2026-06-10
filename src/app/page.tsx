@@ -662,16 +662,17 @@ export default function OraculoJornada() {
                          </div>
                        )}
 
-                       {/* Dica Angelical */}
+                       {/* Dica Angelical (Ritual de Luz - Tarô dos Anjos) */}
                        {tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.dica_angelical && (
-                         <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[28px] border-2 border-[#C4A484]/30 p-6 shadow-lg space-y-4">
-                           <div className="flex items-center gap-2 justify-center mb-1">
-                             <div className="w-10 h-10 rounded-full overflow-hidden border border-[#C4A484]/20 shadow-sm bg-[#F97316]/20">
-                               <img src="/assets/brand/ritual-icon.jpg" alt="Ritual" className="w-full h-full object-cover" />
-                             </div>
-                             <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#C4A484]">Ritual de Luz</h4>
+                         <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[28px] border-2 border-[#C4A484]/30 overflow-hidden shadow-lg">
+                           {/* Imagem do Anjo Destacada */}
+                           <div className="w-full h-32 relative bg-[#F5F2EA]">
+                             <img src="/assets/brand/anjo-ritual.jpg" alt="Anjo" className="w-full h-full object-cover opacity-80" />
+                             <div className="absolute inset-0 bg-gradient-to-t from-[#FDFBF7] to-transparent" />
+                             <h4 className="absolute bottom-2 left-0 w-full text-center text-[13px] font-black uppercase tracking-[0.4em] text-[#C4A484] drop-shadow-md">Ritual de Luz</h4>
                            </div>
-                           <div className="space-y-3 text-center">
+                           
+                           <div className="p-6 space-y-4 text-center relative z-10 -mt-2">
                              <p className="text-[12px] text-[#2C2420] font-medium leading-relaxed italic">
                                "Para sintonizar <span className="font-black text-[#C4A484] uppercase tracking-wider">{resultado.ancoragem_rituais.dica_angelical.foco_oracao}</span>, 
                                acenda uma vela <span className="font-black text-[#C4A484] underline underline-offset-4 decoration-[#C4A484]/30">{resultado.ancoragem_rituais.dica_angelical.vela_cor}</span> acima da sua cabeça por <span className="font-black text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.ritual_dias}</span>."
