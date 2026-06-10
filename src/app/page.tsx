@@ -548,7 +548,7 @@ export default function OraculoJornada() {
 
               <div className="w-full space-y-6 pb-6">
                  <div className="bg-[#2C2420]/85 rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden backdrop-blur-sm">
-                    <h3 className="text-[#C4A484] font-serif text-xl mb-4">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
+                    <h3 className="text-[#C4A484] font-serif text-xl mb-4 text-center">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
                     <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-justify">{resultado.leitura_caminho?.analise_detalhada}</p>
                     {resultado.leitura_caminho?.veredito_direto && !(tipoOraculo === 'Tarô') && (
                       <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-[9px] tracking-widest">{resultado.leitura_caminho.veredito_direto}</div>
@@ -563,7 +563,7 @@ export default function OraculoJornada() {
                      </div>
                      <div className="space-y-2">
                        <h4 className="text-[#C4A484] font-serif text-lg tracking-tight">{resultado.acolhimento_psicologico.titulo || "O Olhar Clínico"}</h4>
-                       <p className="text-xs text-[#5C4D3C]/80 leading-relaxed italic line-clamp-3">
+                       <p className="text-xs text-[#5C4D3C]/80 leading-relaxed italic line-clamp-3 text-justify">
                          {resultado.acolhimento_psicologico.conteudo}
                        </p>
                      </div>
@@ -602,16 +602,24 @@ export default function OraculoJornada() {
 
                        {/* Salmo */}
                        {resultado.ancoragem_rituais.salmo && (
-                         <div className="bg-white/40 backdrop-blur-md rounded-[24px] border border-[#E5D9C3] p-5 shadow-sm hover:shadow-md transition-shadow">
+                         <div className={`backdrop-blur-md rounded-[24px] p-5 shadow-sm hover:shadow-md transition-shadow border ${
+                           tipoOraculo === 'Tarô dos Anjos' 
+                             ? 'bg-[#81D8D0]/20 border-[#81D8D0]/30' 
+                             : (tipoOraculo === 'Baralho Cigano' ? 'bg-orange-500/15 border-orange-200/30' : 'bg-white/40 border-[#E5D9C3]')
+                         }`}>
                            <div className="flex items-center gap-3 mb-2">
-                             <div className="w-8 h-8 rounded-full bg-[#8B735B] flex items-center justify-center shrink-0 text-white shadow-sm">
+                             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white shadow-sm ${
+                               tipoOraculo === 'Tarô dos Anjos' ? 'bg-[#81D8D0]' : (tipoOraculo === 'Baralho Cigano' ? 'bg-orange-500' : 'bg-[#8B735B]')
+                             }`}>
                                <ShieldCheck size={16} />
                              </div>
-                             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#5C4D3C]">
+                             <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${
+                               tipoOraculo === 'Tarô dos Anjos' ? 'text-[#004D40]' : (tipoOraculo === 'Baralho Cigano' ? 'text-orange-900' : 'text-[#5C4D3C]')
+                             }`}>
                                {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Protetor' : 'Orientação Mística'}
                              </span>
                            </div>
-                           <p className="text-[13px] text-[#2C2420] leading-relaxed font-serif font-medium bg-[#F5F2EA]/50 p-3 rounded-xl border border-[#E5D9C3]/30">
+                           <p className="text-[13px] text-[#2C2420] leading-relaxed font-serif font-medium bg-[#F5F2EA]/50 p-3 rounded-xl border border-black/5 text-justify">
                              {resultado.ancoragem_rituais.salmo}
                            </p>
                          </div>

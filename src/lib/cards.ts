@@ -32,13 +32,25 @@ export function getFallbackImageUrl(name: string, deckName: string): string {
   }
   
   if (deckName === 'Baralho Cigano') {
-    // Petit Lenormand clássico (mapeamento simples de número ou nome)
+    // Petit Lenormand clássico
     return `https://raw.githubusercontent.com/Gisat/lenormand-cards/master/images/${slug}.png`;
   }
 
   if (deckName === 'Tarô dos Anjos') {
-    // Imagem genérica de anjo majestoso ou luz divina baseada no nome
-    return `https://images.unsplash.com/photo-1598463162624-912b535d4615?auto=format&fit=crop&q=80&w=300&q=80`;
+    // Coleção de imagens celestiais e angelicais para fallback dinâmico
+    const ANGEL_IDS = [
+      '1598463162624-912b535d4615', // Estátua de Anjo
+      '1550684848-fac1c5b4e853', // Luz Divina
+      '1507692049790-de58290a4334', // Céu Majestoso
+      '1519817650390-64a93db51149', // Brilho Dourado
+      '1477673132141-8469d69cb456', // Pôr do Sol Celestial
+      '1490730141103-6cac27aaab94', // Luz e Nuvem
+      '1511632765486-a017905332b5'  // Asas/Luz
+    ];
+    // Seleciona uma imagem de forma determinística baseada no nome do anjo
+    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const id = ANGEL_IDS[Math.abs(hash) % ANGEL_IDS.length];
+    return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&q=80&w=300`;
   }
 
   return 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=300';
