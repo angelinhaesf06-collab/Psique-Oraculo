@@ -380,14 +380,14 @@ export default function OraculoJornada() {
 
             <div className="flex flex-col gap-3 w-full max-w-[360px] shrink-0 justify-center py-2">
               {[
-                { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma', glass: 'bg-amber-900/10 border-amber-200/20' },
-                { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas', glass: 'bg-red-900/10 border-red-200/20' },
-                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial', glass: 'bg-[#4FD1C5]/10 border-[#4FD1C5]/20' }
+                { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma' },
+                { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
+                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
               ].map((o) => (
                 <button 
                   key={o.id} 
                   onClick={() => { setTipoOraculo(o.id); nextPasso(); }} 
-                  className={`flex items-center gap-4 md:gap-5 group w-full ${o.glass} backdrop-blur-md border p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20`}
+                  className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-white/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20"
                 >
                   <div className="w-14 h-20 md:w-16 md:h-24 bg-white/30 rounded-[18px] border border-[#E5D9C3]/40 p-1 overflow-hidden shrink-0 shadow-sm group-hover:rotate-2 transition-transform duration-500">
                     <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
