@@ -591,12 +591,8 @@ export default function OraculoJornada() {
                        {resultado.ancoragem_rituais.mantra && (
                          <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
                            <div className="flex items-center gap-4">
-                             <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20">
-                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-[#C4A484]">
-                                 <path d="M12 22s-8-4.5-8-11.5S7.5 3 12 3s8 4.5 8 7.5S12 22 12 22z" />
-                                 <path d="M12 22c3.5-3.5 6-6.5 6-10.5S15.5 5 12 5s-6 3.5-6 6.5 2.5 7 6 10.5z" />
-                                 <circle cx="12" cy="12" r="2" />
-                               </svg>
+                             <div className="w-14 h-14 rounded-full bg-white/60 flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden">
+                               <img src="/assets/brand/mantra-icon.jpg" alt="Mantra" className="w-full h-full object-cover" />
                              </div>
                              <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#8B735B]">
                                {tipoOraculo === 'Tarô' ? 'Mantra da Alma' : 'Cântico Sagrado'}
