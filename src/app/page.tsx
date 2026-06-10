@@ -12,6 +12,7 @@ import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
 import { Browser } from '@capacitor/browser';
 import { App as CapacitorApp } from '@capacitor/app';
+import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
 
 const MandalaSmallIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
@@ -115,27 +116,48 @@ export default function OraculoJornada() {
 
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
 
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: session.user.id,
-          email: session.user.email,
-          isNative: isNative, // Passando isNative para a API gerar a URL correta (deep link ou web)
-        }),
-      });
-
-      const data = await res.json();
-      if (data.url) {
-        if (isNative) {
-          // Se for aplicativo nativo, abre a URL do Stripe no navegador in-app
-          await Browser.open({ url: data.url, presentationStyle: 'popover' });
-        } else {
-          // Se for web, redireciona normalmente
-          window.location.href = data.url;
+      if (isNative) {
+        // Fluxo de pagamento NATIVO (Google Play Store via RevenueCat)
+        try {
+          // Identifica o usuário no RevenueCat
+          await Purchases.logIn({ appUserID: session.user.id });
+          
+          // Inicia o processo de compra do produto 'yearly'
+          const purchaseResult = await Purchases.purchaseStoreProduct({ productIdentifier: 'yearly' });
+          
+          // Verifica se a compra liberou o acesso (entitlements)
+          if (typeof purchaseResult.customerInfo.entitlements.active['premium'] !== "undefined") {
+            // A compra foi aprovada, atualizamos nosso banco de dados
+            const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
+            if (!error) {
+              toast.success('Assinatura ativada com sucesso pelo Google Play! ✨');
+              setModalAberto(null);
+            }
+          }
+        } catch (nativeError: any) {
+          if (!nativeError.userCancelled) {
+            console.error('Erro na compra nativa:', nativeError);
+            toast.error('Não foi possível processar o pagamento com o Google Play.');
+          }
         }
       } else {
-        throw new Error(data.error || 'Erro ao iniciar checkout');
+        // Fluxo de pagamento WEB (Stripe)
+        const res = await fetch('/api/stripe/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: session.user.id,
+            email: session.user.email,
+            isNative: false,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.error || 'Erro ao iniciar checkout');
+        }
       }
     } catch (err: any) {
       console.error(err);
@@ -146,32 +168,20 @@ export default function OraculoJornada() {
   };
 
   useEffect(() => {
-    const setupAppLinks = async () => {
+    const initRevenueCat = async () => {
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      if (isNative) {
-        // Escuta os deep links quando o navegador nativo (Stripe) redirecionar de volta
-        CapacitorApp.addListener('appUrlOpen', data => {
-          if (data.url.includes('checkout-return')) {
-            Browser.close(); // Fecha o navegador in-app
-            if (data.url.includes('success=true')) {
-              toast.success('Assinatura ativada com sucesso! ✨');
-              setModalAberto(null);
-              // Opcional: Atualizar status do usuário no banco de dados ou estado local
-            } else {
-              toast.error('Assinatura cancelada ou não concluída.');
-            }
-          }
-        });
+      const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
+      
+      if (isNative && apiKey && apiKey !== 'sua_chave_publica_google_do_revenuecat_aqui') {
+        try {
+          await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
+          await Purchases.configure({ apiKey });
+        } catch (e) {
+          console.error("Falha ao inicializar o RevenueCat", e);
+        }
       }
     };
-    setupAppLinks();
-    
-    return () => {
-      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      if (isNative) {
-        CapacitorApp.removeAllListeners();
-      }
-    };
+    initRevenueCat();
   }, []);
 
   useEffect(() => {

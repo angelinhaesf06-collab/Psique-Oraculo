@@ -19,6 +19,7 @@
     "@capacitor/preferences": "^8.0.1",
     "@capgo/capacitor-native-biometric": "^8.4.5",
     "@google/generative-ai": "^0.24.1",
+    "@revenuecat/purchases-capacitor": "^13.1.5",
     "@stripe/stripe-js": "^9.7.0",
     "@supabase/supabase-js": "^2.106.0",
     "capacitor-voice-recorder": "^7.0.6",
