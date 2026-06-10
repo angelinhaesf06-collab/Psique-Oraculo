@@ -37,15 +37,15 @@ export function getFallbackImageUrl(name: string, deckName: string): string {
   }
 
   if (deckName === 'Tarô dos Anjos') {
-    // Coleção de imagens celestiais e angelicais para fallback dinâmico
+    // Coleção de imagens celestiais, angelicais e de luz pura para fallback dinâmico
     const ANGEL_IDS = [
-      '1598463162624-912b535d4615', // Estátua de Anjo
-      '1550684848-fac1c5b4e853', // Luz Divina
-      '1507692049790-de58290a4334', // Céu Majestoso
-      '1519817650390-64a93db51149', // Brilho Dourado
-      '1477673132141-8469d69cb456', // Pôr do Sol Celestial
-      '1490730141103-6cac27aaab94', // Luz e Nuvem
-      '1511632765486-a017905332b5'  // Asas/Luz
+      '1470770841072-f978cf4d019e', // Céu Majestoso (Luz entre nuvens)
+      '1519817650390-64a93db51149', // Brilho Solar Celestial
+      '1550684848-fac1c5b4e853', // Luz Divina e Etérea
+      '1511632765486-a017905332b5', // Luz Abstrata Sagrada
+      '1490730141103-6cac27aaab94', // Nuvens ao Pôr do Sol (Paz)
+      '1501854140801-50d01698950b', // Céu Estrelado e Infinito
+      '1530983821852-66d49e755294'  // Escultura Clássica de Anjo
     ];
     // Seleciona uma imagem de forma determinística baseada no nome do anjo
     const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);

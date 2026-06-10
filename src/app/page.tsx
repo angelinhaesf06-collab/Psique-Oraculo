@@ -68,6 +68,10 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
            )}
         </div>
       </div>
+
+      <span className="text-[8px] font-black text-[#8B735B] uppercase tracking-wider text-center px-1">
+        {data.carta}
+      </span>
       
       {/* Selos de Atributos Sagrados (Tarô dos Anjos) */}
       {atributosAnjo.length > 0 && (
