@@ -122,17 +122,24 @@ export default function OraculoJornada() {
           // Identifica o usuário no RevenueCat
           await Purchases.logIn({ appUserID: session.user.id });
           
-          // Inicia o processo de compra do produto 'yearly'
-          const purchaseResult = await Purchases.purchaseStoreProduct({ productIdentifier: 'yearly' });
+          // Busca o produto 'yearly' primeiro
+          const { products } = await Purchases.getProducts({ productIdentifiers: ['yearly'] });
           
-          // Verifica se a compra liberou o acesso (entitlements)
-          if (typeof purchaseResult.customerInfo.entitlements.active['premium'] !== "undefined") {
-            // A compra foi aprovada, atualizamos nosso banco de dados
-            const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
-            if (!error) {
-              toast.success('Assinatura ativada com sucesso pelo Google Play! ✨');
-              setModalAberto(null);
+          if (products && products.length > 0) {
+            // Inicia o processo de compra do produto encontrado
+            const purchaseResult = await Purchases.purchaseStoreProduct({ product: products[0] });
+            
+            // Verifica se a compra liberou o acesso (entitlements)
+            if (typeof purchaseResult.customerInfo.entitlements.active['premium'] !== "undefined") {
+              // A compra foi aprovada, atualizamos nosso banco de dados
+              const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
+              if (!error) {
+                toast.success('Assinatura ativada com sucesso pelo Google Play! ✨');
+                setModalAberto(null);
+              }
             }
+          } else {
+             toast.error('Produto não encontrado na loja. Verifique sua conta no RevenueCat.');
           }
         } catch (nativeError: any) {
           if (!nativeError.userCancelled) {
