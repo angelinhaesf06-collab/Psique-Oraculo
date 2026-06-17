@@ -5,10 +5,10 @@ import { Sparkles, Moon, Sun, Heart } from 'lucide-react';
 export default function DecorationOverlay() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {/* Mandala Colorida Rotativa Global - Maior e mais visível como Marca D'água */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-[0.35] mix-blend-multiply">
+      {/* Mandala Colorida Rotativa Global - Maior e mais visível como Marca D'água - Nitidez aumentada conforme solicitado */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-[0.7] mix-blend-multiply">
         <div className="w-[120vw] md:w-[100vw] max-w-[600px] aspect-square flex items-center justify-center">
-          <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
+          <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
         </div>
       </div>
 

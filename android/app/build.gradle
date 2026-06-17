@@ -7,8 +7,8 @@ android {
         applicationId "com.psiqueoraculo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 69
-        versionName "1.1.39"
+        versionCode 70
+        versionName "1.1.40"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -18,10 +18,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('psique-release.jks')
-            storePassword 'psique-password-2026'
-            keyAlias 'psique-key-alias'
-            keyPassword 'psique-password-2026'
+            storeFile file('nova-chave-psique.jks')
+            storePassword 'Psique2026@'
+            keyAlias 'upload'
+            keyPassword 'Psique2026@'
         }
     }
     buildTypes {

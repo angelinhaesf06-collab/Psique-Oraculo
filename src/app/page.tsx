@@ -26,7 +26,7 @@ const MandalaSmallIcon = ({ className }: { className?: string }) => (
 const TEMAS = [
   { label: 'Amigos', icon: Moon, color: 'text-[#4FD1C5]' }, 
   { label: 'Amor', icon: Heart, color: 'text-[#F687B3]' }, 
-  { label: 'Dinheiro', icon: Sun, color: 'text-[#D69E2E]' }, // Ouro mais escuro para contraste no fundo claro
+  { label: 'Dinheiro', icon: Sun, color: 'text-[#D69E2E]' }, 
   { label: 'Saúde', icon: Activity, color: 'text-[#48BB78]' }, 
   { label: 'Trabalho', icon: MandalaSmallIcon, color: 'text-[#9F7AEA]' }, 
 ];
@@ -76,7 +76,6 @@ function CardResult({ title, data, index, tipoOraculo }: { title: string, data: 
         {data.carta}
       </span>
       
-      {/* Selos de Atributos Sagrados (Tarô dos Anjos) */}
       {atributosAnjo.length > 0 && (
         <div className="flex flex-wrap justify-center gap-0.5 mt-1 max-w-[80px]">
           {atributosAnjo.map(attr => (
@@ -115,60 +114,72 @@ export default function OraculoJornada() {
       }
 
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      console.log("Iniciando processo de assinatura. IsNative:", isNative);
 
       if (isNative) {
-        // Fluxo de pagamento NATIVO (Google Play Store via RevenueCat)
         try {
-          // Identifica o usuário no RevenueCat
+          console.log("Configurando RevenueCat para usuário:", session.user.id);
           await Purchases.logIn({ appUserID: session.user.id });
           
-          // Busca o produto 'yearly' primeiro
-          const { products } = await Purchases.getProducts({ productIdentifiers: ['yearly'] });
-          
-          if (products && products.length > 0) {
-            // Inicia o processo de compra do produto encontrado
-            const purchaseResult = await Purchases.purchaseStoreProduct({ product: products[0] });
-            
-            // Verifica se a compra liberou o acesso (entitlements)
-            if (typeof purchaseResult.customerInfo.entitlements.active['premium'] !== "undefined") {
-              // A compra foi aprovada, atualizamos nosso banco de dados
-              const { error } = await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
-              if (!error) {
-                toast.success('Assinatura ativada com sucesso pelo Google Play! ✨');
+          // Busca as ofertas (Offerings) que é o jeito recomendado
+          const offerings = await Purchases.getOfferings();
+          console.log("Ofertas encontradas:", offerings);
+
+          let packageToPurchase = null;
+          if (offerings.current && offerings.current.annual) {
+            packageToPurchase = offerings.current.annual;
+          } else if (offerings.current && (offerings.current as any).Yearly) {
+            packageToPurchase = (offerings.current as any).Yearly;
+          } else {
+            // Fallback para buscar por ID se offerings falhar
+            const { products } = await Purchases.getProducts({ productIdentifiers: ['premium_anual'] });
+            if (products && products.length > 0) {
+              console.log("Produto 'premium_anual' encontrado via fallback.");
+              const purchaseResult = await Purchases.purchaseStoreProduct({ product: products[0] });
+              if (typeof purchaseResult.customerInfo.entitlements.active['com.pisiqueoraculo Pro'] !== "undefined") {
+                await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
+                toast.success('Assinatura ativada! ✨');
                 setModalAberto(null);
+                return;
               }
             }
+          }
+
+          if (packageToPurchase) {
+            const purchaseResult = await Purchases.purchasePackage({ aPackage: packageToPurchase });
+            if (typeof purchaseResult.customerInfo.entitlements.active['com.pisiqueoraculo Pro'] !== "undefined") {
+              await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
+              toast.success('Assinatura ativada! Bem-vinda ao Premium. ✨');
+              setModalAberto(null);
+            }
           } else {
-             toast.error('Produto não encontrado na loja. Verifique sua conta no RevenueCat.');
+             toast.error('Nenhuma oferta ativa encontrada na Play Store.');
           }
         } catch (nativeError: any) {
           if (!nativeError.userCancelled) {
-            console.error('Erro na compra nativa:', nativeError);
-            toast.error('Não foi possível processar o pagamento com o Google Play.');
+            console.error('Erro detalhado RevenueCat:', nativeError);
+            toast.error(`Erro na Play Store: ${nativeError.message || 'Falha na compra'}`);
           }
         }
       } else {
-        // Fluxo de pagamento WEB (Stripe)
+        console.log("Iniciando checkout Stripe...");
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: session.user.id,
-            email: session.user.email,
-            isNative: false,
-          }),
+          body: JSON.stringify({ userId: session.user.id, email: session.user.email, isNative: false }),
         });
 
         const data = await res.json();
         if (data.url) {
           window.location.href = data.url;
         } else {
-          throw new Error(data.error || 'Erro ao iniciar checkout');
+          console.error("Erro retornado pelo Stripe:", data);
+          throw new Error(data.error || 'Erro ao gerar link de pagamento');
         }
       }
     } catch (err: any) {
-      console.error(err);
-      toast.error('Não foi possível abrir o portal de pagamento agora.');
+      console.error("Erro Geral na Assinatura:", err);
+      toast.error(`Erro no portal: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -178,7 +189,6 @@ export default function OraculoJornada() {
     const initRevenueCat = async () => {
       const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
       const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
-      
       if (isNative && apiKey && apiKey !== 'sua_chave_publica_google_do_revenuecat_aqui') {
         try {
           await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
@@ -202,34 +212,26 @@ export default function OraculoJornada() {
         }
         const { data: { session } } = await supabase.auth.getSession();
         const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Alma Querida";
-        
-        const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform?.() || Capacitor.isNativePlatform();
+        const isNative = Capacitor.isNativePlatform();
         const siteUrl = 'https://www.pisiqueoraculo.com.br';
         const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
-
         const res = await fetch(apiUrl, { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ tipoOraculo: 'Geral', tipoLeitura: 'mensagem_dia', tema: 'Motivação e Bem-estar', userName: userName }) 
         });
-
-        if (res) {
+        if (res && res.ok) {
           const textRes = await res.text();
-          console.log("RESPOSTA MENSAGEM DIA:", textRes);
-          if (res.ok) {
-            try {
-              const dataRes = JSON.parse(textRes);
-              if (dataRes.acolhimento_quantum) {
-                const novaMensagem = { texto: dataRes.acolhimento_quantum.conteudo, autor: dataRes.acolhimento_quantum.titulo, data: today };
-                setMensagemDia({ texto: novaMensagem.texto, autor: novaMensagem.autor });
-                localStorage.setItem('psique_mensagem_dia', JSON.stringify(novaMensagem));
-              }
-            } catch (err) {
-              console.error("Erro ao processar JSON da mensagem do dia:", err);
+          try {
+            const dataRes = JSON.parse(textRes);
+            if (dataRes.acolhimento_quantum) {
+              const novaMensagem = { texto: dataRes.acolhimento_quantum.conteudo, autor: dataRes.acolhimento_quantum.titulo, data: today };
+              setMensagemDia({ texto: novaMensagem.texto, autor: novaMensagem.autor });
+              localStorage.setItem('psique_mensagem_dia', JSON.stringify(novaMensagem));
             }
-          }
+          } catch (e) { console.error("Erro parse mensagem dia:", e); }
         }
-      } catch (e) {}
+      } catch (e) { console.error("Erro fetch mensagem dia:", e); }
     };
     fetchMensagemDia();
   }, []);
@@ -239,26 +241,19 @@ export default function OraculoJornada() {
   const prevPasso = () => setPasso(passo - 1);
 
   const handleLeitura = async (tipo: string, imageData?: string) => {
-    // Se o tipo for foto e não tiver imagem, abre a câmera primeiro
     if (tipo === 'foto' && !imageData) {
       try {
         const image = await CapacitorCamera.getPhoto({
-          quality: 70, // Reduzido ligeiramente para evitar erros de payload grande
+          quality: 70, 
           allowEditing: false,
           resultType: CameraResultType.Base64,
           promptLabelHeader: 'Analisar Jogo Físico',
           promptLabelPhoto: 'Escolher da Galeria',
           promptLabelPicture: 'Tirar Foto Agora'
         });
-        
-        if (image.base64String) {
-          handleLeitura('foto', `data:image/jpeg;base64,${image.base64String}`);
-        }
+        if (image.base64String) handleLeitura('foto', `data:image/jpeg;base64,${image.base64String}`);
         return;
-      } catch (e) {
-        console.warn("Usuário cancelou a câmera");
-        return;
-      }
+      } catch (e) { return; }
     }
 
     setLoading(true);
@@ -266,101 +261,35 @@ export default function OraculoJornada() {
       const cartasSorteadas = tipo === 'foto' ? null : (tipo === 'completa' ? await drawCards(tipoOraculo, 3) : await drawCards(tipoOraculo, 1));
       const { data: { session } } = await supabase.auth.getSession();
       const userName = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || "Consulente";
-      
       const isNative = Capacitor.isNativePlatform();
       const siteUrl = 'https://www.pisiqueoraculo.com.br';
       const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
-
       const res = await fetch(apiUrl, {
         method: 'POST', 
-        headers: { 
-          'Content-Type': 'application/json', 
-          'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' 
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
         body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
-      }).catch(err => {
-        console.error("Erro de rede handleLeitura:", err);
-        throw new Error(`Erro de Conexão: ${err.message}. Verifique sua internet.`);
       });
-
       const textResponse = await res.text();
-      console.log("RESPOSTA DO SERVIDOR:", textResponse);
-
       if (!res.ok) {
-        let dataErr;
-        try {
-          dataErr = JSON.parse(textResponse);
-        } catch (e) {}
-
-        if (res.status === 403 && dataErr?.reason === 'paywall') {
-          setModalAberto('assinatura');
-          toast.info(dataErr.error || 'Seu primeiro ciclo gratuito se completou. Sintonize-se com o Plano Anual para continuar recebendo luz em seu caminho! ✨');
-          return;
-        }
-
-        let errorSnippet = textResponse.substring(0, 200).replace(/<[^>]*>?/gm, ''); 
-        if (!errorSnippet.trim()) errorSnippet = textResponse.substring(0, 100);
-        throw new Error(`Erro do Servidor (${res.status}): ${errorSnippet}`);
+        let dataErr; try { dataErr = JSON.parse(textResponse); } catch (e) {}
+        if (res.status === 403 && dataErr?.reason === 'paywall') { setModalAberto('assinatura'); return; }
+        throw new Error(`Erro do Servidor (${res.status})`);
       }
-      
-      let data;
-      try {
-        data = JSON.parse(textResponse);
-      } catch (parseError) {
-        let snippet = textResponse.substring(0, 150);
-        throw new Error(`Resposta inválida (não é JSON): ${snippet}...`);
-      }
-      
-      // Corrigindo a vinculação das cartas sorteadas com o resultado da IA
+      let data = JSON.parse(textResponse);
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
         if (tipo === 'completa' && cartasSorteadas.length === 3) {
-          // Tiragem de 3 Cartas (Situação, Caminho, Resultado)
-          if (data.situacao_atual) {
-            data.situacao_atual.carta = cartasSorteadas[0].name;
-            data.situacao_atual.card_slug = cartasSorteadas[0].slug;
-            data.situacao_atual.image_url = cartasSorteadas[0].image_url;
-          }
-          if (data.caminho_acao) {
-            data.caminho_acao.carta = cartasSorteadas[1].name;
-            data.caminho_acao.card_slug = cartasSorteadas[1].slug;
-            data.caminho_acao.image_url = cartasSorteadas[1].image_url;
-          }
-          if (data.resultado_conselho) {
-            data.resultado_conselho.carta = cartasSorteadas[2].name;
-            data.resultado_conselho.card_slug = cartasSorteadas[2].slug;
-            data.resultado_conselho.image_url = cartasSorteadas[2].image_url;
-          }
-          // Limpa flag de carta única para garantir exibição tripla
+          if (data.situacao_atual) { data.situacao_atual.carta = cartasSorteadas[0].name; data.situacao_atual.card_slug = cartasSorteadas[0].slug; data.situacao_atual.image_url = cartasSorteadas[0].image_url; }
+          if (data.caminho_acao) { data.caminho_acao.carta = cartasSorteadas[1].name; data.caminho_acao.card_slug = cartasSorteadas[1].slug; data.caminho_acao.image_url = cartasSorteadas[1].image_url; }
+          if (data.resultado_conselho) { data.resultado_conselho.carta = cartasSorteadas[2].name; data.resultado_conselho.card_slug = cartasSorteadas[2].slug; data.resultado_conselho.image_url = cartasSorteadas[2].image_url; }
           data.carta_sorteada = null;
         } else {
-          // Tiragem de 1 Carta (Sim/Não)
-          if (data.carta_sorteada) {
-            data.carta_sorteada.carta = cartasSorteadas[0].name;
-            data.carta_sorteada.card_slug = cartasSorteadas[0].slug;
-            data.carta_sorteada.image_url = cartasSorteadas[0].image_url;
-          }
-          // Garante que não mostre as 3 posições se for tiragem única
+          if (data.carta_sorteada) { data.carta_sorteada.carta = cartasSorteadas[0].name; data.carta_sorteada.card_slug = cartasSorteadas[0].slug; data.carta_sorteada.image_url = cartasSorteadas[0].image_url; }
           data.situacao_atual = null;
-        }
-      } else if (tipo === 'foto') {
-        // Se foi por foto, a IA devolveu os nomes. Precisamos apenas garantir que as URLs sejam buscadas.
-        if (data.situacao_atual && data.situacao_atual.carta) {
-           data.situacao_atual.image_url = getFallbackImageUrl(data.situacao_atual.carta, tipoOraculo);
-        }
-        if (data.caminho_acao && data.caminho_acao.carta) {
-           data.caminho_acao.image_url = getFallbackImageUrl(data.caminho_acao.carta, tipoOraculo);
-        }
-        if (data.resultado_conselho && data.resultado_conselho.carta) {
-           data.resultado_conselho.image_url = getFallbackImageUrl(data.resultado_conselho.carta, tipoOraculo);
-        }
-        if (data.carta_sorteada && data.carta_sorteada.carta) {
-           data.carta_sorteada.image_url = getFallbackImageUrl(data.carta_sorteada.carta, tipoOraculo);
         }
       }
       setResultado(data); setPasso(4); 
     } catch (error: any) { 
-      console.error("Erro na canalização:", error);
-      toast.info("As energias estão se recalibrando. O portal está sendo purificado para sua próxima consulta. Respire fundo e tente novamente em um momento de paz. ✨", { duration: 8000 }); 
+      toast.info("As energias estão se recalibrando. Tente novamente em um momento de paz. ✨"); 
     } finally { setLoading(false); }
   };
 
@@ -368,10 +297,7 @@ export default function OraculoJornada() {
     const requestPermissions = async () => {
       try {
         const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-        if (isNative) {
-          await SpeechRecognition.requestPermissions();
-          await VoiceRecorder.requestAudioRecordingPermission();
-        }
+        if (isNative) { await SpeechRecognition.requestPermissions(); await VoiceRecorder.requestAudioRecordingPermission(); }
       } catch (e) {}
     };
     requestPermissions();
@@ -383,528 +309,447 @@ export default function OraculoJornada() {
       if (!isNative) {
         const recognition = new (window as any).webkitSpeechRecognition();
         recognition.lang = 'pt-BR';
-        recognition.onresult = (event: any) => {
-          const text = event.results[0][0].transcript;
-          setDesabafo(prev => prev + (prev ? ' ' : '') + text);
-        };
-        recognition.start();
-        setIsGravando(true);
-        return;
+        recognition.onresult = (event: any) => { setDesabafo(prev => prev + (prev ? ' ' : '') + event.results[0][0].transcript); };
+        recognition.start(); setIsGravando(true); return;
       }
       const { available } = await SpeechRecognition.available();
       if (available) {
         setIsGravando(true);
         SpeechRecognition.start({ language: "pt-BR", partialResults: true, popup: true });
-        SpeechRecognition.addListener("partialResults", (data: any) => {
-          if (data.matches && data.matches.length > 0) setDesabafo(data.matches[0]);
-        });
+        SpeechRecognition.addListener("partialResults", (data: any) => { if (data.matches && data.matches.length > 0) setDesabafo(data.matches[0]); });
       }
     } catch (err: any) { setIsGravando(false); }
   };
 
-  const stopRecording = async () => {
-    try {
-      setIsGravando(false);
-      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      if (isNative) {
-        await SpeechRecognition.stop();
-        setTimeout(() => SpeechRecognition.removeAllListeners(), 500);
-      }
-    } catch (e) {}
-  };
+  const stopRecording = async () => { try { setIsGravando(false); if (Capacitor.isNativePlatform()) { await SpeechRecognition.stop(); setTimeout(() => SpeechRecognition.removeAllListeners(), 500); } } catch (e) {} };
 
   return (
-    <div className={`h-[100dvh] w-full text-[#5C4D3C] font-sans flex flex-col items-center relative ${passo <= 3 ? 'overflow-hidden' : ''}`}>
-      <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 pt-safe pb-safe overflow-hidden">
+    <div className="w-full text-[#5C4D3C] font-sans flex flex-col items-center justify-center relative h-[100dvh] bg-transparent overflow-hidden">
+      <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 py-8 pt-[calc(env(safe-area-inset-top)+60px)]">
         
-        {/* Cabeçalho Fixo - Equilibrado */}
-        <div className="flex flex-col items-center mb-2 shrink-0">
-           <div className="w-16 h-16 relative p-1.5">
-              <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow" />
-           </div>
+        {/* Ícone Superior - Unificado Web/App - Com margem de segurança extra */}
+        <div className="flex justify-center z-20 pointer-events-none mb-6">
+          <div className="w-24 h-24 flex-none">
+            <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
+          </div>
         </div>
 
-        {passo === 0 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-bottom-4 duration-1000 py-1">
-            
-            <div className="flex flex-col items-center w-full gap-2 shrink-0">
-              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
-              
-              {mensagemDia && (
-                <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-4 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-2 animate-in zoom-in duration-1000">
-                  <div className="flex items-center gap-2">
-                    <Sparkles size={12} className="text-[#C4A484] animate-pulse" />
-                    <span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span>
-                    <Sparkles size={12} className="text-[#C4A484] animate-pulse" />
-                  </div>
-                  <p className="text-[13px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3 px-2 font-medium">&quot;{mensagemDia.texto}&quot;</p>
-                  <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 group-hover:text-[#C4A484] transition-colors">Toque para ler a mensagem completa ✨</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-3 w-full max-w-[360px] shrink-0 justify-center py-2">
-              {[
-                { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma' },
-                { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
-                { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
-              ].map((o) => (
-                <button 
-                  key={o.id} 
-                  onClick={() => { setTipoOraculo(o.id); nextPasso(); }} 
-                  className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-white/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all hover:bg-white/20"
-                >
-                  <div className="w-14 h-20 md:w-16 md:h-24 bg-white/20 rounded-[18px] border border-white/10 p-1 overflow-hidden shrink-0 shadow-sm group-hover:rotate-2 transition-transform duration-500">
-                    <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
-                  </div>
-                  <div className="flex flex-col text-left space-y-0.5">
-                    <div className="flex flex-col">
-                      <span className="text-[12px] md:text-[13px] font-black tracking-[0.25em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
-                      <span className="text-[#C4A484] text-[11px] md:text-[12px] font-black tracking-[0.25em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
+        <div className="w-full flex flex-col items-center gap-6 animate-in fade-in duration-1000 overflow-y-auto no-scrollbar pb-10">
+          {passo === 0 && (
+            <>
+              <div className="flex flex-col items-center w-full gap-4 shrink-0">
+                <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
+                {mensagemDia && (
+                  <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-2.5 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={12} className="text-[#C4A484] animate-pulse" /><span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span><Sparkles size={12} className="text-[#C4A484] animate-pulse" />
                     </div>
-                    <span className="text-[8px] md:text-[9px] font-medium text-[#8B735B]/50 uppercase tracking-widest leading-tight">{o.desc}</span>
+                    <p className="text-[13px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3 px-2 font-medium">&quot;{mensagemDia.texto}&quot;</p>
+                    <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 group-hover:text-[#C4A484] transition-colors">Toque para ler a mensagem completa ✨</span>
                   </div>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-col items-center gap-2 w-full shrink-0 pb-1 pt-2">
-               <div className="flex items-center gap-2 w-full justify-center flex-wrap px-1">
-                  <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-3 py-1.5 shadow-sm active:scale-95 transition-all group">
-                    <Crown className="w-3.5 h-3.5 text-[#C4A484]" />
-                    <span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span>
-                  </button>
-                  <button onClick={() => setModalAberto('ajuda')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white/70 px-3 py-1.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Ajuda</button>
-                  <button onClick={() => setModalAberto('politicas')} className="text-[8px] font-black uppercase tracking-widest text-[#C4A484] bg-white/70 px-3 py-1.5 rounded-full border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">Políticas</button>
-                  <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-3 py-1.5 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
-               </div>
-            </div>
-          </div>
-        )}
-
-        {passo === 1 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-1">
-            <div className="flex flex-col items-center w-full gap-2 shrink-0">
-              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
-            </div>
-            
-            <div className="flex flex-col gap-2.5 w-full max-w-[340px] shrink-0 justify-center py-2">
-              {TEMAS.map((t) => (
-                <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/10 backdrop-blur-md border border-white/20 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
-                  <div className="w-full h-full bg-transparent rounded-[20px] flex items-center justify-between px-6">
-                    <div className="flex items-center gap-4">
-                      <div className={`p-1.5 rounded-full bg-white/50 shadow-sm ${t.color}`}>
-                        <t.icon className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
-                      </div>
-                      <span className={`text-sm font-bold tracking-[0.2em] uppercase ${t.color}`}>{t.label}</span>
-                    </div>
-                    <ChevronLeft className={`w-4 h-4 rotate-180 opacity-30 ${t.color} group-hover:opacity-100 transition-opacity`} />
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-col items-center gap-2 w-full shrink-0 pb-2 pt-2">
-               <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Voltar ao Oráculo</button>
-            </div>
-          </div>
-        )}
-
-        {passo === 2 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-1">
-            <div className="flex flex-col items-center w-full gap-2 shrink-0">
-              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
-            </div>
-            
-            <div className="w-full max-w-[340px] flex flex-col justify-center shrink-0 py-2">
-              <div className="bg-white/5 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/40 p-6 shadow-sm w-full space-y-4">
-                <textarea 
-                  value={desabafo} 
-                  onChange={(e) => setDesabafo(e.target.value)} 
-                  placeholder="Escreva sua dúvida..." 
-                  className="w-full h-32 bg-transparent border-none focus:outline-none text-base md:text-lg font-medium text-[#4A3B28] resize-none placeholder:text-[#8B735B]/50 custom-scrollbar" 
-                />
-                <div className="space-y-3 pt-4 border-t border-[#E5D9C3]/40">
-                  <button 
-                    onMouseDown={startRecording} 
-                    onMouseUp={stopRecording}
-                    onTouchStart={startRecording}
-                    onTouchEnd={stopRecording}
-                    className={`w-full py-4 rounded-full flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse shadow-red-200' : 'bg-white/20 text-[#4A3B28] border border-[#E5D9C3]/50 shadow-sm'} active:scale-95`}
-                  >
-                    <Mic size={16} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}
-                  </button>
-                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#4A3B28] text-white py-4 rounded-full text-[9px] font-black uppercase tracking-[0.4em] shadow-md disabled:opacity-20 active:scale-95 transition-all">Prosseguir</button>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center gap-2 w-full shrink-0 pb-2 pt-2">
-               <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Trocar Foco ({tema.toUpperCase()})</button>
-            </div>
-          </div>
-        )}
-
-        {passo === 3 && (
-          <div className="flex-1 flex flex-col items-center justify-between w-full animate-in fade-in slide-in-from-right-4 duration-700 py-1">
-            <div className="flex flex-col items-center w-full gap-2 shrink-0">
-              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Consulte o Invisível</h2>
-            </div>
-            
-            <div className="flex flex-col gap-3 w-full max-w-[340px] shrink-0 justify-center py-2">
-              {[
-                { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, 
-                { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, 
-                { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' }
-              ].map((m) => (
-                <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-16 flex items-center gap-5 bg-white/10 backdrop-blur-md border border-white/20 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
-                  <div className={`w-10 h-10 ${m.color} rounded-[14px] flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-500`}>
-                    <m.icon size={20} />
-                  </div>
-                  <h4 className="font-black text-[10px] text-[#5C4D3C] uppercase tracking-[0.25em] text-left leading-relaxed">{m.title}</h4>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex flex-col items-center gap-2 w-full shrink-0 pb-2 pt-2">
-               <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Refazer Pergunta</button>
-            </div>
-          </div>
-        )}
-
-        {passo === 4 && resultado && (
-          <div className="flex-1 flex flex-col items-center w-full animate-in fade-in zoom-in-95 duration-1000 overflow-hidden">
-            <div className="mb-4 text-center shrink-0">
-              <div className="inline-block px-3 py-1 bg-[#C4A484]/10 rounded-full text-[8px] font-bold text-[#C4A484] uppercase tracking-widest border border-[#C4A484]/20 mb-1">{resultado.tema}</div>
-              <h2 className="text-xl font-serif text-[#C4A484] leading-none">Sua Revelação</h2>
-            </div>
-            
-            <div className="flex-1 w-full overflow-y-auto px-1 custom-scrollbar">
-              <div className="flex flex-col items-center mb-6 w-full py-1">
-                {/* Exibição para 3 Cartas (Caminho do Destino) */}
-                {resultado.situacao_atual && (
-                  <div className="flex flex-row justify-center gap-2 w-full">
-                    <CardResult title="Situação" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
-                    <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
-                    <CardResult title="Resultado" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
-                  </div>
-                )}
-
-                {/* Exibição para 1 Carta (Sim ou Não) */}
-                {resultado.carta_sorteada && !resultado.situacao_atual && (
-                   <div className="flex flex-col items-center gap-6">
-                      {resultado.leitura_caminho?.veredito_direto && (
-                        <div className="bg-[#C4A484] px-10 py-4 rounded-[24px] shadow-xl border-4 border-white/20 animate-in zoom-in duration-500">
-                          <span className="text-3xl font-black text-white uppercase tracking-[0.4em] drop-shadow-md">
-                            {(() => {
-                               let v = resultado.leitura_caminho.veredito_direto.toUpperCase();
-                               if (/\bNO\b/.test(v)) return 'NÃO';
-                               if (/\bYES\b/.test(v)) return 'SIM';
-                               if (/\bMAYBE\b/.test(v)) return 'TALVEZ';
-                               return v.split(' ')[0].replace(/[^a-zA-ZáéíóúãõçÁÉÍÓÚÃÕÇ]/g, '');
-                            })()}
-                          </span>
-                        </div>
-                      )}
-                      <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />
-                   </div>
                 )}
               </div>
 
-              <div className="w-full space-y-6 pb-6">
-                 <div className="bg-[#2C2420]/85 rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden backdrop-blur-sm">
-                    <h3 className="text-[#C4A484] font-serif text-xl mb-4 text-center">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
-                    <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-justify">{resultado.leitura_caminho?.analise_detalhada}</p>
-                    {resultado.leitura_caminho?.veredito_direto && !(tipoOraculo === 'Tarô') && (
-                      <div className="mt-8 pt-6 border-t border-white/10 text-center font-black text-[#C4A484] uppercase text-[9px] tracking-widest">{resultado.leitura_caminho.veredito_direto}</div>
-                    )}
+              <div className="flex flex-col gap-2.5 w-full max-w-[360px] shrink-0">
+                {[
+                  { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma' },
+                  { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
+                  { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
+                ].map((o) => (
+                  <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-white/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all">
+                    <div className="w-14 h-20 md:w-16 md:h-24 bg-white/20 rounded-[18px] border border-white/10 p-1 overflow-hidden shrink-0 shadow-sm"><img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" /></div>
+                    <div className="flex flex-col text-left space-y-0.5">
+                      <div className="flex flex-col"><span className="text-[12px] md:text-[13px] font-black tracking-[0.25em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span><span className="text-[#C4A484] text-[11px] md:text-[12px] font-black tracking-[0.25em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span></div>
+                      <span className="text-[8px] md:text-[9px] font-medium text-[#8B735B]/50 uppercase tracking-widest leading-tight">{o.desc}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-col items-center gap-3 w-full shrink-0 pt-4">
+                 <div className="flex items-center gap-1.5 w-full justify-center flex-wrap px-1">
+                    <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><Crown className="w-3.5 h-3.5 text-[#C4A484]" /><span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span></button>
+                    <button onClick={() => setModalAberto('ajuda')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Ajuda</span></button>
+                    <button onClick={() => setModalAberto('politicas')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Políticas</span></button>
+                    <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-2.5 py-1 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
                  </div>
+              </div>
+            </>
+          )}
 
-                 {/* Acolhimento Psicólogo - Integrado no final da leitura */}
-                 {resultado.acolhimento_psicologico && (
-                   <div className="bg-white/20 backdrop-blur-md rounded-[32px] border border-[#C4A484]/30 p-8 text-center shadow-lg space-y-4 animate-in fade-in duration-1000">
-                     <div className="w-12 h-12 bg-white/40 rounded-full flex items-center justify-center mx-auto border border-[#C4A484]/20 shadow-sm p-1.5">
-                       <img src="/assets/brand/mandala-login.png" alt="Oráculo" className="w-full h-full object-contain animate-spin-slow opacity-90" />
-                     </div>
-                     <div className="space-y-2">
-                       <h4 className="text-[#C4A484] font-serif text-lg tracking-tight">{resultado.acolhimento_psicologico.titulo || "O Olhar Clínico"}</h4>
-                       <p className="text-xs text-[#5C4D3C]/80 leading-relaxed italic line-clamp-3 text-justify">
-                         {resultado.acolhimento_psicologico.conteudo}
-                       </p>
-                     </div>
-                     <button 
-                       onClick={() => setPasso(5)} 
-                       className="text-[9px] font-black uppercase tracking-[0.3em] text-white py-3 px-8 bg-[#2C2420] rounded-full shadow-md active:scale-95 transition-all hover:bg-[#4A3B28]"
-                     >
-                       Ler Conselho Completo 👨‍⚕️
-                     </button>
-                   </div>
-                 )}
+          {passo === 1 && (
+            <div className="flex flex-col items-center justify-center w-full gap-8 animate-in fade-in slide-in-from-right-4 duration-700">
+              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
+              <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
+                {TEMAS.map((t) => (
+                  <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/10 backdrop-blur-md border border-white/20 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
+                    <div className="w-full h-full bg-transparent rounded-[20px] flex items-center justify-between px-6">
+                      <div className="flex items-center gap-4"><div className={`p-1.5 rounded-full bg-white/50 shadow-sm ${t.color}`}><t.icon className="w-4 h-4" /></div><span className={`text-sm font-bold tracking-[0.2em] uppercase ${t.color}`}>{t.label}</span></div>
+                      <ChevronLeft className={`w-4 h-4 rotate-180 opacity-30 ${t.color}`} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Voltar ao Oráculo</button>
+            </div>
+          )}
 
-                 {resultado.ancoragem_rituais && (
-                   <div className="space-y-4 w-full">
-                     <h3 className="text-[#C4A484] font-serif text-xl text-center mb-2">
-                       {tipoOraculo === 'Tarô dos Anjos' ? 'Salmos e Luz' : (tipoOraculo === 'Tarô' ? 'Cânticos e Mantras' : 'Ancoragem e Rituais')}
-                     </h3>
-                     
-                     <div className="space-y-3">
-                       {/* Mantra/Cântico */}
-                       {resultado.ancoragem_rituais.mantra && (
-                         <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
-                           <div className="flex items-center gap-4">
-                             <div className="w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden bg-[#81D8D0]/40">
-                               {tipoOraculo === 'Tarô' ? (
-                                 <img src="/assets/brand/taro-mantra-icon.jpg" alt="Mantra" className="w-full h-full object-cover" />
-                               ) : (
-                                 <img src="/assets/brand/mantra-icon.jpg" alt="Mantra" className="w-full h-full object-cover" />
-                               )}
-                             </div>
-                             <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#8B735B]">
-                               {tipoOraculo === 'Tarô' ? 'Mantra da Alma' : 'Cântico Sagrado'}
-                             </span>
-                           </div>
-                           <div className="bg-white/30 p-6 rounded-[24px] border border-white/20">
-                             <p className="text-[14px] text-[#2C2420] leading-relaxed font-serif italic font-medium text-justify">
-                               "{resultado.ancoragem_rituais.mantra}"
-                             </p>
-                           </div>
-                         </div>
-                       )}
+          {passo === 2 && (
+            <div className="flex flex-col items-center justify-center w-full gap-6 animate-in fade-in slide-in-from-right-4 duration-700">
+              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
+              <div className="w-full max-w-[340px] bg-white/5 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/40 p-6 shadow-sm space-y-4">
+                <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base md:text-lg font-medium text-[#4A3B28] resize-none placeholder:text-[#8B735B]/50" />
+                <div className="space-y-3 pt-4 border-t border-[#E5D9C3]/40">
+                  <button onMouseDown={startRecording} onMouseUp={stopRecording} onTouchStart={startRecording} onTouchEnd={stopRecording} className={`w-full py-4 rounded-full flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse' : 'bg-white/20 text-[#4A3B28] border border-[#E5D9C3]/50'}`}><Mic size={16} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}</button>
+                  <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#4A3B28] text-white py-4 rounded-full text-[9px] font-black uppercase tracking-[0.4em] shadow-md disabled:opacity-20">Prosseguir</button>
+                </div>
+              </div>
+              <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">‹ Trocar Foco ({tema.toUpperCase()})</button>
+            </div>
+          )}
 
-                       {/* Salmo / Orientação Mística */}
-                       {resultado.ancoragem_rituais.salmo && (
-                         <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
-                           <div className="flex items-center gap-4">
-                             <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden ${tipoOraculo === 'Tarô dos Anjos' ? 'bg-[#FFD1DC]/40' : 'bg-[#EF4444]/20'}`}>
-                               {tipoOraculo === 'Tarô dos Anjos' ? (
-                                 <img src="/assets/brand/psalm-icon.jpg" alt="Salmo" className="w-full h-full object-cover" />
-                               ) : (
-                                 <img src="/assets/brand/orientation-icon.jpg" alt="Orientação" className="w-full h-full object-cover" />
-                               )}
-                             </div>
-                             <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#8B735B]">
-                               {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Protetor' : 'Orientação Mística'}
-                             </span>
-                           </div>
-                           <div className="bg-white/30 p-6 rounded-[24px] border border-white/20">
-                             <p className="text-[14px] text-[#2C2420] leading-relaxed font-serif font-medium text-justify">
-                               {resultado.ancoragem_rituais.salmo}
-                             </p>
-                           </div>
-                         </div>
-                       )}
-
-                       {/* Ação Mística / Banho / Dizeres */}
-                       {((tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.biblia) || (tipoOraculo === 'Baralho Cigano' && resultado.ancoragem_rituais.banho)) && (
-                         <div className="bg-white/20 backdrop-blur-md rounded-[32px] p-8 shadow-lg border border-white/30 space-y-4">
-                           <div className="flex items-center gap-4">
-                             <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 shadow-sm border border-[#C4A484]/20 overflow-hidden ${tipoOraculo === 'Tarô dos Anjos' ? 'bg-[#F5F2EA]/60' : (tipoOraculo === 'Baralho Cigano' ? 'bg-[#EF4444]/20' : 'bg-white/60')}`}>
-                               {tipoOraculo === 'Tarô dos Anjos' ? (
-                                 <img src="/assets/brand/bible-icon.jpg" alt="Bíblia" className="w-full h-full object-cover" />
-                               ) : (
-                                 tipoOraculo === 'Baralho Cigano' ? (
-                                   <img src="/assets/brand/cigano-ritual-icon.jpg" alt="Vela" className="w-full h-full object-cover" />
-                                 ) : (
-                                   <Sparkles className="w-7 h-7 text-[#C4A484]" strokeWidth={1.5} />
-                                 )
-                               )}
-                             </div>
-                             <span className="text-[12px] font-black uppercase tracking-[0.4em] text-[#8B735B]">
-                               {tipoOraculo === 'Tarô dos Anjos' ? 'Ação de Luz' : (tipoOraculo === 'Baralho Cigano' ? 'Ritual de Luz' : 'Ação Mística')}
-                             </span>
-                           </div>
-                           <div className="bg-white/30 p-6 rounded-[24px] border border-white/20">
-                             <p className="text-[14px] text-[#2C2420] leading-relaxed font-serif font-medium text-justify">
-                               {tipoOraculo === 'Tarô dos Anjos' 
-                                 ? (resultado.ancoragem_rituais.biblia?.toLowerCase().includes('banho') || resultado.ancoragem_rituais.biblia?.toLowerCase().includes('erva') ? 'Mentalize a luz angelical protetora em sua jornada.' : resultado.ancoragem_rituais.biblia)
-                                 : resultado.ancoragem_rituais.banho}
-                             </p>
-                           </div>
-                         </div>
-                       )}
-
-                       {/* Dica Angelical (Ritual de Luz - Tarô dos Anjos) */}
-                       {tipoOraculo === 'Tarô dos Anjos' && resultado.ancoragem_rituais.dica_angelical && (
-                         <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[28px] border-2 border-[#C4A484]/30 overflow-hidden shadow-lg">
-                           {/* Imagem do Anjo Destacada */}
-                           <div className="w-full h-40 relative bg-[#F5F2EA] flex items-center justify-center p-2">
-                             <img src="/assets/brand/anjo-ritual.jpg" alt="Anjo" className="w-full h-full object-contain" />
-                             <div className="absolute inset-0 bg-gradient-to-t from-[#FDFBF7] via-transparent to-transparent" />
-                             <h4 className="absolute bottom-2 left-0 w-full text-center text-[13px] font-black uppercase tracking-[0.4em] text-[#C4A484] drop-shadow-sm">Ritual de Luz</h4>
-                           </div>
-                           
-                           <div className="p-6 pt-2 space-y-4 text-center relative z-10">
-                             <p className="text-[12px] text-[#2C2420] font-medium leading-relaxed italic">
-                               "Para sintonizar <span className="font-black text-[#C4A484] uppercase tracking-wider">{resultado.ancoragem_rituais.dica_angelical.foco_oracao}</span>, 
-                               acenda uma vela <span className="font-black text-[#C4A484] underline underline-offset-4 decoration-[#C4A484]/30">{resultado.ancoragem_rituais.dica_angelical.vela_cor}</span> acima da sua cabeça por <span className="font-black text-[#C4A484]">{resultado.ancoragem_rituais.dica_angelical.ritual_dias}</span>."
-                             </p>
-                             <div className="w-12 h-[1px] bg-[#C4A484]/30 mx-auto" />
-                             <p className="text-[11px] text-[#5C4D3C] leading-relaxed font-bold">
-                               {resultado.ancoragem_rituais.dica_angelical.dica_texto}
-                             </p>
-                           </div>
-                         </div>
-                       )}
-                     </div>
-                   </div>
-                 )}
-
-                 {resultado.acolhimento_quantum && tipoOraculo === 'Geral' && (
-                   <div className="bg-gradient-to-br from-[#FDFBF7] to-[#F5F2EA] rounded-[32px] border border-[#C4A484]/20 p-8 text-center shadow-inner italic">
-                     <div className="text-[#C4A484] mb-4 flex justify-center"><Heart size={24} /></div>
-                     <h4 className="text-[#C4A484] font-serif text-lg mb-2">{resultado.acolhimento_quantum.titulo}</h4>
-                     <p className="text-xs text-[#5C4D3C]/70 leading-relaxed">
-                       {resultado.acolhimento_quantum.conteudo}
-                     </p>
-                   </div>
-                 )}
+          {passo === 3 && (
+            <div className="flex flex-col items-center justify-center w-full gap-6 animate-in fade-in slide-in-from-right-4 duration-700">
+              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Consulte o Invisível</h2>
+              <div className="flex flex-col gap-3 w-full max-w-[340px]">
+                {[ { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' } ].map((m) => (
+                  <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-16 flex items-center gap-5 bg-white/10 backdrop-blur-md border border-white/20 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
+                    <div className={`w-10 h-10 ${m.color} rounded-[14px] flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-500`}><m.icon size={20} /></div>
+                    <h4 className="font-black text-[10px] text-[#5C4D3C] uppercase tracking-[0.25em] text-left leading-relaxed">{m.title}</h4>
+                  </button>
+                ))}
+              </div>
+              <div className="pt-8">
+                <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Refazer Pergunta</button>
               </div>
             </div>
-
-            <div className="w-full pt-4 pb-2 flex flex-col items-center gap-4 shrink-0">
-               {resultado.acolhimento_psicologico && (
-                 <button onClick={() => setPasso(5)} className="text-[10px] font-bold uppercase tracking-[0.2em] text-white py-3 px-8 bg-[#2C2420] rounded-full shadow-lg border border-[#C4A484]/30 animate-pulse hover:bg-[#4A3B28] transition-all">Quer um conselho do Psico? 👨‍⚕️</button>
-               )}
-               <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[9px] font-black uppercase tracking-widest text-[#C4A484] py-4 bg-white shadow-md px-10 rounded-full border border-[#E5D9C3] active:scale-95 transition-all">Novo Ciclo ✨</button>
-            </div>
-          </div>
-        )}
-
-        {passo === 5 && resultado && (
-          <div className="flex-1 flex flex-col items-center w-full animate-in fade-in slide-in-from-right-4 duration-700 overflow-hidden">
-            <div className="mb-6 text-center shrink-0">
-               <h2 className="text-3xl font-serif text-[#C4A484] leading-tight">O Olhar Clínico</h2>
-               <p className="text-[9px] font-bold uppercase tracking-widest text-[#8B735B]/60">Sua jornada emocional</p>
-            </div>
-            <div className="flex-1 w-full overflow-y-auto px-1 custom-scrollbar pb-10">
-               <div className="bg-white/60 backdrop-blur-md rounded-[40px] border border-[#E5D9C3] p-8 shadow-2xl space-y-6 relative overflow-hidden">
-                  <div className="absolute -top-10 -left-10 opacity-[0.03] rotate-12"><Users size={200} className="text-[#C4A484]" /></div>
-                  <h3 className="text-xl font-serif text-[#5C4D3C] text-center border-b border-[#E5D9C3]/30 pb-4">{resultado.acolhimento_psicologico.titulo}</h3>
-                  <div className="space-y-4"><p className="text-sm md:text-base leading-relaxed text-[#5C4D3C]/90 font-sans font-light text-justify first-letter:text-3xl first-letter:font-serif first-letter:text-[#C4A484] first-letter:mr-2">{resultado.acolhimento_psicologico.conteudo}</p></div>
-                  <div className="pt-6 border-t border-[#E5D9C3]/30"><p className="text-[10px] text-center italic text-[#8B735B]/80 font-serif">"O autoconhecimento é o portal para a cura da alma."</p></div>
-               </div>
-            </div>
-            <div className="w-full pt-4 pb-2 flex justify-center shrink-0 gap-4">
-               <button onClick={() => setPasso(4)} className="text-[9px] font-bold uppercase tracking-widest text-[#C4A484] py-4 bg-white/50 px-8 rounded-full border border-[#E5D9C3] active:scale-95 transition-all">‹ Voltar ao Oráculo</button>
-               <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); }} className="text-[9px] font-black uppercase tracking-widest text-white py-4 bg-[#C4A484] shadow-md px-10 rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
-            </div>
-          </div>
-        )}
-
-        {loading && (
-          <div className="fixed inset-0 bg-[#FDFBF7] z-[100] flex flex-col items-center justify-center overflow-hidden">
-            <div className="relative z-10 flex flex-col items-center">
-              <div className="w-40 h-40 md:w-48 md:h-48 relative flex items-center justify-center">
-                <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full animate-spin opacity-90 drop-shadow-lg" />
-                <div className="absolute -inset-6 border-t-[3px] border-b-[3px] border-[#C4A484] rounded-full animate-spin-slow shadow-[0_0_30px_rgba(196,164,132,0.4)]" />
-              </div>
-              <div className="flex flex-col items-center justify-center text-center mt-16 w-full max-w-[300px]">
-                <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-[#8B735B] animate-pulse whitespace-nowrap">Sintonizando Essência...</p>
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {passo === 4 && resultado && (
+        <div className="fixed inset-0 z-50 bg-[#FDFBF7] flex flex-col items-center px-6 py-10 overflow-y-auto no-scrollbar">
+          <div className="mb-6 text-center shrink-0">
+            <div className="inline-block px-3 py-1 bg-[#C4A484]/10 rounded-full text-[8px] font-bold text-[#C4A484] uppercase tracking-widest border border-[#C4A484]/20 mb-2">{resultado.tema}</div>
+            <h2 className="text-2xl font-serif text-[#C4A484] leading-tight">Sua Revelação</h2>
+          </div>
+
+          <div className="flex flex-col items-center mb-8 w-full py-2">
+            {resultado.situacao_atual ? (
+              <div className="flex flex-row justify-center gap-2 w-full">
+                <CardResult title="Situação" data={resultado.situacao_atual} index={1} tipoOraculo={tipoOraculo} />
+                <CardResult title="Caminho" data={resultado.caminho_acao} index={2} tipoOraculo={tipoOraculo} />
+                <CardResult title="Resultado" data={resultado.resultado_conselho} index={3} tipoOraculo={tipoOraculo} />
+              </div>
+            ) : resultado.carta_sorteada && (
+              <div className="flex flex-col items-center gap-6">
+                <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />
+              </div>
+            )}
+          </div>
+
+          <div className="w-full max-w-[360px] space-y-8 pb-12">
+             {/* 1. Síntese do Destino */}
+             <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden backdrop-blur-sm">
+                <div className="absolute top-0 right-0 p-4 opacity-10"><Sparkles className="w-12 h-12 text-[#C4A484]" /></div>
+                <h3 className="text-[#C4A484] font-serif text-xl mb-4 text-center">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
+                <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-justify">{resultado.leitura_caminho?.analise_detalhada}</p>
+                {resultado.leitura_caminho?.veredito_direto && (
+                  <div className="mt-6 pt-6 border-t border-white/10 flex flex-col items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Veredito</span>
+                    <span className="text-2xl font-serif font-bold text-white tracking-widest">{resultado.leitura_caminho.veredito_direto}</span>
+                  </div>
+                )}
+             </div>
+
+             {/* 2. Interpretação das Cartas */}
+             <div className="space-y-4">
+                {resultado.situacao_atual && (
+                  <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
+                    <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">A Situação: {resultado.situacao_atual.carta}</h4>
+                    <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.situacao_atual.interpretacao}</p>
+                  </div>
+                )}
+                {resultado.caminho_acao && (
+                  <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
+                    <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">O Caminho: {resultado.caminho_acao.carta}</h4>
+                    <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.caminho_acao.interpretacao}</p>
+                  </div>
+                )}
+                {resultado.resultado_conselho && (
+                  <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
+                    <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">O Resultado: {resultado.resultado_conselho.carta}</h4>
+                    <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.resultado_conselho.interpretacao}</p>
+                  </div>
+                )}
+                {resultado.carta_sorteada && (
+                  <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
+                    <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">{resultado.carta_sorteada.carta}</h4>
+                    <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.carta_sorteada.interpretacao}</p>
+                  </div>
+                )}
+             </div>
+
+             {/* 3. Acolhimento Psicológico */}
+             {resultado.acolhimento_psicologico && (
+               <div className="bg-[#FDFBF7] rounded-[32px] border-2 border-[#E5D9C3] p-8 shadow-xl space-y-4">
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <div className="p-3 rounded-full bg-[#C4A484]/10"><Heart className="w-6 h-6 text-[#C4A484]" /></div>
+                    <h4 className="text-lg font-serif text-[#4A3B28]">{resultado.acolhimento_psicologico.titulo || "Um Espaço de Escuta"}</h4>
+                  </div>
+                  
+                  <details className="group">
+                    <summary className="list-none cursor-pointer flex flex-col items-center gap-2">
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C4A484] group-open:hidden py-2 px-6 rounded-full border border-[#C4A484]/20 hover:bg-[#C4A484]/5 transition-all">
+                        Quer um aconselhamento do Psico?
+                      </span>
+                    </summary>
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-500 pt-4">
+                      <p className="text-sm italic text-[#5C4D3C] leading-relaxed text-justify font-medium">&quot;{resultado.acolhimento_psicologico.conteudo}&quot;</p>
+                    </div>
+                  </details>
+               </div>
+             )}
+
+             {/* 4. Ancoragem e Rituais */}
+             {resultado.ancoragem_rituais && (
+               <div className="space-y-4">
+                  <div className="flex items-center gap-3 px-2">
+                    <div className="h-px flex-1 bg-[#E5D9C3]" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#8B735B]">Rituais de Ancoragem</span>
+                    <div className="h-px flex-1 bg-[#E5D9C3]" />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    {resultado.ancoragem_rituais.mantra && (
+                      <div className="bg-gradient-to-br from-white to-[#FDFBF7] rounded-[24px] border border-[#E5D9C3] p-6 shadow-sm flex flex-col items-center text-center gap-3">
+                        <Sparkles className="w-5 h-5 text-[#C4A484]" />
+                        <h5 className="text-[9px] font-black text-[#8B735B]/60 uppercase tracking-[0.3em]">Mantra da Alma</h5>
+                        <p className="text-sm font-serif font-bold text-[#4A3B28] italic leading-relaxed">&quot;{resultado.ancoragem_rituais.mantra}&quot;</p>
+                      </div>
+                    )}
+
+                    {resultado.ancoragem_rituais.salmo && (
+                      <div className="bg-white rounded-[24px] border border-[#E5D9C3] p-6 shadow-sm space-y-2">
+                        <h5 className="text-[9px] font-black text-[#C4A484] uppercase tracking-widest flex items-center gap-2">
+                           {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Sagrado' : 'Dica da Cigana'}
+                        </h5>
+                        <p className="text-xs text-[#5C4D3C] leading-relaxed font-medium">{resultado.ancoragem_rituais.salmo}</p>
+                      </div>
+                    )}
+
+                    {resultado.ancoragem_rituais.banho && (
+                      <div className="bg-[#C4A484]/5 rounded-[24px] border border-[#C4A484]/20 p-6 shadow-sm space-y-2">
+                        <h5 className="text-[9px] font-black text-[#C4A484] uppercase tracking-widest">Banho ou Erva Mística</h5>
+                        <p className="text-xs text-[#5C4D3C] leading-relaxed font-medium">{resultado.ancoragem_rituais.banho}</p>
+                      </div>
+                    )}
+
+                    {resultado.ancoragem_rituais.biblia && (
+                      <div className="bg-white rounded-[24px] border border-[#E5D9C3] p-6 shadow-sm space-y-2 italic">
+                        <h5 className="text-[9px] font-black text-[#8B735B]/60 uppercase tracking-widest not-italic">Versículo de Acolhimento</h5>
+                        <p className="text-xs text-[#5C4D3C] leading-relaxed">&quot;{resultado.ancoragem_rituais.biblia}&quot;</p>
+                      </div>
+                    )}
+
+                    {resultado.ancoragem_rituais.dica_angelical && (
+                      <div className="bg-[#4FD1C5]/5 rounded-[24px] border border-[#4FD1C5]/20 p-6 shadow-sm space-y-4">
+                        <h5 className="text-[9px] font-black text-[#4FD1C5] uppercase tracking-widest">Ritual Angelical</h5>
+                        <div className="grid grid-cols-2 gap-4">
+                           <div className="space-y-1">
+                              <span className="text-[8px] font-bold text-[#8B735B]/60 uppercase">Foco</span>
+                              <p className="text-[10px] font-bold text-[#5C4D3C]">{resultado.ancoragem_rituais.dica_angelical.foco_oracao}</p>
+                           </div>
+                           <div className="space-y-1">
+                              <span className="text-[8px] font-bold text-[#8B735B]/60 uppercase">Vela</span>
+                              <p className="text-[10px] font-bold text-[#5C4D3C]">{resultado.ancoragem_rituais.dica_angelical.vela_cor}</p>
+                           </div>
+                        </div>
+                        <p className="text-xs text-[#5C4D3C] leading-relaxed border-t border-[#4FD1C5]/10 pt-3">{resultado.ancoragem_rituais.dica_angelical.dica_texto}</p>
+                      </div>
+                    )}
+                  </div>
+               </div>
+             )}
+
+             <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); window.scrollTo(0,0); }} className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-white py-6 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] shadow-2xl rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
+          </div>
+        </div>
+      )}
+
+      {loading && (
+        <div className="fixed inset-0 bg-[#FDFBF7] z-[100] flex flex-col items-center justify-center overflow-hidden">
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-40 h-40 relative flex items-center justify-center">
+              <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full animate-spin opacity-90 drop-shadow-lg" />
+              <div className="absolute -inset-6 border-t-[3px] border-b-[3px] border-[#C4A484] rounded-full animate-spin-slow shadow-[0_0_30px_rgba(196,164,132,0.4)]" />
+            </div>
+            <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.4em] text-[#8B735B] animate-pulse mt-16">Sintonizando Essência...</p>
+          </div>
+        </div>
+      )}
 
       {modalAberto && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-[#2C2420]/70 backdrop-blur-md" onClick={() => setModalAberto(null)} />
-          <div className="relative w-full max-w-md bg-[#FDFBF7]/90 backdrop-blur-xl rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden h-[85vh] max-h-[85vh] flex flex-col">
-            {modalAberto === 'mensagem_ampliada' && mensagemDia && (
-              <div className="flex flex-col h-full bg-[#FDFBF7]">
-                <div className="w-full flex justify-end items-center px-6 py-4 shrink-0 bg-white/20">
-                  <button onClick={() => setModalAberto(null)} className="p-2 text-[#C4A484] hover:opacity-50 transition-opacity"><X size={28} strokeWidth={1} /></button>
-                </div>
-                <div className="flex-1 w-full overflow-y-auto px-8 flex flex-col items-center justify-start text-center py-10">
-                  <div className="w-28 h-28 rounded-full bg-[#F5F2EA] flex items-center justify-center shrink-0 mb-6 relative overflow-hidden p-2">
-                    <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow opacity-80" />
-                  </div>
-                  <div className="space-y-8 max-w-[320px]">
-                    <h4 className="text-[11px] font-sans font-black tracking-[0.4em] text-[#C4A484] uppercase opacity-80">Sintonização e Bem-estar</h4>
-                    <p className="text-2xl italic font-serif text-[#5C4D3C] leading-relaxed">"{mensagemDia.texto}"</p>
-                    <div className="flex flex-col items-center gap-6 pt-6">
-                      <div className="w-20 h-[0.5px] bg-[#C4A484]/20" />
-                      <span className="text-xs font-sans font-bold tracking-[0.2em] text-[#C4A484] uppercase">{mensagemDia.autor || "Abraço da Alma"}</span>
+          <div className="absolute inset-0 bg-[#2C2420]/80 backdrop-blur-md" onClick={() => setModalAberto(null)} />
+          
+          <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[40px] border border-[#E5D9C3] shadow-2xl overflow-hidden h-[90vh] flex flex-col z-[110]">
+            {/* Header do Modal */}
+            <div className="flex justify-between items-center px-8 py-6 border-b border-[#E5D9C3]/50 bg-[#FDFBF7]">
+              <h3 className="text-2xl font-serif text-[#C4A484]">
+                {modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Santuário de Ajuda' : 'Políticas de Luz')}
+              </h3>
+              <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-[#C4A484]/10 rounded-full transition-colors">
+                <X className="w-6 h-6 text-[#C4A484]" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto no-scrollbar p-8 bg-[#FDFBF7]">
+               {modalAberto === 'mensagem_ampliada' && mensagemDia && (
+                 <div className="flex flex-col items-center text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="w-20 h-20 flex-none">
+                      <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
                     </div>
-                  </div>
-                </div>
-                <div className="w-full px-10 pb-10 pt-4 shrink-0">
-                  <button onClick={() => setModalAberto(null)} className="w-full py-5 bg-[#C4A484] text-white rounded-[45px] font-sans font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl active:scale-95 transition-all hover:bg-[#B39373]">Receber com Gratidão ✨</button>
-                </div>
-              </div>
-            )}
-            {modalAberto !== 'mensagem_ampliada' && (
-              <>
-                <div className="p-5 border-b border-[#E5D9C3]/30 flex justify-between items-center bg-white/30 backdrop-blur-sm">
-                  <h3 className="text-xl font-serif text-[#C4A484]">{modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Guia de Sintonização' : 'Pacto de Luz')}</h3>
-                  <button onClick={() => setModalAberto(null)} className="p-2"><X className="w-5 h-5 text-[#C4A484]" /></button>
-                </div>
-                <div className="p-6 overflow-y-auto">
-                  {modalAberto === 'assinatura' && (
-                    <div className="space-y-6 text-center">
-                      <div className="w-20 h-20 bg-[#C4A484]/5 rounded-full flex items-center justify-center mx-auto p-3 shadow-inner">
-                        <img src="/assets/brand/mandala-login.png" alt="Logo" className="w-full h-full object-contain animate-spin-slow" />
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <Sparkles size={14} className="text-[#C4A484]" />
+                        <h4 className="text-xl font-serif text-[#C4A484] uppercase tracking-[0.2em]">{mensagemDia.autor || "Sintonização"}</h4>
+                        <Sparkles size={14} className="text-[#C4A484]" />
                       </div>
-                      <div className="space-y-2">
-                        <h4 className="text-lg font-bold text-[#5C4D3C]">Acesso Premium</h4>
-                        <p className="text-[10px] leading-relaxed text-[#8B735B]">Experimente <span className="font-bold">grátis por 24 horas</span>.<br/>Após o teste, pague apenas R$ 89,00 e use o <span className="font-bold">ano inteiro</span> sem mensalidades.</p>
+                      <div className="h-px w-12 bg-[#E5D9C3] mx-auto" />
+                      <p className="text-lg italic text-[#4A3B28] font-serif leading-relaxed px-2 font-medium">
+                        &quot;{mensagemDia.texto}&quot;
+                      </p>
+                    </div>
+
+                    <div className="pt-8 border-t border-[#E5D9C3]/50 w-full">
+                       <p className="text-[10px] font-black text-[#8B735B]/60 uppercase tracking-[0.4em]">Que sua essência brilhe hoje ✨</p>
+                    </div>
+                 </div>
+               )}
+
+               {modalAberto === 'assinatura' && (
+                 <div className="flex flex-col items-center text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="w-24 h-24 flex-none">
+                      <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="text-2xl font-bold text-[#4A3B28]">Acesso Premium</h4>
+                      <p className="text-sm text-[#8B735B] leading-relaxed">
+                        Experimente <span className="font-bold">grátis por 24 horas</span>.<br />
+                        Após o teste, pague apenas R$ 89,00 e use o <span className="font-bold">ano inteiro</span> sem mensalidades.
+                      </p>
+                    </div>
+
+                    <div className="w-full bg-white rounded-[32px] border border-[#E5D9C3] p-8 shadow-sm space-y-6">
+                      <div className="space-y-1">
+                        <span className="text-4xl font-black text-[#C4A484]">R$ 89,00</span>
+                        <p className="text-[10px] font-bold text-[#8B735B]/60 uppercase tracking-widest">Pagamento Único • Válido por 365 dias</p>
                       </div>
-                      <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-[#E5D9C3]/50 p-6 shadow-sm space-y-4">
-                        <div className="space-y-1">
-                          <div className="text-3xl font-black text-[#C4A484]">R$ 89,00</div>
-                          <p className="text-[10px] uppercase tracking-widest font-bold text-[#8B735B]">Pagamento Único • Válido por 365 dias</p>
-                        </div>
-                        <div className="space-y-2 pt-2 border-t border-[#E5D9C3]/50">
-                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Salmos e Cânticos da Bíblia</span></div>
-                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Psico Conselhos Inclusos</span></div>
-                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Simpatias e Banhos Místicos</span></div>
-                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C] font-bold">Mantras e Meditações Sagradas</span></div>
-                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">Acesso Total a todos os Decks</span></div>
-                          <div className="flex items-center gap-2 text-left"><CheckCircle2 className="w-3 h-3 text-emerald-500" /><span className="text-[10px] text-[#5C4D3C]">5 Tiragens Completas Diárias</span></div>
-                        </div>
+
+                      <div className="w-full h-px bg-[#E5D9C3]/50" />
+
+                      <div className="space-y-4 text-left">
+                        {[
+                          "Salmos e Cânticos da Bíblia",
+                          "Psico Conselhos Inclusos",
+                          "Simpatias e Banhos Místicos",
+                          "Mantras e Meditações Sagradas",
+                          "Acesso Total a todos os Decks",
+                          "5 Tiragens Completas Diárias"
+                        ].map((item) => (
+                          <div key={item} className="flex items-center gap-3">
+                            <CheckCircle2 className="w-5 h-5 text-[#48BB78] shrink-0" />
+                            <span className="text-[13px] font-medium text-[#5C4D3C]">{item}</span>
+                          </div>
+                        ))}
                       </div>
+                    </div>
+
+                    <div className="w-full space-y-4 pt-4">
                       <button 
                         onClick={handleSubscribe}
                         disabled={loading}
-                        className="w-full py-5 bg-gradient-to-r from-[#C4A484] to-[#8B735B] text-white rounded-[32px] font-bold uppercase tracking-widest text-[10px] shadow-lg active:scale-95 transition-all disabled:opacity-50"
+                        className="w-full py-5 bg-gradient-to-br from-[#C4A484] to-[#8B735B] text-white rounded-[24px] shadow-xl text-xs font-black uppercase tracking-[0.3em] active:scale-95 transition-all"
                       >
-                        {loading ? 'Preparando Portal...' : 'Iniciar 24h Grátis'}
+                        {loading ? "Processando..." : "Iniciar 3 Dias Grátis"}
                       </button>
-                      <p className="text-[8px] text-[#8B735B]/50 px-4">Cancele a qualquer momento antes do fim do período de teste.</p>
+                      <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-tighter">Cancele a qualquer momento antes do fim do período de teste.</p>
                     </div>
-                  )}
-                  {modalAberto === 'ajuda' && (
-                    <div className="space-y-6 text-[#5C4D3C]">
-                      <div className="space-y-4">
-                        <div className="p-4 bg-white rounded-2xl border border-[#E5D9C3] space-y-2 text-left">
-                          <h4 className="font-bold text-[10px] uppercase tracking-widest text-[#C4A484]">Como consultar?</h4>
-                          <p className="text-[11px] leading-relaxed">Escolha seu deck preferido, foque em uma questão do seu coração e deixe que a IA interprete os símbolos para você.</p>
-                        </div>
-                        <div className="p-4 bg-white rounded-2xl border border-[#E5D9C3] space-y-2 text-left">
-                          <h4 className="font-bold text-[10px] uppercase tracking-widest text-[#C4A484]">Métodos de Leitura</h4>
-                          <p className="text-[11px] leading-relaxed">Oferecemos a Bússola Sim/Não para dúvidas rápidas e o Caminho do Destino para análises profundas de 3 cartas.</p>
-                        </div>
-                        <div className="p-4 bg-white rounded-2xl border border-[#E5D9C3] space-y-2 text-left">
-                          <h4 className="font-bold text-[10px] uppercase tracking-widest text-[#C4A484]">Voz e Imagem</h4>
-                          <p className="text-[11px] leading-relaxed">Você pode falar sua dúvida segurando o microfone ou fotografar um jogo de cartas físico para análise.</p>
-                        </div>
-                      </div>
-                      <p className="text-[9px] text-[#8B735B] italic">Suporte: angelinhaesf06@gmail.com</p>
+                 </div>
+               )}
+
+               {modalAberto === 'ajuda' && (
+                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="flex flex-col items-center text-center space-y-4">
+                       <div className="w-16 h-16 flex-none">
+                          <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
+                       </div>
+                       <h4 className="text-xl font-bold text-[#4A3B28]">Como sintonizar?</h4>
                     </div>
-                  )}
-                  {modalAberto === 'politicas' && (
-                    <div className="space-y-6 text-[#5C4D3C]">
-                      <div className="flex flex-col gap-3">
-                        <button onClick={() => router.push('/terms')} className="w-full p-4 bg-white rounded-2xl border border-[#E5D9C3] flex items-center justify-between group"><span className="text-[10px] font-bold uppercase tracking-widest">Termos de Uso</span><ChevronLeft className="w-3 h-3 rotate-180 opacity-40" /></button>
-                        <button onClick={() => router.push('/privacy')} className="w-full p-4 bg-white rounded-2xl border border-[#E5D9C3] flex items-center justify-between group"><span className="text-[10px] font-bold uppercase tracking-widest">Privacidade</span><ChevronLeft className="w-3 h-3 rotate-180 opacity-40" /></button>
-                        <button onClick={() => router.push('/delete-account')} className="w-full p-4 bg-white rounded-2xl border border-red-100 flex items-center justify-between group"><span className="text-[10px] font-bold uppercase tracking-widest text-red-500">Excluir Minha Conta</span><Trash className="w-3 h-3 text-red-300" /></button>
-                      </div>
-                      <p className="text-[8px] text-[#8B735B]/50 uppercase tracking-widest text-center">Versão 1.0.0 • Psiquê Oráculo</p>
+
+                    <div className="space-y-6">
+                       <div className="space-y-3">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">1. Escolha seu Deck</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Navegue entre o Tarô Clássico, Baralho Cigano ou Tarô dos Anjos. Cada um possui uma vibração única para sua necessidade atual.</p>
+                       </div>
+                       <div className="space-y-3">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">2. Defina o Tema</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Selecione a área da vida (Amor, Trabalho, Saúde, etc.) que deseja iluminar com a sabedoria do oráculo.</p>
+                       </div>
+                       <div className="space-y-3">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">3. Abra o Coração</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Você pode escrever sua dúvida ou usar o comando de voz para desabafar. A sinceridade atrai as melhores respostas.</p>
+                       </div>
+                       <div className="space-y-3">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">4. Consulte o Invisível</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Escolha entre uma leitura completa de 3 cartas, uma resposta direta Sim/Não ou a leitura de um jogo físico via foto.</p>
+                       </div>
                     </div>
-                  )}
-                </div>
-              </>
-            )}
+
+                    <div className="pt-8 border-t border-[#E5D9C3]/50 text-center space-y-4">
+                       <p className="text-[11px] font-bold text-[#8B735B]/60 uppercase tracking-widest">Ainda com dúvidas?</p>
+                       <a href="mailto:angelinhaesf06@gmail.com" className="inline-block px-8 py-3 bg-[#C4A484]/10 text-[#C4A484] rounded-full text-[10px] font-black uppercase tracking-widest border border-[#C4A484]/20">Suporte por E-mail</a>
+                    </div>
+                 </div>
+               )}
+
+               {modalAberto === 'politicas' && (
+                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div className="flex flex-col items-center text-center space-y-4">
+                       <div className="w-16 h-16 flex-none">
+                          <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
+                       </div>
+                       <h4 className="text-xl font-bold text-[#4A3B28]">Privacidade Sagrada</h4>
+                    </div>
+
+                    <div className="space-y-6">
+                       <div className="space-y-3">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">Dados Protegidos</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Suas perguntas, desabafos e tiragens são estritamente confidenciais e criptografadas. Ninguém, além de você, tem acesso ao seu histórico.</p>
+                       </div>
+                       <div className="space-y-3">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">Termos de Uso</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">O Psiquê Oráculo é uma ferramenta de autoconhecimento e entretenimento. Não substitui aconselhamento médico, psicológico ou jurídico profissional.</p>
+                       </div>
+                       <div className="space-y-3">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">Pagamentos Seguros</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Todas as transações são processadas via Stripe ou Google Play Store, garantindo a segurança máxima dos seus dados financeiros.</p>
+                       </div>
+                       <div className="space-y-3">
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">Uso da IA</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Utilizamos a tecnologia Google Gemini para processar as interpretações, unindo sabedoria ancestral com tecnologia de ponta.</p>
+                       </div>
+                    </div>
+
+                    <div className="pt-8 border-t border-[#E5D9C3]/50 text-center">
+                       <button onClick={() => setModalAberto(null)} className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest underline underline-offset-4">Entendido</button>
+                    </div>
+                 </div>
+               )}
+            </div>
           </div>
         </div>
       )}

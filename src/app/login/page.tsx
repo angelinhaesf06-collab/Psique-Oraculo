@@ -3,10 +3,9 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Fingerprint, Mail, Lock, Sparkles } from 'lucide-react';
+import { Mail, Lock, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import DecorationOverlay from '../DecorationOverlay';
 
 export default function LoginPage() {
@@ -15,58 +14,6 @@ export default function LoginPage() {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const handleBiometricLogin = async () => {
-    try {
-      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      if (!isNative) {
-        toast.error('Biometria disponível apenas no aplicativo.');
-        return;
-      }
-
-      const result = await NativeBiometric.isAvailable();
-      if (!result.isAvailable) {
-        toast.error('Biometria não configurada neste aparelho.');
-        return;
-      }
-
-      setLoading(true);
-      await NativeBiometric.verifyIdentity({
-        reason: "Acesse seu Oráculo Particular",
-        title: "Autenticação Biométrica",
-        subtitle: "Sintonize sua identidade",
-        description: "Use sua digital ou reconhecimento facial",
-      });
-
-      // Se passou da biometria, busca credenciais salvas no dispositivo
-      const credentials = await NativeBiometric.getCredentials({
-        server: "com.angela.psiqueoraculo",
-      });
-
-      if (credentials && credentials.username && credentials.password) {
-        const { error, data } = await supabase.auth.signInWithPassword({
-          email: credentials.username,
-          password: credentials.password,
-        });
-
-        if (!error) {
-          const userFullName = data.user?.user_metadata?.full_name || credentials.username.split('@')[0];
-          toast.success('Portal aberto via Biometria!');
-          localStorage.setItem('psique_user_name', userFullName);
-          router.push('/');
-        } else {
-          toast.error('Suas credenciais biométricas expiraram. Faça login manual.');
-        }
-      } else {
-        toast.info('Nenhuma conta vinculada. Faça login com e-mail e senha uma vez para salvar a digital.');
-      }
-    } catch (error: any) {
-      console.error(error);
-      toast.error('Acesso biométrico cancelado ou falhou.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,7 +54,7 @@ export default function LoginPage() {
         // Se signUp teve sucesso:
         const userFullName = nome || email.split('@')[0];
         toast.success('Alma registrada! Portal aberto.');
-        await saveCredentials(email, senha, userFullName);
+        await saveCredentials(userFullName);
         router.push('/');
         return;
       }
@@ -115,7 +62,7 @@ export default function LoginPage() {
       // Se signIn teve sucesso:
       const userFullName = nome || signInData.user?.user_metadata?.full_name || email.split('@')[0];
       toast.success('Portal Aberto!');
-      await saveCredentials(email, senha, userFullName);
+      await saveCredentials(userFullName);
       router.push('/');
     } catch (error: any) {
       console.error("Erro Geral no Login:", error);
@@ -125,69 +72,36 @@ export default function LoginPage() {
     }
   };
 
-  const saveCredentials = async (userEmail: string, userPass: string, userName: string) => {
-      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
-      if (isNative) {
-         try {
-           const result = await NativeBiometric.isAvailable();
-           if (result.isAvailable) {
-              await NativeBiometric.setCredentials({
-                username: userEmail,
-                password: userPass,
-                server: "com.angela.psiqueoraculo",
-              });
-           }
-         } catch (e) {
-           console.log("Não foi possível salvar biometria silenciosamente.", e);
-         }
-      }
+  const saveCredentials = async (userName: string) => {
       localStorage.setItem('psique_user_name', userName);
   };
 
   return (
-    <div className="h-[100dvh] w-full bg-transparent flex flex-col items-center relative overflow-hidden">
+    <div className="h-screen w-full bg-[#FDFBF7] flex flex-col items-center relative overflow-hidden">
       <DecorationOverlay />
       
-      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-start px-6 pt-safe pb-safe text-center gap-8">
+      <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-center px-6 pb-12 text-center pt-[calc(env(safe-area-inset-top)+20px)]">
         
-        <div className="flex flex-col items-center gap-4 w-full pt-2">
-          {/* Logo/Mandala Superior - Nitidez Corrigida */}
-          <div className="w-20 h-20 md:w-28 md:h-28 animate-in zoom-in duration-1000 p-1 shrink-0">
-            <img src="/assets/brand/mandala-login.png" alt="Mandala" className="w-full h-full object-contain animate-spin-slow [image-rendering:-webkit-optimize-contrast]" />
-          </div>
-
-          <div className="flex flex-col gap-1 drop-shadow-md">
-            <h1 className="text-3xl md:text-4xl font-serif text-[#C4A484] leading-tight">
-              Psiquê Oráculo
-            </h1>
-            <div className="space-y-1">
-              <h2 className="text-[10px] md:text-xs font-sans font-bold tracking-[0.4em] text-[#8B735B] uppercase">
-                Seu oráculo de bolso
-              </h2>
-              <p className="text-[8px] font-sans font-medium tracking-[0.2em] text-[#C4A484]/60 uppercase">
-                Sintonize sua Essência
-              </p>
-            </div>
+        {/* Ícone Superior - Layout Unificado Web/App */}
+        <div className="flex justify-center z-20 pointer-events-none mb-6">
+          <div className="w-20 h-20 flex-none">
+            <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
           </div>
         </div>
 
-        <div className="w-full space-y-4 pt-2">
-          <button
-            onClick={handleBiometricLogin}
-            disabled={loading}
-            className="w-full h-16 bg-white/40 backdrop-blur-md border-2 border-[#E5D9C3] rounded-[24px] flex flex-col items-center justify-center gap-1 shadow-lg active:scale-95 transition-all disabled:opacity-50"
-          >
-            <Fingerprint className="w-6 h-6 text-[#C4A484]" strokeWidth={1.5} />
-            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#8B735B]">Entrar com Digital</span>
-          </button>
-
-          <div className="flex items-center gap-4 py-1 opacity-30">
-            <div className="h-[0.5px] flex-1 bg-[#8B735B]" />
-            <span className="text-[8px] font-bold uppercase tracking-widest text-[#5C4D3C]">Ou use Email</span>
-            <div className="h-[0.5px] flex-1 bg-[#8B735B]" />
+        <div className="flex flex-col items-center gap-4 w-full mb-8">
+          <div className="flex flex-col gap-2 items-center">
+            <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484] leading-tight text-center drop-shadow-sm">
+              Psiquê Oráculo
+            </h1>
+            <h2 className="text-[10px] md:text-xs font-sans font-bold tracking-[0.4em] text-[#8B735B] uppercase text-center">
+              Seu Oráculo de Bolso
+            </h2>
           </div>
+        </div>
 
-          <form onSubmit={handleEmailLogin} className="space-y-3">
+        <div className="w-full space-y-4">
+          <form onSubmit={handleEmailLogin} className="space-y-4">
              <div className="relative">
                 <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C4A484]" />
                 <input

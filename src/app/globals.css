@@ -76,10 +76,27 @@ body::before {
   padding-right: env(safe-area-inset-right);
 }
 
-.pb-safe {
-  padding-bottom: max(env(safe-area-inset-bottom), 32px);
+.image-render-sharp {
+  image-rendering: -webkit-optimize-contrast !important;
+  image-rendering: crisp-edges !important;
+  image-rendering: pixelated !important;
 }
 
-.pt-safe {
-  padding-top: env(safe-area-inset-top);
+body {
+  background-color: #FDFBF7 !important;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #FDFBF7;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.custom-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
