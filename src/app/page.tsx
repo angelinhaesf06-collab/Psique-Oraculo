@@ -334,11 +334,11 @@ export default function OraculoJornada() {
           </div>
         </div>
 
-        <div className="w-full flex flex-col items-center gap-6 animate-in fade-in duration-1000 overflow-y-auto no-scrollbar pb-10">
+        <div className="w-full flex flex-col items-center gap-6 animate-in fade-in duration-1000 overflow-hidden pb-4 flex-1 justify-center">
           {passo === 0 && (
             <>
-              <div className="flex flex-col items-center w-full gap-4 shrink-0">
-                <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight tracking-tight">Qual arcano você escolhe hoje?</h2>
+              <div className="flex flex-col items-center w-full gap-4 shrink-0 -mt-12">
+                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight tracking-tight drop-shadow-sm">Qual arcano você escolhe hoje?</h2>
                 {mensagemDia && (
                   <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-2.5 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
                     <div className="flex items-center gap-2">
@@ -378,8 +378,10 @@ export default function OraculoJornada() {
           )}
 
           {passo === 1 && (
-            <div className="flex flex-col items-center justify-center w-full gap-8 animate-in fade-in slide-in-from-right-4 duration-700">
-              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Onde sua alma busca luz?</h2>
+            <div className="flex flex-col items-center justify-center w-full gap-8 animate-in fade-in slide-in-from-right-4 duration-700 flex-1">
+              <div className="flex flex-col items-center w-full gap-4 shrink-0 -mt-16 mb-4">
+                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight drop-shadow-sm">Onde sua alma busca luz?</h2>
+              </div>
               <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
                 {TEMAS.map((t) => (
                   <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/10 backdrop-blur-md border border-white/20 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
@@ -395,8 +397,10 @@ export default function OraculoJornada() {
           )}
 
           {passo === 2 && (
-            <div className="flex flex-col items-center justify-center w-full gap-6 animate-in fade-in slide-in-from-right-4 duration-700">
-              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Abra o seu coração</h2>
+            <div className="flex flex-col items-center justify-center w-full gap-6 animate-in fade-in slide-in-from-right-4 duration-700 flex-1">
+              <div className="flex flex-col items-center w-full gap-4 shrink-0 -mt-16 mb-4">
+                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight drop-shadow-sm">Abra o seu coração</h2>
+              </div>
               <div className="w-full max-w-[340px] bg-white/5 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/40 p-6 shadow-sm space-y-4">
                 <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base md:text-lg font-medium text-[#4A3B28] resize-none placeholder:text-[#8B735B]/50" />
                 <div className="space-y-3 pt-4 border-t border-[#E5D9C3]/40">
@@ -409,8 +413,10 @@ export default function OraculoJornada() {
           )}
 
           {passo === 3 && (
-            <div className="flex flex-col items-center justify-center w-full gap-6 animate-in fade-in slide-in-from-right-4 duration-700">
-              <h2 className="text-xl md:text-2xl font-serif text-[#C4A484] text-center px-4 leading-tight">Consulte o Invisível</h2>
+            <div className="flex flex-col items-center justify-center w-full gap-6 animate-in fade-in slide-in-from-right-4 duration-700 flex-1">
+              <div className="flex flex-col items-center w-full gap-4 shrink-0 -mt-16 mb-4">
+                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight drop-shadow-sm">Consulte o Invisível</h2>
+              </div>
               <div className="flex flex-col gap-3 w-full max-w-[340px]">
                 {[ { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' } ].map((m) => (
                   <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-16 flex items-center gap-5 bg-white/10 backdrop-blur-md border border-white/20 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
@@ -462,33 +468,35 @@ export default function OraculoJornada() {
                 )}
              </div>
 
-             {/* 2. Interpretação das Cartas */}
-             <div className="space-y-4">
-                {resultado.situacao_atual && (
-                  <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
-                    <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">A Situação: {resultado.situacao_atual.carta}</h4>
-                    <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.situacao_atual.interpretacao}</p>
-                  </div>
-                )}
-                {resultado.caminho_acao && (
-                  <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
-                    <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">O Caminho: {resultado.caminho_acao.carta}</h4>
-                    <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.caminho_acao.interpretacao}</p>
-                  </div>
-                )}
-                {resultado.resultado_conselho && (
-                  <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
-                    <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">O Resultado: {resultado.resultado_conselho.carta}</h4>
-                    <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.resultado_conselho.interpretacao}</p>
-                  </div>
-                )}
-                {resultado.carta_sorteada && (
-                  <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
-                    <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">{resultado.carta_sorteada.carta}</h4>
-                    <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.carta_sorteada.interpretacao}</p>
-                  </div>
-                )}
-             </div>
+             {/* 2. Interpretação das Cartas (Oculta se for Sim/Não) */}
+             {resultado.tipoLeitura !== 'sim_nao' && (
+               <div className="space-y-4">
+                  {resultado.situacao_atual && (
+                    <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
+                      <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">A Situação: {resultado.situacao_atual.carta}</h4>
+                      <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.situacao_atual.interpretacao}</p>
+                    </div>
+                  )}
+                  {resultado.caminho_acao && (
+                    <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
+                      <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">O Caminho: {resultado.caminho_acao.carta}</h4>
+                      <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.caminho_acao.interpretacao}</p>
+                    </div>
+                  )}
+                  {resultado.resultado_conselho && (
+                    <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
+                      <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">O Resultado: {resultado.resultado_conselho.carta}</h4>
+                      <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.resultado_conselho.interpretacao}</p>
+                    </div>
+                  )}
+                  {resultado.carta_sorteada && (
+                    <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
+                      <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">{resultado.carta_sorteada.carta}</h4>
+                      <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.carta_sorteada.interpretacao}</p>
+                    </div>
+                  )}
+               </div>
+             )}
 
              {/* 3. Acolhimento Psicológico */}
              {resultado.acolhimento_psicologico && (
