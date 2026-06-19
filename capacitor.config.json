@@ -1,5 +1,12 @@
 {
   "appId": "com.psiqueoraculo",
   "appName": "Psiquê Oráculo",
-  "webDir": "out"
+  "webDir": "out",
+  "plugins": {
+    "CapacitorUpdater": {
+      "autoUpdate": true,
+      "stats": true,
+      "resetWhenError": true
+    }
+  }
 }

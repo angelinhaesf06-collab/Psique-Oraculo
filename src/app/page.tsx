@@ -123,42 +123,77 @@ export default function OraculoJornada() {
           
           // Busca as ofertas (Offerings) que é o jeito recomendado
           const offerings = await Purchases.getOfferings();
-          console.log("Ofertas encontradas:", offerings);
+          console.log("Ofertas encontradas:", JSON.stringify(offerings));
 
           let packageToPurchase = null;
-          if (offerings.current && offerings.current.annual) {
-            packageToPurchase = offerings.current.annual;
-          } else if (offerings.current && (offerings.current as any).Yearly) {
-            packageToPurchase = (offerings.current as any).Yearly;
-          } else {
-            // Fallback para buscar por ID se offerings falhar
-            const { products } = await Purchases.getProducts({ productIdentifiers: ['premium_anual'] });
-            if (products && products.length > 0) {
-              console.log("Produto 'premium_anual' encontrado via fallback.");
-              const purchaseResult = await Purchases.purchaseStoreProduct({ product: products[0] });
-              if (typeof purchaseResult.customerInfo.entitlements.active['com.pisiqueoraculo Pro'] !== "undefined") {
-                await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
-                toast.success('Assinatura ativada! ✨');
-                setModalAberto(null);
-                return;
+          if (offerings.current) {
+            // Tenta o pacote anual primeiro
+            if (offerings.current.annual) {
+              packageToPurchase = offerings.current.annual;
+              console.log("Pacote anual encontrado via offerings.current.annual");
+            } else if (offerings.current.availablePackages && offerings.current.availablePackages.length > 0) {
+              // Fallback: pega o primeiro pacote disponível na oferta atual
+              packageToPurchase = offerings.current.availablePackages[0];
+              console.log("Pacote encontrado via availablePackages:", packageToPurchase);
+            }
+          }
+
+          if (!packageToPurchase) {
+            // Último recurso: busca direto por ID do produto
+            try {
+              const { products } = await Purchases.getProducts({ productIdentifiers: ['premium_anual', 'psique_premium_anual'] });
+              if (products && products.length > 0) {
+                console.log("Produto encontrado via getProducts:", products[0].productIdentifier);
+                const purchaseResult = await Purchases.purchaseStoreProduct({ product: products[0] });
+                const activeEntitlements = purchaseResult.customerInfo.entitlements.active;
+                const hasPremiumFallback = Object.keys(activeEntitlements).length > 0;
+                if (hasPremiumFallback) {
+                  await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
+                  toast.success('Assinatura ativada! ✨');
+                  setModalAberto(null);
+                  return;
+                }
               }
+            } catch (productErr) {
+              console.error("Erro ao buscar produtos diretamente:", productErr);
             }
           }
 
           if (packageToPurchase) {
             const purchaseResult = await Purchases.purchasePackage({ aPackage: packageToPurchase });
-            if (typeof purchaseResult.customerInfo.entitlements.active['com.pisiqueoraculo Pro'] !== "undefined") {
+
+            const activeEntitlements = purchaseResult.customerInfo.entitlements.active;
+            console.log("Entitlements ativos após compra:", JSON.stringify(activeEntitlements));
+
+            // Qualquer entitlement ativo = premium, ou verifica IDs específicos
+            const hasPremium =
+              Object.keys(activeEntitlements).length > 0 ||
+              typeof activeEntitlements['com.psiqueoraculo Pro'] !== "undefined" ||
+              typeof activeEntitlements['premium'] !== "undefined" ||
+              typeof activeEntitlements['pro'] !== "undefined";
+
+            if (hasPremium) {
               await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
               toast.success('Assinatura ativada! Bem-vinda ao Premium. ✨');
               setModalAberto(null);
+            } else {
+              console.error("Nenhum entitlement ativo após compra:", activeEntitlements);
+              toast.error('Assinatura processada, mas o acesso Premium ainda não foi liberado. Tente reiniciar o app.');
             }
           } else {
-             toast.error('Nenhuma oferta ativa encontrada na Play Store.');
+             toast.error('Nenhuma oferta ativa encontrada na Play Store. Verifique suas compras in-app no RevenueCat.');
           }
         } catch (nativeError: any) {
           if (!nativeError.userCancelled) {
             console.error('Erro detalhado RevenueCat:', nativeError);
-            toast.error(`Erro na Play Store: ${nativeError.message || 'Falha na compra'}`);
+            
+            let msgErro = "Falha na compra. Tente novamente.";
+            if (nativeError.code === "3") msgErro = "A compra foi cancelada.";
+            if (nativeError.code === "2") msgErro = "Problema com a loja (Play Store). Verifique sua conta Google.";
+            if (nativeError.code === "7") msgErro = "Este produto já foi adquirido.";
+            if (nativeError.code === "5") msgErro = "Produto não disponível para compra no momento.";
+            
+            toast.error(`Erro na Play Store: ${msgErro} (${nativeError.message || ''})`);
           }
         }
       } else {
@@ -169,8 +204,16 @@ export default function OraculoJornada() {
           body: JSON.stringify({ userId: session.user.id, email: session.user.email, isNative: false }),
         });
 
-        const data = await res.json();
-        if (data.url) {
+        const textResponse = await res.text();
+        let data;
+        try {
+          data = JSON.parse(textResponse);
+        } catch (e) {
+          console.error("Erro ao processar resposta do servidor (não é JSON):", textResponse);
+          throw new Error('O servidor retornou uma resposta inválida. Tente novamente mais tarde.');
+        }
+
+        if (res.ok && data.url) {
           window.location.href = data.url;
         } else {
           console.error("Erro retornado pelo Stripe:", data);
@@ -285,6 +328,8 @@ export default function OraculoJornada() {
         } else {
           if (data.carta_sorteada) { data.carta_sorteada.carta = cartasSorteadas[0].name; data.carta_sorteada.card_slug = cartasSorteadas[0].slug; data.carta_sorteada.image_url = cartasSorteadas[0].image_url; }
           data.situacao_atual = null;
+          data.caminho_acao = null;
+          data.resultado_conselho = null;
         }
       }
       setResultado(data); setPasso(4); 
@@ -324,20 +369,21 @@ export default function OraculoJornada() {
   const stopRecording = async () => { try { setIsGravando(false); if (Capacitor.isNativePlatform()) { await SpeechRecognition.stop(); setTimeout(() => SpeechRecognition.removeAllListeners(), 500); } } catch (e) {} };
 
   return (
-    <div className="w-full text-[#5C4D3C] font-sans flex flex-col items-center justify-center relative h-[100dvh] bg-transparent overflow-hidden">
-      <div className="relative z-10 w-full max-w-md h-full flex flex-col items-center px-6 py-8 pt-[calc(env(safe-area-inset-top)+60px)]">
-        
-        {/* Ícone Superior - Unificado Web/App - Com margem de segurança extra */}
-        <div className="flex justify-center z-20 pointer-events-none mb-6">
-          <div className="w-24 h-24 flex-none">
-            <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
-          </div>
-        </div>
+    <div className="w-full text-[#5C4D3C] font-sans flex flex-col items-center relative min-h-[100dvh] bg-transparent overflow-y-auto no-scrollbar">
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center px-6 pt-[calc(env(safe-area-inset-top)+20px)] pb-8 min-h-[100dvh]">
 
-        <div className="w-full flex flex-col items-center gap-6 animate-in fade-in duration-1000 overflow-hidden pb-4 flex-1 justify-center">
+        <div className="w-full flex flex-col items-center gap-6 animate-in fade-in duration-1000 pb-4 flex-1 justify-center">
           {passo === 0 && (
             <>
-              <div className="flex flex-col items-center w-full gap-4 shrink-0 -mt-12">
+              <div className="flex flex-col items-center w-full gap-4 shrink-0">
+                {/* Ícone Superior - dentro do fluxo para não sobrepor o título */}
+                {passo !== 2 && (
+                  <div className="flex justify-center pointer-events-none animate-in fade-in duration-500">
+                    <div className="w-20 h-20 flex-none">
+                      <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
+                    </div>
+                  </div>
+                )}
                 <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight tracking-tight drop-shadow-sm">Qual arcano você escolhe hoje?</h2>
                 {mensagemDia && (
                   <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-2.5 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
@@ -356,10 +402,15 @@ export default function OraculoJornada() {
                   { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
                   { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
                 ].map((o) => (
-                  <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/10 backdrop-blur-md border border-white/20 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all">
-                    <div className="w-14 h-20 md:w-16 md:h-24 bg-white/20 rounded-[18px] border border-white/10 p-1 overflow-hidden shrink-0 shadow-sm"><img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" /></div>
+                  <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/15 backdrop-blur-lg border border-white/30 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all">
+                    <div className="w-14 h-20 md:w-16 md:h-24 bg-white/10 rounded-[18px] border border-white/20 p-1 overflow-hidden shrink-0 shadow-sm">
+                      <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
+                    </div>
                     <div className="flex flex-col text-left space-y-0.5">
-                      <div className="flex flex-col"><span className="text-[12px] md:text-[13px] font-black tracking-[0.25em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span><span className="text-[#C4A484] text-[11px] md:text-[12px] font-black tracking-[0.25em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span></div>
+                      <div className="flex flex-col">
+                        <span className="text-[12px] md:text-[13px] font-black tracking-[0.25em] text-[#8B735B] uppercase leading-none">{o.title.split(' ')[0]}</span>
+                        <span className="text-[#C4A484] text-[11px] md:text-[12px] font-black tracking-[0.25em] uppercase">{o.title.split(' ').slice(1).join(' ')}</span>
+                      </div>
                       <span className="text-[8px] md:text-[9px] font-medium text-[#8B735B]/50 uppercase tracking-widest leading-tight">{o.desc}</span>
                     </div>
                   </button>
@@ -368,7 +419,7 @@ export default function OraculoJornada() {
 
               <div className="flex flex-col items-center gap-3 w-full shrink-0 pt-4">
                  <div className="flex items-center gap-1.5 w-full justify-center flex-wrap px-1">
-                    <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><Crown className="w-3.5 h-3.5 text-[#C4A484]" /><span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span></button>
+                    <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span></button>
                     <button onClick={() => setModalAberto('ajuda')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Ajuda</span></button>
                     <button onClick={() => setModalAberto('politicas')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Políticas</span></button>
                     <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-2.5 py-1 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
@@ -379,8 +430,15 @@ export default function OraculoJornada() {
 
           {passo === 1 && (
             <div className="flex flex-col items-center justify-center w-full gap-8 animate-in fade-in slide-in-from-right-4 duration-700 flex-1">
-              <div className="flex flex-col items-center w-full gap-4 shrink-0 -mt-16 mb-4">
-                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight drop-shadow-sm">Onde sua alma busca luz?</h2>
+              <div className="flex flex-col items-center w-full gap-4 shrink-0 mb-4">
+                <div className="flex justify-center pointer-events-none mb-2">
+                  <div className="w-20 h-20 flex-none">
+                    <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
+                  </div>
+                </div>
+                <div className="bg-[#C4A484]/15 backdrop-blur-md px-8 py-4 rounded-[28px] border border-[#C4A484]/30 shadow-sm">
+                  <h2 className="text-2xl md:text-3xl font-serif text-[#4A3B28] text-center leading-tight drop-shadow-sm">Onde sua alma busca luz?</h2>
+                </div>
               </div>
               <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
                 {TEMAS.map((t) => (
@@ -398,8 +456,10 @@ export default function OraculoJornada() {
 
           {passo === 2 && (
             <div className="flex flex-col items-center justify-center w-full gap-6 animate-in fade-in slide-in-from-right-4 duration-700 flex-1">
-              <div className="flex flex-col items-center w-full gap-4 shrink-0 -mt-16 mb-4">
-                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight drop-shadow-sm">Abra o seu coração</h2>
+              <div className="flex flex-col items-center w-full gap-4 shrink-0 mt-6 mb-4">
+                <div className="bg-[#C4A484]/15 backdrop-blur-md px-8 py-4 rounded-[28px] border border-[#C4A484]/30 shadow-sm">
+                  <h2 className="text-2xl md:text-3xl font-serif text-[#4A3B28] text-center leading-tight drop-shadow-sm">Abra o seu coração</h2>
+                </div>
               </div>
               <div className="w-full max-w-[340px] bg-white/5 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/40 p-6 shadow-sm space-y-4">
                 <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base md:text-lg font-medium text-[#4A3B28] resize-none placeholder:text-[#8B735B]/50" />
@@ -414,7 +474,12 @@ export default function OraculoJornada() {
 
           {passo === 3 && (
             <div className="flex flex-col items-center justify-center w-full gap-6 animate-in fade-in slide-in-from-right-4 duration-700 flex-1">
-              <div className="flex flex-col items-center w-full gap-4 shrink-0 -mt-16 mb-4">
+              <div className="flex flex-col items-center w-full gap-4 shrink-0 mb-4">
+                <div className="flex justify-center pointer-events-none mb-2">
+                  <div className="w-20 h-20 flex-none">
+                    <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
+                  </div>
+                </div>
                 <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight drop-shadow-sm">Consulte o Invisível</h2>
               </div>
               <div className="flex flex-col gap-3 w-full max-w-[340px]">
@@ -500,10 +565,10 @@ export default function OraculoJornada() {
 
              {/* 3. Acolhimento Psicológico */}
              {resultado.acolhimento_psicologico && (
-               <div className="bg-[#FDFBF7] rounded-[32px] border-2 border-[#E5D9C3] p-8 shadow-xl space-y-4">
-                  <div className="flex flex-col items-center gap-2 text-center">
+               <div className="bg-[#4A3B28]/10 backdrop-blur-sm rounded-[32px] border-2 border-[#E5D9C3] p-8 shadow-xl space-y-4 text-center">
+                  <div className="flex flex-col items-center gap-2">
                     <div className="p-3 rounded-full bg-[#C4A484]/10"><Heart className="w-6 h-6 text-[#C4A484]" /></div>
-                    <h4 className="text-lg font-serif text-[#4A3B28]">{resultado.acolhimento_psicologico.titulo || "Um Espaço de Escuta"}</h4>
+                    <h4 className="text-lg font-serif text-[#4A3B28]">{resultado.acolhimento_psicologico.titulo || "Um Espaço de Escuta e Acolhimento"}</h4>
                   </div>
                   
                   <details className="group">
@@ -513,7 +578,7 @@ export default function OraculoJornada() {
                       </span>
                     </summary>
                     <div className="animate-in fade-in slide-in-from-top-2 duration-500 pt-4">
-                      <p className="text-sm italic text-[#5C4D3C] leading-relaxed text-justify font-medium">&quot;{resultado.acolhimento_psicologico.conteudo}&quot;</p>
+                      <p className="text-sm italic text-[#5C4D3C] leading-relaxed text-center font-medium">&quot;{resultado.acolhimento_psicologico.conteudo}&quot;</p>
                     </div>
                   </details>
                </div>
@@ -653,7 +718,7 @@ export default function OraculoJornada() {
 
                     <div className="w-full bg-white rounded-[32px] border border-[#E5D9C3] p-8 shadow-sm space-y-6">
                       <div className="space-y-1">
-                        <span className="text-4xl font-black text-[#C4A484]">R$ 89,00</span>
+                        <span className="text-4xl font-black text-[#C4A484]">R$ 89,90</span>
                         <p className="text-[10px] font-bold text-[#8B735B]/60 uppercase tracking-widest">Pagamento Único • Válido por 365 dias</p>
                       </div>
 

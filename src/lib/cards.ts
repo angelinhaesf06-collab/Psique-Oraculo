@@ -143,7 +143,12 @@ export async function drawCards(deckName: string, count: number = 3) {
     };
 
     const rank = rankMap[parts[0]];
-    const suit = suitMap[parts[1]];
+    let suit = suitMap[parts[1]];
+
+    // Correção para variações de nomes de arquivos (plural/singular)
+    if (suit === 'paus' && name.includes(' de Pau') && !name.includes(' de Paus')) {
+      suit = 'pau';
+    }
 
     if (rank && suit) return `minor/${rank}-de-${suit}.jpg`;
     return null;

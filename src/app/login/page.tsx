@@ -83,13 +83,13 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-center px-6 pb-12 text-center pt-[calc(env(safe-area-inset-top)+20px)]">
         
         {/* Ícone Superior - Layout Unificado Web/App */}
-        <div className="flex justify-center z-20 pointer-events-none mb-6">
+        <div className="flex justify-center z-20 pointer-events-none mb-10">
           <div className="w-20 h-20 flex-none">
             <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-4 w-full mb-8">
+        <div className="flex flex-col items-center gap-4 w-full mb-12">
           <div className="flex flex-col gap-2 items-center">
             <h1 className="text-4xl md:text-5xl font-serif text-[#C4A484] leading-tight text-center drop-shadow-sm">
               Psiquê Oráculo
@@ -100,8 +100,8 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="w-full space-y-4">
-          <form onSubmit={handleEmailLogin} className="space-y-4">
+        <div className="w-full space-y-5">
+          <form onSubmit={handleEmailLogin} className="space-y-5">
              <div className="relative">
                 <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#C4A484]" />
                 <input
