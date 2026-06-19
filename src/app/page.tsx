@@ -143,7 +143,7 @@ export default function OraculoJornada() {
             try {
               const { products } = await Purchases.getProducts({ productIdentifiers: ['premium_anual', 'psique_premium_anual'] });
               if (products && products.length > 0) {
-                console.log("Produto encontrado via getProducts:", products[0].productIdentifier);
+                console.log("Produto encontrado via getProducts:", products[0].identifier);
                 const purchaseResult = await Purchases.purchaseStoreProduct({ product: products[0] });
                 const activeEntitlements = purchaseResult.customerInfo.entitlements.active;
                 const hasPremiumFallback = Object.keys(activeEntitlements).length > 0;
@@ -377,13 +377,11 @@ export default function OraculoJornada() {
             <>
               <div className="flex flex-col items-center w-full gap-4 shrink-0">
                 {/* Ícone Superior - dentro do fluxo para não sobrepor o título */}
-                {passo !== 2 && (
-                  <div className="flex justify-center pointer-events-none animate-in fade-in duration-500">
-                    <div className="w-20 h-20 flex-none">
-                      <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
-                    </div>
+                <div className="flex justify-center pointer-events-none animate-in fade-in duration-500">
+                  <div className="w-20 h-20 flex-none">
+                    <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
                   </div>
-                )}
+                </div>
                 <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight tracking-tight drop-shadow-sm">Qual arcano você escolhe hoje?</h2>
                 {mensagemDia && (
                   <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-2.5 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
