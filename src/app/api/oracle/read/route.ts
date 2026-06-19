@@ -112,10 +112,27 @@ export async function POST(req: Request) {
       - Use sua base de conhecimento sobre Tarot, Baralho Cigano e Tarot dos Anjos para reconhecer as ilustrações.
       - Se a imagem estiver escura ou difícil, faça a melhor leitura possível baseada nos símbolos visíveis.
 
-      REGRAS POR ORÁCULO:
-      1. TARÔ: Foco Arquetípico e Vibracional. Cite Arcanos em PORTUGUÊS. Entregue um "Mantra da Alma" no campo 'mantra'.
-      2. BARALHO CIGANO: Preditivo e Direto. Identifique Nome + Número da carta. Ofereça "Banho", "Cristal" ou "Erva". No campo 'salmo', entregue uma "Dica da Cigana" (simpatia leve).
-      3. TARÔ DOS ANJOS: Amparo Angelical. Nome do Anjo. Salmo real, Arcanjo e Versículo bíblico. No campo 'dica_angelical', entregue um ritual angelical completo.
+      REGRAS POR ORÁCULO (cada oráculo TEM UMA IDENTIDADE PRÓPRIA — respeite os campos exatos):
+
+      1. TARÔ CLÁSSICO — Voz arquetípica, junguiana e poética (interpretação mais profunda e simbólica).
+         PREENCHA OBRIGATORIAMENTE em 'ancoragem_rituais':
+            - 'mantra': um "Mantra da Alma" curto e poderoso (afirmação na 1ª pessoa).
+            - 'biblia': um versículo de acolhimento (opcional, se fizer sentido).
+         DEIXE COMO NULL: 'banho', 'salmo', 'dica_angelical'.
+
+      2. BARALHO CIGANO — Voz PREDITIVA, DIRETA e OBJETIVA (respostas práticas, sem rodeios, foco no concreto do dia a dia).
+         Identifique Nome + Número da carta.
+         PREENCHA OBRIGATORIAMENTE em 'ancoragem_rituais':
+            - 'salmo': uma "Dica da Cigana" — uma SIMPATIA leve e prática (ex: com sal grosso, fita, vela, ervas).
+            - 'banho': um BANHO ou ERVA mística com instrução clara (qual erva e como usar).
+         DEIXE COMO NULL: 'mantra', 'biblia', 'dica_angelical'.
+
+      3. TARÔ DOS ANJOS — Voz de amparo celestial e devocional. Cite o Nome do Anjo.
+         PREENCHA OBRIGATORIAMENTE em 'ancoragem_rituais':
+            - 'salmo': um SALMO real (com número, ex: "Salmo 91") apropriado ao momento.
+            - 'biblia': um Versículo bíblico de conforto.
+            - 'dica_angelical': um RITUAL ANGELICAL completo (foco_oracao, vela_cor, ritual_dias, dica_texto).
+         DEIXE COMO NULL: 'mantra', 'banho'.
 
       INSTRUÇÕES DE TIRAGEM (1 CARTA - SIM OU NÃO):
       - OBJETIVIDADE: Esta deve ser direta. 
@@ -153,7 +170,10 @@ export async function POST(req: Request) {
     `;
 
     const modelName = "gemini-3.1-flash-lite";
-    const tools = [{ googleSearch: {} }];
+    // A API do Gemini fica instável ao combinar IMAGEM + ferramenta de busca + resposta JSON.
+    // Quando há foto (tiragem física), desligamos o googleSearch para a identificação funcionar.
+    const temImagem = typeof imagem === 'string' && imagem.includes("base64,");
+    const tools = temImagem ? undefined : [{ googleSearch: {} }];
     const model = getGeminiModel(modelName, systemInstruction, tools);
 
     const nomesDasCartas = Array.isArray(cartas) 

@@ -37,20 +37,8 @@ export function getFallbackImageUrl(name: string, deckName: string): string {
   }
 
   if (deckName === 'Tarô dos Anjos') {
-    // Coleção de imagens celestiais, angelicais e de luz pura para fallback dinâmico
-    const ANGEL_IDS = [
-      '1470770841072-f978cf4d019e', // Céu Majestoso (Luz entre nuvens)
-      '1519817650390-64a93db51149', // Brilho Solar Celestial
-      '1550684848-fac1c5b4e853', // Luz Divina e Etérea
-      '1511632765486-a017905332b5', // Luz Abstrata Sagrada
-      '1490730141103-6cac27aaab94', // Nuvens ao Pôr do Sol (Paz)
-      '1501854140801-50d01698950b', // Céu Estrelado e Infinito
-      '1530983821852-66d49e755294'  // Escultura Clássica de Anjo
-    ];
-    // Seleciona uma imagem de forma determinística baseada no nome do anjo
-    const hash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const id = ANGEL_IDS[Math.abs(hash) % ANGEL_IDS.length];
-    return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&q=80&w=300`;
+    // Sempre uma imagem de anjo local: nunca fica em branco e funciona offline.
+    return `/assets/decks/anjos/default-angel.jpg`;
   }
 
   return 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&q=80&w=300';
@@ -162,13 +150,17 @@ export async function drawCards(deckName: string, count: number = 3) {
     }
 
     if (deckName === 'Tarô dos Anjos') {
-      const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '');
-      if (name === 'Lelahel') return `/assets/decks/anjos/lelahel.png`;
-      
-      const customAngels = ['vehuiah', 'jeliel', 'sitael', 'elemiah', 'mahasiah', 'achaiah'];
-      if (customAngels.includes(slug)) return `/assets/decks/anjos/${slug}.jpg`;
-      
-      return `/assets/decks/anjos/default-angel.jpg`;
+      // Anjos com imagem própria. Todos os demais usam a imagem padrão de anjo
+      // (default-angel.jpg) — assim NUNCA fica em branco.
+      const ANGEL_FILES: Record<string, string> = {
+        'Vehuiah': 'vehuiah.jpg', 'Jeliel': 'jeliel.jpg', 'Sitael': 'sitael.jpg',
+        'Elemiah': 'elemiah.jpg', 'Mahasiah': 'mahasiah.jpg', 'Lelahel': 'lelahel.png',
+        'Achaiah': 'achaiah.jpg', 'Cahetel': 'cahetel.jpg', 'Haziel': 'haziel.jpg',
+        'Aladiah': 'aladiah.jpg', 'Lauviah': 'lauviah.jpg', 'Hahaiah': 'hahaiah.png',
+        'Iezalel': 'iezalel.png', 'Mebahel': 'mebahel.png', 'Hariel': 'hariel.png'
+      };
+      const file = ANGEL_FILES[name] || 'default-angel.jpg';
+      return `/assets/decks/anjos/${file}`;
     }
 
     let filename = CIGANO_MAP[name] || CUSTOM_MAP[name] || `${name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '')}.jpg`;
