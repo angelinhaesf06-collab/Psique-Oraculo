@@ -316,6 +316,7 @@ export default function OraculoJornada() {
       if (!res.ok) {
         let dataErr; try { dataErr = JSON.parse(textResponse); } catch (e) {}
         if (res.status === 403 && dataErr?.reason === 'paywall') { setModalAberto('assinatura'); return; }
+        if (res.status === 403) { toast.info(dataErr?.message || 'Você atingiu seu limite de leituras por hoje. Volte amanhã. ✨'); return; }
         throw new Error(`Erro do Servidor (${res.status})`);
       }
       let data = JSON.parse(textResponse);

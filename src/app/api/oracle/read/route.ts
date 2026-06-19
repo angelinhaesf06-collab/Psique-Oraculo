@@ -42,8 +42,38 @@ export async function POST(req: Request) {
     console.log("Tipo Leitura:", tipoLeitura);
     console.log("Tema:", tema);
 
-    // 2. Validação e Consumo de Créditos (Sempre permitir por enquanto)
-    let creditStatus = { allowed: true, type: "test_mode" };
+    // 2. Validação e Consumo de Créditos
+    // Regra de negócio (função check_and_consume_reading no banco):
+    //   - Trial de 24h após cadastro: leituras liberadas
+    //   - Premium: até 5 leituras por dia
+    //   - Trial expirado e sem premium: bloqueia (paywall)
+    let creditStatus: any = { allowed: true, type: "open" };
+
+    // A "mensagem do dia" é sempre gratuita e nunca consome créditos.
+    if (tipoLeitura !== 'mensagem_dia' && userId) {
+      try {
+        const { data: gate, error: gateError } = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId });
+
+        if (gateError) {
+          // Falha ao consultar o banco: libera por segurança para não quebrar a experiência,
+          // mas registra para investigação.
+          console.error("Erro ao validar créditos (liberando por segurança):", gateError.message);
+        } else if (gate) {
+          creditStatus = gate;
+          if (!gate.allowed) {
+            console.log("Leitura bloqueada pela regra de acesso:", gate);
+            const blockResponse = NextResponse.json(
+              { reason: gate.reason || 'paywall', message: gate.message || 'Acesso premium necessário para continuar.' },
+              { status: 403 }
+            );
+            blockResponse.headers.set('Access-Control-Allow-Origin', '*');
+            return blockResponse;
+          }
+        }
+      } catch (gateEx: any) {
+        console.error("Exceção ao validar créditos (liberando por segurança):", gateEx?.message);
+      }
+    }
 
     // 3. Inicialização do Modelo Gemini
     console.log("Sintonizando com o Modelo Gemini...");

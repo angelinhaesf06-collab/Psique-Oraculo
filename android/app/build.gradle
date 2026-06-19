@@ -1,5 +1,13 @@
 apply plugin: 'com.android.application'
 
+// Carrega as credenciais de assinatura de um arquivo NÃO versionado (keystore.properties).
+// Isso evita expor senhas e a chave .jks no controle de versão.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.psiqueoraculo"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +15,8 @@ android {
         applicationId "com.psiqueoraculo"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 77
-        versionName "1.1.47"
+        versionCode 78
+        versionName "1.1.48"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -18,10 +26,10 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('nova-chave-psique.jks')
-            storePassword 'Psique2026@'
-            keyAlias 'upload'
-            keyPassword 'Psique2026@'
+            storeFile file(keystoreProperties['storeFile'] ?: 'nova-chave-psique.jks')
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
         }
     }
     buildTypes {

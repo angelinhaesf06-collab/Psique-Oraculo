@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
+// Necessário para o build de exportação estática (Capacitor) não falhar.
+// No Vercel é ignorado e a rota roda normalmente como dinâmica.
 export const dynamic = 'force-static';
 
 export async function POST(req: Request) {
