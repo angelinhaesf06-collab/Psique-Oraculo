@@ -360,21 +360,62 @@ export default function OraculoJornada() {
     try {
       const isNative = Capacitor.isNativePlatform();
       if (!isNative) {
-        const recognition = new (window as any).webkitSpeechRecognition();
+        const SR = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+        if (!SR) { toast.info('Seu navegador não suporta voz. Digite sua pergunta. ✨'); return; }
+        const recognition = new SR();
         recognition.lang = 'pt-BR';
-        recognition.onresult = (event: any) => { setDesabafo(prev => prev + (prev ? ' ' : '') + event.results[0][0].transcript); };
-        recognition.start(); setIsGravando(true); return;
-      }
-      const { available } = await SpeechRecognition.available();
-      if (available) {
+        recognition.interimResults = true;
+        recognition.continuous = true;
+        recognition.onresult = (event: any) => {
+          const txt = Array.from(event.results).map((r: any) => r[0].transcript).join(' ');
+          setDesabafo(txt);
+        };
+        recognition.start();
+        (window as any).__rec = recognition;
         setIsGravando(true);
-        SpeechRecognition.start({ language: "pt-BR", partialResults: true, popup: true });
-        SpeechRecognition.addListener("partialResults", (data: any) => { if (data.matches && data.matches.length > 0) setDesabafo(data.matches[0]); });
+        return;
       }
-    } catch (err: any) { setIsGravando(false); }
+
+      // Garante a permissão de microfone ANTES de gravar
+      let perm = await SpeechRecognition.checkPermissions();
+      if (perm.speechRecognition !== 'granted') {
+        perm = await SpeechRecognition.requestPermissions();
+      }
+      if (perm.speechRecognition !== 'granted') {
+        toast.error('Permita o microfone nas configurações para usar a voz. 🎤');
+        return;
+      }
+
+      const { available } = await SpeechRecognition.available();
+      if (!available) {
+        toast.info('Voz indisponível neste aparelho. Pode digitar sua pergunta. ✨');
+        return;
+      }
+
+      setIsGravando(true);
+      SpeechRecognition.removeAllListeners();
+      SpeechRecognition.addListener("partialResults", (data: any) => {
+        if (data.matches && data.matches.length > 0) setDesabafo(data.matches[0]);
+      });
+      // popup:false = gravação inline, combina com o "segure para falar"
+      await SpeechRecognition.start({ language: "pt-BR", partialResults: true, popup: false });
+    } catch (err: any) {
+      setIsGravando(false);
+      toast.error('Não consegui ouvir agora. Tente de novo ou digite. 🎤');
+    }
   };
 
-  const stopRecording = async () => { try { setIsGravando(false); if (Capacitor.isNativePlatform()) { await SpeechRecognition.stop(); setTimeout(() => SpeechRecognition.removeAllListeners(), 500); } } catch (e) {} };
+  const stopRecording = async () => {
+    try {
+      setIsGravando(false);
+      if (Capacitor.isNativePlatform()) {
+        await SpeechRecognition.stop();
+        setTimeout(() => SpeechRecognition.removeAllListeners(), 500);
+      } else {
+        try { (window as any).__rec?.stop(); } catch {}
+      }
+    } catch (e) {}
+  };
 
   return (
     <div className="w-full text-[#5C4D3C] font-sans flex flex-col items-center relative min-h-[100dvh] bg-transparent overflow-y-auto no-scrollbar">
