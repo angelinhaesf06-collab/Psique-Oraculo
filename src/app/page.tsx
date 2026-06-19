@@ -105,8 +105,15 @@ export default function OraculoJornada() {
   const handleSubscribe = async () => {
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      let { data: { session } } = await supabase.auth.getSession();
+
+      // Rede de segurança: se a sessão não veio na primeira tentativa,
+      // tenta renová-la antes de mandar a usuária para o login.
+      if (!session) {
+        const refreshed = await supabase.auth.refreshSession();
+        session = refreshed.data.session;
+      }
+
       if (!session) {
         toast.error('Faça login para iniciar sua jornada premium.');
         router.push('/login');
