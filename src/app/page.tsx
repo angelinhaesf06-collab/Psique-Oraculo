@@ -113,7 +113,7 @@ export default function OraculoJornada() {
         return;
       }
 
-      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      const isNative = Capacitor.isNativePlatform();
       console.log("Iniciando processo de assinatura. IsNative:", isNative);
 
       if (isNative) {
@@ -230,7 +230,7 @@ export default function OraculoJornada() {
 
   useEffect(() => {
     const initRevenueCat = async () => {
-      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      const isNative = Capacitor.isNativePlatform();
       const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
       if (isNative && apiKey && apiKey !== 'sua_chave_publica_google_do_revenuecat_aqui') {
         try {
@@ -342,7 +342,7 @@ export default function OraculoJornada() {
   useEffect(() => {
     const requestPermissions = async () => {
       try {
-        const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+        const isNative = Capacitor.isNativePlatform();
         if (isNative) { await SpeechRecognition.requestPermissions(); await VoiceRecorder.requestAudioRecordingPermission(); }
       } catch (e) {}
     };
@@ -351,7 +351,7 @@ export default function OraculoJornada() {
 
   const startRecording = async () => {
     try {
-      const isNative = typeof window !== 'undefined' && (window as any).Capacitor?.isNative;
+      const isNative = Capacitor.isNativePlatform();
       if (!isNative) {
         const recognition = new (window as any).webkitSpeechRecognition();
         recognition.lang = 'pt-BR';
