@@ -127,6 +127,15 @@ export default function OraculoJornada() {
   const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
+  const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
+
+  const fecharBoasVindas = async () => {
+    try {
+      if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_welcome_seen', value: '1' });
+      else localStorage.setItem('psique_welcome_seen', '1');
+    } catch {}
+    setMostrarBoasVindas(false);
+  };
 
   // Ao abrir: carrega sessão, status premium e quantas consultas grátis restam.
   useEffect(() => {
@@ -142,6 +151,12 @@ export default function OraculoJornada() {
         setIsPremiumUser(premium);
         const usadas = await getFreeReadingsUsed();
         setFreeRestantes(Math.max(0, FREE_READINGS_LIMIT - usadas));
+
+        // Tela de boas-vindas: só na primeira vez (e não para quem já é premium)
+        const welcomeSeen = Capacitor.isNativePlatform()
+          ? (await Preferences.get({ key: 'psique_welcome_seen' })).value
+          : localStorage.getItem('psique_welcome_seen');
+        if (welcomeSeen !== '1' && !premium) setMostrarBoasVindas(true);
 
         // Se a pessoa voltou do cadastro com intenção de assinar, abre o paywall.
         const pend = Capacitor.isNativePlatform()
@@ -788,6 +803,32 @@ export default function OraculoJornada() {
 
              <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); window.scrollTo(0,0); }} className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-white py-6 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] shadow-2xl rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
           </div>
+        </div>
+      )}
+
+      {mostrarBoasVindas && (
+        <div className="fixed inset-0 bg-[#FDFBF7] z-[120] flex flex-col items-center justify-center px-8 py-10 text-center animate-in fade-in duration-500 overflow-y-auto no-scrollbar">
+          <div className="w-28 h-28 flex-none mb-6">
+            <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
+          </div>
+          <h1 className="text-3xl font-serif text-[#C4A484] leading-tight mb-2">Bem-vinda ✨</h1>
+          <p className="text-sm text-[#8B735B] max-w-[300px] leading-relaxed mb-6">
+            Seu oráculo de bolso com <span className="font-bold">Tarô, Baralho Cigano e Tarô dos Anjos</span>, interpretado com sensibilidade e acolhimento.
+          </p>
+
+          <div className="w-full max-w-[320px] bg-[#C4A484]/10 border border-[#C4A484]/30 rounded-[28px] p-6 mb-8 flex flex-col items-center gap-2">
+            <Sparkles size={20} className="text-[#C4A484]" />
+            <span className="text-2xl font-serif font-bold text-[#4A3B28]">3 leituras grátis</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">para começar sua jornada</span>
+          </div>
+
+          <button
+            onClick={fecharBoasVindas}
+            className="w-full max-w-[320px] py-5 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[24px] shadow-xl text-[11px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all"
+          >
+            Começar minha jornada
+          </button>
+          <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-widest mt-4">Sem cadastro · É só escolher seu arcano</p>
         </div>
       )}
 
