@@ -128,6 +128,33 @@ export default function OraculoJornada() {
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
+  const [respostaRapida, setRespostaRapida] = useState<string | null>(null);
+  const [loadingRapida, setLoadingRapida] = useState(false);
+
+  // Pergunta sugerida: sorteia 1 carta invisível e pede uma resposta curta (baixo token).
+  const handlePerguntaSugerida = async () => {
+    if (!resultado?.pergunta_sugerida || loadingRapida || respostaRapida) return;
+    setLoadingRapida(true);
+    try {
+      const carta = await drawCards(tipoOraculo, 1);
+      const { data: { session } } = await supabase.auth.getSession();
+      const siteUrl = 'https://www.pisiqueoraculo.com.br';
+      const apiUrl = Capacitor.isNativePlatform() ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
+        body: JSON.stringify({ tipoOraculo, tipoLeitura: 'resposta_rapida', tema, pergunta: resultado.pergunta_sugerida, cartas: carta })
+      });
+      const txt = await res.text();
+      let data: any = {};
+      try { data = JSON.parse(txt); } catch {}
+      setRespostaRapida(data?.resposta_rapida || 'As energias pedem silêncio. Tente novamente em paz. ✨');
+    } catch {
+      setRespostaRapida('As energias pedem silêncio. Tente novamente em paz. ✨');
+    } finally {
+      setLoadingRapida(false);
+    }
+  };
 
   const fecharBoasVindas = async () => {
     try {
@@ -431,7 +458,7 @@ export default function OraculoJornada() {
           data.resultado_conselho = null;
         }
       }
-      setResultado(data); setPasso(4);
+      setResultado(data); setPasso(4); setRespostaRapida(null);
       // Consumiu uma consulta grátis (só conta quem ainda não é premium)
       if (!isPremium) { await incFreeReadings(); setFreeRestantes((r) => Math.max(0, r - 1)); }
     } catch (error: any) {
@@ -801,7 +828,34 @@ export default function OraculoJornada() {
                </div>
              )}
 
-             <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); window.scrollTo(0,0); }} className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-white py-6 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] shadow-2xl rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
+             {/* Pergunta sugerida (isca) + resposta rápida */}
+             {resultado.pergunta_sugerida && (
+               <div className="flex flex-col items-center gap-3">
+                 {!respostaRapida ? (
+                   <button
+                     onClick={handlePerguntaSugerida}
+                     disabled={loadingRapida}
+                     className="w-full flex items-center justify-center gap-2 py-4 px-5 rounded-[24px] bg-[#C4A484]/10 border border-[#C4A484]/40 text-[#8B735B] active:scale-[0.98] transition-all disabled:opacity-60"
+                   >
+                     <Sparkles size={15} className={`text-[#C4A484] ${loadingRapida ? 'animate-spin' : 'animate-pulse'}`} />
+                     <span className="text-[12px] font-bold text-[#5C4D3C]">
+                       {loadingRapida ? 'Consultando o oráculo...' : resultado.pergunta_sugerida}
+                     </span>
+                   </button>
+                 ) : (
+                   <div className="w-full bg-[#2C2420] rounded-[24px] border border-[#C4A484]/20 p-6 text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+                     <div className="flex items-center justify-center gap-2 mb-3">
+                       <Sparkles size={12} className="text-[#C4A484]" />
+                       <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#C4A484]">{resultado.pergunta_sugerida}</span>
+                       <Sparkles size={12} className="text-[#C4A484]" />
+                     </div>
+                     <p className="text-base font-serif text-white/90 leading-relaxed">{respostaRapida}</p>
+                   </div>
+                 )}
+               </div>
+             )}
+
+             <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); setRespostaRapida(null); window.scrollTo(0,0); }} className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-white py-6 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] shadow-2xl rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
           </div>
         </div>
       )}

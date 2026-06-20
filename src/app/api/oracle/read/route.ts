@@ -36,6 +36,26 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl } = body;
 
+    // RESPOSTA RÁPIDA (pergunta de acompanhamento): prompt enxuto p/ baixo custo de tokens.
+    if (tipoLeitura === 'resposta_rapida') {
+      const cartaRapida = Array.isArray(cartas) ? (cartas[0]?.name || cartas[0]) : cartas;
+      const quickModel = getGeminiModel("gemini-3.1-flash-lite");
+      const quickPrompt = `Você é um oráculo direto. O usuário perguntou: "${pergunta}". A carta sorteada foi: ${cartaRapida}. Responda de forma extremamente clara e objetiva, sem rodeios, em no máximo 2 frases curtas (limite estrito de 30 palavras). Apenas a resposta, em português do Brasil, sem explicações adicionais.`;
+      let quickText = "";
+      try {
+        const quickResult = await quickModel.generateContent({
+          contents: [{ role: "user", parts: [{ text: quickPrompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 80 } as any
+        });
+        quickText = (quickResult?.response?.text() || "").trim();
+      } catch (e: any) {
+        console.error("Erro na resposta rápida:", e?.message);
+      }
+      const quickResponse = NextResponse.json({ resposta_rapida: quickText || "As energias pedem silêncio neste instante. Tente novamente em paz." });
+      quickResponse.headers.set('Access-Control-Allow-Origin', '*');
+      return quickResponse;
+    }
+
     console.log("--- INÍCIO DA REQUISIÇÃO ORÁCULO ---");
     console.log("Usuário ID Identificado:", userId);
     console.log("Tipo Oráculo:", tipoOraculo);
@@ -141,6 +161,8 @@ export async function POST(req: Request) {
 
       CONSELHO DO PSICÓLOGO: Tom humanista, acolhedor e poético. "Abraço em palavras".
 
+      PERGUNTA SUGERIDA: Ao final da leitura, com base no contexto do que foi respondido, gere UMA única sugestão de pergunta curta de acompanhamento que o usuário provavelmente faria agora (ex: "Quer saber quando isso vai acontecer?", "Qual o maior obstáculo?", "E na vida amorosa?"). Coloque essa frase curta no campo 'pergunta_sugerida'. Para a leitura "mensagem_dia", deixe 'pergunta_sugerida' como null.
+
       ESTRUTURA JSON OBRIGATÓRIA (Mantenha todos os valores em PORTUGUÊS):
       {
         "oraculo_utilizado": "${tipoOraculo}",
@@ -155,6 +177,7 @@ export async function POST(req: Request) {
           "veredito_direto": "SIM ou NÃO ou TALVEZ"
         },
         "acolhimento_quantum": { "titulo": "Sabedoria", "conteudo": "Reflexão" },
+        "pergunta_sugerida": "Pergunta curta de acompanhamento (ou null na mensagem do dia)",
         "acolhimento_psicologico": {
           "titulo": "Um Espaço de Escuta e Acolhimento",
           "conteudo": "Análise profunda com tom de psicólogo renomado e empático."
