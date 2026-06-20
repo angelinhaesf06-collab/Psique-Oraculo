@@ -7,12 +7,36 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { drawCards, getAngelAttributes, getFallbackImageUrl } from '@/lib/cards';
 import { Capacitor } from '@capacitor/core';
+import { Preferences } from '@capacitor/preferences';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
 import { Browser } from '@capacitor/browser';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
+
+// Modelo de conversão: a pessoa usa o app sem login. Após 3 consultas grátis
+// (contadas NO APARELHO), aparece o paywall para cadastrar e assinar.
+// A "mensagem do dia" é sempre gratuita e não entra nessa conta.
+const FREE_READINGS_LIMIT = 3;
+
+async function getFreeReadingsUsed(): Promise<number> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { value } = await Preferences.get({ key: 'psique_free_readings' });
+      return parseInt(value || '0', 10) || 0;
+    }
+    return parseInt(localStorage.getItem('psique_free_readings') || '0', 10) || 0;
+  } catch { return 0; }
+}
+
+async function incFreeReadings(): Promise<void> {
+  try {
+    const next = String((await getFreeReadingsUsed()) + 1);
+    if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_free_readings', value: next });
+    else localStorage.setItem('psique_free_readings', next);
+  } catch {}
+}
 
 const MandalaSmallIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
@@ -101,6 +125,37 @@ export default function OraculoJornada() {
   const [resultado, setResultado] = useState<any>(null);
   const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | 'mensagem_ampliada' | null>(null);
   const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
+  const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
+
+  // Ao abrir: carrega sessão, status premium e quantas consultas grátis restam.
+  useEffect(() => {
+    const carregarAcesso = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        let premium = false;
+        if (session) {
+          const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', session.user.id).single();
+          premium = !!prof?.is_premium;
+        }
+        setIsPremiumUser(premium);
+        const usadas = await getFreeReadingsUsed();
+        setFreeRestantes(Math.max(0, FREE_READINGS_LIMIT - usadas));
+
+        // Se a pessoa voltou do cadastro com intenção de assinar, abre o paywall.
+        const pend = Capacitor.isNativePlatform()
+          ? (await Preferences.get({ key: 'psique_pending_subscribe' })).value
+          : localStorage.getItem('psique_pending_subscribe');
+        if (pend === '1' && session) {
+          if (Capacitor.isNativePlatform()) await Preferences.remove({ key: 'psique_pending_subscribe' });
+          else localStorage.removeItem('psique_pending_subscribe');
+          setModalAberto('assinatura');
+        }
+      } catch {}
+    };
+    carregarAcesso();
+  }, []);
 
   const handleSubscribe = async () => {
     try {
@@ -115,7 +170,12 @@ export default function OraculoJornada() {
       }
 
       if (!session) {
-        toast.error('Faça login para iniciar sua jornada premium.');
+        // Modelo de conversão: a pessoa cria a conta agora e volta direto para assinar.
+        try {
+          if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_pending_subscribe', value: '1' });
+          else localStorage.setItem('psique_pending_subscribe', '1');
+        } catch {}
+        toast.info('Crie sua conta para ativar o Premium ✨');
         router.push('/login');
         return;
       }
@@ -156,6 +216,7 @@ export default function OraculoJornada() {
                 const hasPremiumFallback = Object.keys(activeEntitlements).length > 0;
                 if (hasPremiumFallback) {
                   await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
+                  setIsPremiumUser(true);
                   toast.success('Assinatura ativada! ✨');
                   setModalAberto(null);
                   return;
@@ -181,6 +242,7 @@ export default function OraculoJornada() {
 
             if (hasPremium) {
               await supabase.from('profiles').update({ is_premium: true }).eq('id', session.user.id);
+              setIsPremiumUser(true);
               toast.success('Assinatura ativada! Bem-vinda ao Premium. ✨');
               setModalAberto(null);
             } else {
@@ -291,6 +353,20 @@ export default function OraculoJornada() {
   const prevPasso = () => setPasso(passo - 1);
 
   const handleLeitura = async (tipo: string, imageData?: string) => {
+    // Controle de acesso: premium libera tudo; senão, 3 consultas grátis no aparelho.
+    const { data: { session: gateSession } } = await supabase.auth.getSession();
+    let isPremium = false;
+    if (gateSession) {
+      try {
+        const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', gateSession.user.id).single();
+        isPremium = !!prof?.is_premium;
+      } catch {}
+    }
+    if (!isPremium && (await getFreeReadingsUsed()) >= FREE_READINGS_LIMIT) {
+      setModalAberto('assinatura');
+      return;
+    }
+
     if (tipo === 'foto' && !imageData) {
       try {
         const image = await CapacitorCamera.getPhoto({
@@ -340,8 +416,10 @@ export default function OraculoJornada() {
           data.resultado_conselho = null;
         }
       }
-      setResultado(data); setPasso(4); 
-    } catch (error: any) { 
+      setResultado(data); setPasso(4);
+      // Consumiu uma consulta grátis (só conta quem ainda não é premium)
+      if (!isPremium) { await incFreeReadings(); setFreeRestantes((r) => Math.max(0, r - 1)); }
+    } catch (error: any) {
       toast.info("As energias estão se recalibrando. Tente novamente em um momento de paz. ✨"); 
     } finally { setLoading(false); }
   };
@@ -465,11 +543,27 @@ export default function OraculoJornada() {
               </div>
 
               <div className="flex flex-col items-center gap-3 w-full shrink-0 pt-4">
+                 {/* Selo de status: premium ou consultas grátis restantes */}
+                 {isPremiumUser ? (
+                   <div className="flex items-center gap-1.5 rounded-full bg-[#C4A484]/15 border border-[#C4A484]/30 px-3 py-1">
+                     <Crown size={11} className="text-[#C4A484]" />
+                     <span className="text-[8px] font-black uppercase tracking-widest text-[#8B735B]">Premium Ativo</span>
+                   </div>
+                 ) : (
+                   <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full bg-[#C4A484]/10 border border-[#C4A484]/25 px-3 py-1 active:scale-95 transition-all">
+                     <Sparkles size={11} className="text-[#C4A484]" />
+                     <span className="text-[8px] font-black uppercase tracking-widest text-[#8B735B]">
+                       {freeRestantes > 0 ? `${freeRestantes} ${freeRestantes === 1 ? 'consulta grátis' : 'consultas grátis'}` : 'Seja Premium para continuar'}
+                     </span>
+                   </button>
+                 )}
                  <div className="flex items-center gap-1.5 w-full justify-center flex-wrap px-1">
                     <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span></button>
                     <button onClick={() => setModalAberto('ajuda')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Ajuda</span></button>
                     <button onClick={() => setModalAberto('politicas')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Políticas</span></button>
-                    <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-2.5 py-1 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
+                    {user && (
+                      <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-2.5 py-1 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
+                    )}
                  </div>
               </div>
             </>
