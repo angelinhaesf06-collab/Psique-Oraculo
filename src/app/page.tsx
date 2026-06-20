@@ -808,8 +808,8 @@ export default function OraculoJornada() {
 
       {mostrarBoasVindas && (
         <div className="fixed inset-0 bg-[#FDFBF7] z-[120] flex flex-col items-center justify-center px-8 py-10 text-center animate-in fade-in duration-500 overflow-y-auto no-scrollbar">
-          <div className="w-28 h-28 flex-none mb-6">
-            <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
+          <div className="w-28 h-28 flex-none mb-6 rounded-[28px] overflow-hidden shadow-lg border border-[#E5D9C3]">
+            <img src="/assets/brand/icon-512.png" alt="Psiquê Oráculo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-3xl font-serif text-[#C4A484] leading-tight mb-2">Bem-vinda ✨</h1>
           <p className="text-sm text-[#8B735B] max-w-[300px] leading-relaxed mb-6">
