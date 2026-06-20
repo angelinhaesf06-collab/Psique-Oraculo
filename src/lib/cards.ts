@@ -154,10 +154,10 @@ export async function drawCards(deckName: string, count: number = 3) {
       // (default-angel.jpg) — assim NUNCA fica em branco.
       const ANGEL_FILES: Record<string, string> = {
         'Vehuiah': 'vehuiah.jpg', 'Jeliel': 'jeliel.jpg', 'Sitael': 'sitael.jpg',
-        'Elemiah': 'elemiah.jpg', 'Mahasiah': 'mahasiah.jpg', 'Lelahel': 'lelahel.png',
+        'Elemiah': 'elemiah.jpg', 'Mahasiah': 'mahasiah.jpg', 'Lelahel': 'lelahel.jpg',
         'Achaiah': 'achaiah.jpg', 'Cahetel': 'cahetel.jpg', 'Haziel': 'haziel.jpg',
-        'Aladiah': 'aladiah.jpg', 'Lauviah': 'lauviah.jpg', 'Hahaiah': 'hahaiah.png',
-        'Iezalel': 'iezalel.png', 'Mebahel': 'mebahel.png', 'Hariel': 'hariel.png'
+        'Aladiah': 'aladiah.jpg', 'Lauviah': 'lauviah.jpg', 'Hahaiah': 'hahaiah.jpg',
+        'Iezalel': 'iezalel.jpg', 'Mebahel': 'mebahel.jpg', 'Hariel': 'hariel.jpg'
       };
       const file = ANGEL_FILES[name] || 'default-angel.jpg';
       return `/assets/decks/anjos/${file}`;
