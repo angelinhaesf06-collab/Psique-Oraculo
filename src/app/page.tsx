@@ -295,17 +295,26 @@ export default function OraculoJornada() {
              toast.error('Nenhuma oferta ativa encontrada na Play Store. Verifique suas compras in-app no RevenueCat.');
           }
         } catch (nativeError: any) {
-          if (!nativeError.userCancelled) {
+          // Detecção robusta de cancelamento: não é erro, a pessoa só desistiu.
+          const msg = (nativeError?.message || '').toLowerCase();
+          const foiCancelada =
+            nativeError?.userCancelled === true ||
+            nativeError?.code === "1" ||
+            nativeError?.code === 1 ||
+            nativeError?.code === "PURCHASE_CANCELLED" ||
+            msg.includes('cancel');
+
+          if (!foiCancelada) {
             console.error('Erro detalhado RevenueCat:', nativeError);
-            
+
             let msgErro = "Falha na compra. Tente novamente.";
-            if (nativeError.code === "3") msgErro = "A compra foi cancelada.";
             if (nativeError.code === "2") msgErro = "Problema com a loja (Play Store). Verifique sua conta Google.";
             if (nativeError.code === "7") msgErro = "Este produto já foi adquirido.";
             if (nativeError.code === "5") msgErro = "Produto não disponível para compra no momento.";
-            
-            toast.error(`Erro na Play Store: ${msgErro} (${nativeError.message || ''})`);
+
+            toast.error(`Erro na Play Store: ${msgErro}`);
           }
+          // Se foi cancelada: não mostra nada (experiência tranquila).
         }
       } else {
         console.log("Iniciando checkout Stripe...");
