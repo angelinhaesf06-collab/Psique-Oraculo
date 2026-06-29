@@ -259,7 +259,7 @@ export default function OraculoJornada() {
           if (!packageToPurchase) {
             // Último recurso: busca direto por ID do produto
             try {
-              const fallbackIds = plano === 'mensal' ? ['premium_mensal', 'psique_premium_mensal'] : ['premium_anual', 'psique_premium_anual'];
+              const fallbackIds = plano === 'mensal' ? ['mensal', 'premium_mensal', 'psique_premium_mensal'] : ['premium_anual', 'psique_premium_anual'];
               const { products } = await Purchases.getProducts({ productIdentifiers: fallbackIds });
               if (products && products.length > 0) {
                 console.log("Produto encontrado via getProducts:", products[0].identifier);
