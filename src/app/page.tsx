@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import { drawCards, getAngelAttributes, getFallbackImageUrl } from '@/lib/cards';
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
+import { agendarMensagemDiaria } from '@/lib/notifications';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
@@ -197,9 +198,11 @@ export default function OraculoJornada() {
       } catch {}
     };
     carregarAcesso();
+    // Agenda o lembrete diário da "mensagem do dia" (retém quem ainda não assinou)
+    agendarMensagemDiaria();
   }, []);
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = async (plano: 'anual' | 'mensal' = 'anual') => {
     try {
       setLoading(true);
       let { data: { session } } = await supabase.auth.getSession();
@@ -234,23 +237,30 @@ export default function OraculoJornada() {
           const offerings = await Purchases.getOfferings();
           console.log("Ofertas encontradas:", JSON.stringify(offerings));
 
-          let packageToPurchase = null;
+          let packageToPurchase: any = null;
+          const pkgs = offerings.current?.availablePackages || [];
           if (offerings.current) {
-            // Tenta o pacote anual primeiro
-            if (offerings.current.annual) {
-              packageToPurchase = offerings.current.annual;
-              console.log("Pacote anual encontrado via offerings.current.annual");
-            } else if (offerings.current.availablePackages && offerings.current.availablePackages.length > 0) {
-              // Fallback: pega o primeiro pacote disponível na oferta atual
-              packageToPurchase = offerings.current.availablePackages[0];
-              console.log("Pacote encontrado via availablePackages:", packageToPurchase);
+            if (plano === 'mensal') {
+              packageToPurchase =
+                offerings.current.monthly ||
+                pkgs.find((p: any) => p.packageType === 'MONTHLY') ||
+                pkgs.find((p: any) => /mensal|monthly/i.test(p.identifier || p.product?.identifier || ''));
+            } else {
+              packageToPurchase =
+                offerings.current.annual ||
+                pkgs.find((p: any) => p.packageType === 'ANNUAL') ||
+                pkgs.find((p: any) => /anual|annual/i.test(p.identifier || p.product?.identifier || ''));
             }
+            // Último recurso dentro da oferta: primeiro pacote disponível
+            if (!packageToPurchase && pkgs.length > 0) packageToPurchase = pkgs[0];
+            console.log(`Plano ${plano} -> pacote escolhido:`, packageToPurchase?.identifier);
           }
 
           if (!packageToPurchase) {
             // Último recurso: busca direto por ID do produto
             try {
-              const { products } = await Purchases.getProducts({ productIdentifiers: ['premium_anual', 'psique_premium_anual'] });
+              const fallbackIds = plano === 'mensal' ? ['premium_mensal', 'psique_premium_mensal'] : ['premium_anual', 'psique_premium_anual'];
+              const { products } = await Purchases.getProducts({ productIdentifiers: fallbackIds });
               if (products && products.length > 0) {
                 console.log("Produto encontrado via getProducts:", products[0].identifier);
                 const purchaseResult = await Purchases.purchaseStoreProduct({ product: products[0] });
@@ -956,19 +966,11 @@ export default function OraculoJornada() {
                     <div className="space-y-2">
                       <h4 className="text-2xl font-bold text-[#4A3B28]">Acesso Premium</h4>
                       <p className="text-sm text-[#8B735B] leading-relaxed">
-                        Experimente <span className="font-bold">grátis por 24 horas</span>.<br />
-                        Após o teste, pague apenas R$ 89,00 e use o <span className="font-bold">ano inteiro</span> sem mensalidades.
+                        Desbloqueie <span className="font-bold">todos os oráculos</span>, rituais e leituras. Escolha o plano que combina com você.
                       </p>
                     </div>
 
-                    <div className="w-full bg-white rounded-[32px] border border-[#E5D9C3] p-8 shadow-sm space-y-6">
-                      <div className="space-y-1">
-                        <span className="text-4xl font-black text-[#C4A484]">R$ 89,90</span>
-                        <p className="text-[10px] font-bold text-[#8B735B]/60 uppercase tracking-widest">Pagamento Único • Válido por 365 dias</p>
-                      </div>
-
-                      <div className="w-full h-px bg-[#E5D9C3]/50" />
-
+                    <div className="w-full bg-white rounded-[32px] border border-[#E5D9C3] p-6 shadow-sm">
                       <div className="space-y-4 text-left">
                         {[
                           "Salmos e Cânticos da Bíblia",
@@ -986,15 +988,35 @@ export default function OraculoJornada() {
                       </div>
                     </div>
 
-                    <div className="w-full space-y-4 pt-4">
-                      <button 
-                        onClick={handleSubscribe}
+                    <div className="w-full space-y-3 pt-2">
+                      {/* Plano Anual - destaque */}
+                      <button
+                        onClick={() => handleSubscribe('anual')}
                         disabled={loading}
-                        className="w-full py-5 bg-gradient-to-br from-[#C4A484] to-[#8B735B] text-white rounded-[24px] shadow-xl text-xs font-black uppercase tracking-[0.3em] active:scale-95 transition-all"
+                        className="w-full relative py-4 px-5 bg-gradient-to-br from-[#C4A484] to-[#8B735B] text-white rounded-[24px] shadow-xl active:scale-95 transition-all flex items-center justify-between disabled:opacity-60"
                       >
-                        {loading ? "Processando..." : "Iniciar 3 Dias Grátis"}
+                        <div className="flex flex-col text-left">
+                          <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-80">Anual · Melhor valor</span>
+                          <span className="text-lg font-black leading-tight">R$ 89,90 <span className="text-[11px] font-medium opacity-80">/ano</span></span>
+                          <span className="text-[9px] font-medium opacity-70">Equivale a R$ 7,49/mês</span>
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-3 py-1.5 rounded-full">{loading ? '...' : 'Assinar'}</span>
                       </button>
-                      <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-tighter">Cancele a qualquer momento antes do fim do período de teste.</p>
+
+                      {/* Plano Mensal */}
+                      <button
+                        onClick={() => handleSubscribe('mensal')}
+                        disabled={loading}
+                        className="w-full py-4 px-5 bg-white border border-[#C4A484]/40 rounded-[24px] shadow-sm active:scale-95 transition-all flex items-center justify-between disabled:opacity-60"
+                      >
+                        <div className="flex flex-col text-left">
+                          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#8B735B]/70">Mensal · Flexível</span>
+                          <span className="text-lg font-black text-[#4A3B28] leading-tight">R$ 19,90 <span className="text-[11px] font-medium opacity-70">/mês</span></span>
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#C4A484]">{loading ? '...' : 'Assinar'}</span>
+                      </button>
+
+                      <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-tighter text-center">Cancele quando quiser • Renovação automática</p>
                     </div>
                  </div>
                )}
