@@ -148,6 +148,15 @@ export default function OraculoJornada() {
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
+  const [mostrarNovidades, setMostrarNovidades] = useState(false);
+
+  const fecharNovidades = async () => {
+    try {
+      if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_novidades_v1', value: '1' });
+      else localStorage.setItem('psique_novidades_v1', '1');
+    } catch {}
+    setMostrarNovidades(false);
+  };
   const [respostaRapida, setRespostaRapida] = useState<string | null>(null);
   const [loadingRapida, setLoadingRapida] = useState(false);
   const [paidReadings, setPaidReadings] = useState(0);
@@ -227,7 +236,15 @@ export default function OraculoJornada() {
         const welcomeSeen = Capacitor.isNativePlatform()
           ? (await Preferences.get({ key: 'psique_welcome_seen' })).value
           : localStorage.getItem('psique_welcome_seen');
-        if (welcomeSeen !== '1' && !premium) setMostrarBoasVindas(true);
+        if (welcomeSeen !== '1' && !premium) {
+          setMostrarBoasVindas(true);
+        } else {
+          // Usuário que já conhece o app: mostra "Novidades" 1x
+          const novidadesVistas = Capacitor.isNativePlatform()
+            ? (await Preferences.get({ key: 'psique_novidades_v1' })).value
+            : localStorage.getItem('psique_novidades_v1');
+          if (novidadesVistas !== '1') setMostrarNovidades(true);
+        }
 
         // Se a pessoa voltou do cadastro com intenção de assinar, abre o paywall.
         const pend = Capacitor.isNativePlatform()
@@ -784,7 +801,7 @@ export default function OraculoJornada() {
              <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden backdrop-blur-sm">
                 <div className="absolute top-0 right-0 p-4 opacity-10"><Sparkles className="w-12 h-12 text-[#C4A484]" /></div>
                 <h3 className="text-[#C4A484] font-serif text-xl mb-4 text-center">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
-                <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-justify">{resultado.leitura_caminho?.analise_detalhada}</p>
+                <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-left">{resultado.leitura_caminho?.analise_detalhada}</p>
                 {resultado.leitura_caminho?.veredito_direto && (
                   <div className="mt-6 pt-6 border-t border-white/10 flex flex-col items-center gap-2">
                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Veredito</span>
@@ -838,7 +855,7 @@ export default function OraculoJornada() {
                       </span>
                     </summary>
                     <div className="animate-in fade-in slide-in-from-top-2 duration-500 pt-4">
-                      <p className="text-sm italic text-[#5C4D3C] leading-relaxed text-center font-medium">&quot;{resultado.acolhimento_psicologico.conteudo}&quot;</p>
+                      <p className="text-sm italic text-[#5C4D3C] leading-relaxed text-left font-medium">&quot;{resultado.acolhimento_psicologico.conteudo}&quot;</p>
                     </div>
                   </details>
                </div>
@@ -960,6 +977,40 @@ export default function OraculoJornada() {
             Começar minha jornada
           </button>
           <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-widest mt-4">Sem cadastro · É só escolher seu arcano</p>
+        </div>
+      )}
+
+      {mostrarNovidades && (
+        <div className="fixed inset-0 z-[119] flex items-center justify-center p-5 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-[#2C2420]/80 backdrop-blur-md" onClick={fecharNovidades} />
+          <div className="relative w-full max-w-sm bg-[#FDFBF7] rounded-[32px] border border-[#E5D9C3] shadow-2xl p-7 z-[120] animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col items-center text-center mb-5">
+              <div className="w-16 h-16 rounded-[20px] overflow-hidden border border-[#E5D9C3] mb-3">
+                <img src="/assets/brand/icon-512.png" alt="" className="w-full h-full object-cover" />
+              </div>
+              <h3 className="text-xl font-serif text-[#C4A484]">Novidades ✨</h3>
+              <p className="text-[11px] text-[#8B735B]/70 mt-1">O Psiquê Oráculo está ainda melhor</p>
+            </div>
+            <div className="space-y-3 mb-6">
+              {[
+                { t: 'Plano mensal', d: 'Agora por R$ 19,90/mês, além do anual' },
+                { t: 'Leitura avulsa', d: 'Pague só por uma consulta quando quiser' },
+                { t: 'Pergunta rápida', d: 'Uma resposta extra no fim de cada leitura' },
+                { t: 'App mais leve e rápido', d: 'Atualizado para abrir e rodar melhor' },
+              ].map((n) => (
+                <div key={n.t} className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-[#48BB78] shrink-0 mt-0.5" />
+                  <div className="text-left">
+                    <p className="text-[13px] font-bold text-[#4A3B28] leading-tight">{n.t}</p>
+                    <p className="text-[11px] text-[#8B735B] leading-tight">{n.d}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={fecharNovidades} className="w-full py-4 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
+              Explorar agora
+            </button>
+          </div>
         </div>
       )}
 
