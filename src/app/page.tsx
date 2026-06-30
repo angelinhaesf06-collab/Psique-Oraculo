@@ -14,7 +14,7 @@ import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
 import { Browser } from '@capacitor/browser';
 import { App as CapacitorApp } from '@capacitor/app';
-import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
+import { Purchases, LOG_LEVEL, PRODUCT_CATEGORY } from '@revenuecat/purchases-capacitor';
 
 // Modelo de conversão: a pessoa usa o app sem login. Após 3 consultas grátis
 // (contadas NO APARELHO), aparece o paywall para cadastrar e assinar.
@@ -36,6 +36,25 @@ async function incFreeReadings(): Promise<void> {
     const next = String((await getFreeReadingsUsed()) + 1);
     if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_free_readings', value: next });
     else localStorage.setItem('psique_free_readings', next);
+  } catch {}
+}
+
+// Créditos de leitura avulsa (comprados a R$ 2,06 cada), guardados no aparelho.
+async function getPaidReadings(): Promise<number> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { value } = await Preferences.get({ key: 'psique_paid_readings' });
+      return parseInt(value || '0', 10) || 0;
+    }
+    return parseInt(localStorage.getItem('psique_paid_readings') || '0', 10) || 0;
+  } catch { return 0; }
+}
+
+async function setPaidReadingsStore(n: number): Promise<void> {
+  try {
+    const v = String(Math.max(0, n));
+    if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_paid_readings', value: v });
+    else localStorage.setItem('psique_paid_readings', v);
   } catch {}
 }
 
@@ -131,6 +150,29 @@ export default function OraculoJornada() {
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
   const [respostaRapida, setRespostaRapida] = useState<string | null>(null);
   const [loadingRapida, setLoadingRapida] = useState(false);
+  const [paidReadings, setPaidReadings] = useState(0);
+
+  // Compra avulsa: paga R$ 2,06 e libera 1 leitura (produto consumível 'leitura_avulsa').
+  const handleComprarAvulsa = async () => {
+    try {
+      setLoading(true);
+      if (!Capacitor.isNativePlatform()) { toast.info('A compra avulsa está disponível no aplicativo. ✨'); return; }
+      const { products } = await Purchases.getProducts({ productIdentifiers: ['leitura_avulsa'], type: PRODUCT_CATEGORY.NON_SUBSCRIPTION });
+      if (!products || products.length === 0) { toast.error('Produto indisponível no momento. Tente novamente.'); return; }
+      await Purchases.purchaseStoreProduct({ product: products[0] });
+      const novo = (await getPaidReadings()) + 1;
+      await setPaidReadingsStore(novo);
+      setPaidReadings(novo);
+      toast.success('Leitura liberada! ✨');
+      setModalAberto(null);
+    } catch (e: any) {
+      const msg = (e?.message || '').toLowerCase();
+      const cancel = e?.userCancelled === true || e?.code === '1' || e?.code === 1 || msg.includes('cancel');
+      if (!cancel) toast.error('Não foi possível concluir a compra. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Pergunta sugerida: sorteia 1 carta invisível e pede uma resposta curta (baixo token).
   const handlePerguntaSugerida = async () => {
@@ -179,6 +221,7 @@ export default function OraculoJornada() {
         setIsPremiumUser(premium);
         const usadas = await getFreeReadingsUsed();
         setFreeRestantes(Math.max(0, FREE_READINGS_LIMIT - usadas));
+        setPaidReadings(await getPaidReadings());
 
         // Tela de boas-vindas: só na primeira vez (e não para quem já é premium)
         const welcomeSeen = Capacitor.isNativePlatform()
@@ -423,9 +466,14 @@ export default function OraculoJornada() {
         isPremium = !!prof?.is_premium;
       } catch {}
     }
-    if (!isPremium && (await getFreeReadingsUsed()) >= FREE_READINGS_LIMIT) {
-      setModalAberto('assinatura');
-      return;
+    if (!isPremium) {
+      const gratisRestantes = FREE_READINGS_LIMIT - (await getFreeReadingsUsed());
+      const avulsas = await getPaidReadings();
+      // Sem grátis e sem crédito avulso → paywall
+      if (gratisRestantes <= 0 && avulsas <= 0) {
+        setModalAberto('assinatura');
+        return;
+      }
     }
 
     if (tipo === 'foto' && !imageData) {
@@ -479,7 +527,17 @@ export default function OraculoJornada() {
       }
       setResultado(data); setPasso(4); setRespostaRapida(null);
       // Consumiu uma consulta grátis (só conta quem ainda não é premium)
-      if (!isPremium) { await incFreeReadings(); setFreeRestantes((r) => Math.max(0, r - 1)); }
+      if (!isPremium) {
+        // Consome grátis primeiro; se não houver, consome 1 crédito avulso pago
+        if ((await getFreeReadingsUsed()) < FREE_READINGS_LIMIT) {
+          await incFreeReadings();
+          setFreeRestantes((r) => Math.max(0, r - 1));
+        } else {
+          const restante = Math.max(0, (await getPaidReadings()) - 1);
+          await setPaidReadingsStore(restante);
+          setPaidReadings(restante);
+        }
+      }
     } catch (error: any) {
       toast.info("As energias estão se recalibrando. Tente novamente em um momento de paz. ✨"); 
     } finally { setLoading(false); }
@@ -1017,6 +1075,20 @@ export default function OraculoJornada() {
                       </button>
 
                       <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-tighter text-center">Cancele quando quiser • Renovação automática</p>
+
+                      {/* Opção avulsa - discreta, para quem não quer assinar */}
+                      <div className="flex items-center gap-2 pt-2">
+                        <div className="h-px flex-1 bg-[#E5D9C3]/60" />
+                        <span className="text-[8px] font-bold uppercase tracking-widest text-[#8B735B]/50">ou</span>
+                        <div className="h-px flex-1 bg-[#E5D9C3]/60" />
+                      </div>
+                      <button
+                        onClick={handleComprarAvulsa}
+                        disabled={loading}
+                        className="w-full py-3 rounded-[20px] border border-[#E5D9C3] bg-white/60 text-[#8B735B] active:scale-95 transition-all disabled:opacity-60"
+                      >
+                        <span className="text-[11px] font-bold">Só hoje? Liberar 1 leitura · R$ 2,06</span>
+                      </button>
                     </div>
                  </div>
                )}
