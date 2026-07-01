@@ -147,6 +147,12 @@ export default function OraculoJornada() {
   const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
   const [conselhoDia, setConselhoDia] = useState<{ carta: string, texto: string, img: string } | null>(null);
   const [loadingConselho, setLoadingConselho] = useState(false);
+  const [mostrarPressagio, setMostrarPressagio] = useState(false);
+
+  const abrirPressagio = () => {
+    setMostrarPressagio(true);
+    carregarConselhoDia(tipoOraculo);
+  };
 
   // Conselho do Dia: 1 arcano do oráculo escolhido + conselho curto.
   // Cache por dia e por oráculo → no máximo 1 chamada de IA por dia/oráculo.
@@ -184,10 +190,6 @@ export default function OraculoJornada() {
     }
   };
 
-  // Carrega o conselho ao chegar no passo dos temas (com o oráculo já escolhido)
-  useEffect(() => {
-    if (passo === 1 && tipoOraculo) carregarConselhoDia(tipoOraculo);
-  }, [passo, tipoOraculo]);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
@@ -758,30 +760,11 @@ export default function OraculoJornada() {
                 </div>
               </div>
 
-              {/* Conselho do Dia — 1 arcano do oráculo escolhido */}
-              {(loadingConselho || conselhoDia) && (
-                <div className="w-full max-w-[340px] bg-white/40 backdrop-blur-md rounded-[24px] border border-[#C4A484]/25 shadow-sm p-3 flex items-center gap-3 animate-in fade-in duration-500">
-                  {loadingConselho ? (
-                    <div className="flex items-center gap-3 w-full justify-center py-3">
-                      <Sparkles size={14} className="text-[#C4A484] animate-spin" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">Sorteando seu conselho...</span>
-                    </div>
-                  ) : conselhoDia && (
-                    <>
-                      <div className="w-12 h-[68px] rounded-lg overflow-hidden border border-[#C4A484]/30 bg-[#FDFBF7] shrink-0">
-                        <img src={conselhoDia.img} alt={conselhoDia.carta} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      </div>
-                      <div className="flex flex-col text-left gap-0.5">
-                        <div className="flex items-center gap-1.5">
-                          <Sparkles size={10} className="text-[#C4A484]" />
-                          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-[#C4A484]">Presságio do Dia · {conselhoDia.carta}</span>
-                        </div>
-                        <p className="text-[11px] italic text-[#5C4D3C] leading-snug font-medium">&quot;{conselhoDia.texto}&quot;</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
+              {/* Botão para revelar o Presságio do Dia (abre em pop-up, não corta a tela) */}
+              <button onClick={abrirPressagio} className="flex items-center gap-2 rounded-full border border-[#C4A484]/40 bg-white/50 px-4 py-2 shadow-sm active:scale-95 transition-all">
+                <Sparkles size={12} className="text-[#C4A484]" />
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#8B735B]">Ver Presságio do Dia</span>
+              </button>
 
               <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
                 {TEMAS.map((t) => (
@@ -1075,6 +1058,38 @@ export default function OraculoJornada() {
             </div>
             <button onClick={fecharNovidades} className="w-full py-4 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
               Explorar agora
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mostrarPressagio && (
+        <div className="fixed inset-0 z-[118] flex items-center justify-center p-5 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-[#2C2420]/80 backdrop-blur-md" onClick={() => setMostrarPressagio(false)} />
+          <div className="relative w-full max-w-sm bg-[#FDFBF7] rounded-[32px] border border-[#E5D9C3] shadow-2xl p-7 z-[120] flex flex-col items-center text-center animate-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles size={14} className="text-[#C4A484]" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C4A484]">Presságio do Dia</span>
+              <Sparkles size={14} className="text-[#C4A484]" />
+            </div>
+            {loadingConselho ? (
+              <div className="flex flex-col items-center gap-3 py-8">
+                <Sparkles size={22} className="text-[#C4A484] animate-spin" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">Consultando o oráculo...</span>
+              </div>
+            ) : conselhoDia ? (
+              <>
+                <div className="w-20 h-[112px] rounded-xl overflow-hidden border border-[#C4A484]/30 bg-[#FDFBF7] shadow-md mb-4">
+                  <img src={conselhoDia.img} alt={conselhoDia.carta} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                </div>
+                <h4 className="text-lg font-serif text-[#4A3B28] mb-2">{conselhoDia.carta}</h4>
+                <p className="text-sm italic text-[#5C4D3C] leading-relaxed font-medium mb-6">&quot;{conselhoDia.texto}&quot;</p>
+              </>
+            ) : (
+              <p className="text-sm text-[#8B735B] py-8">O oráculo sussurra em silêncio. Tente novamente.</p>
+            )}
+            <button onClick={() => setMostrarPressagio(false)} className="w-full py-4 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
+              Voltar ao Oráculo
             </button>
           </div>
         </div>
