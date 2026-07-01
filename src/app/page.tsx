@@ -145,6 +145,49 @@ export default function OraculoJornada() {
   const [resultado, setResultado] = useState<any>(null);
   const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | 'mensagem_ampliada' | null>(null);
   const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
+  const [conselhoDia, setConselhoDia] = useState<{ carta: string, texto: string, img: string } | null>(null);
+  const [loadingConselho, setLoadingConselho] = useState(false);
+
+  // Conselho do Dia: 1 arcano do oráculo escolhido + conselho curto.
+  // Cache por dia e por oráculo → no máximo 1 chamada de IA por dia/oráculo.
+  const carregarConselhoDia = async (oraculo: string) => {
+    if (!oraculo) return;
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    const chave = `psique_conselho_${oraculo}_${hoje}`;
+    try {
+      const salvo = localStorage.getItem(chave);
+      if (salvo) { setConselhoDia(JSON.parse(salvo)); return; }
+    } catch {}
+    setConselhoDia(null);
+    setLoadingConselho(true);
+    try {
+      const cartas = await drawCards(oraculo, 1);
+      const carta = cartas[0];
+      const { data: { session } } = await supabase.auth.getSession();
+      const siteUrl = 'https://www.pisiqueoraculo.com.br';
+      const apiUrl = Capacitor.isNativePlatform() ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
+        body: JSON.stringify({ tipoOraculo: oraculo, tipoLeitura: 'resposta_rapida', tema: 'Conselho do Dia', pergunta: 'Qual conselho breve e inspirador o oráculo me dá para hoje?', cartas })
+      });
+      const txt = await res.text();
+      let data: any = {};
+      try { data = JSON.parse(txt); } catch {}
+      const conselho = { carta: carta.name, texto: data?.resposta_rapida || 'Confie no seu caminho hoje. ✨', img: carta.image_url };
+      setConselhoDia(conselho);
+      try { localStorage.setItem(chave, JSON.stringify(conselho)); } catch {}
+    } catch {
+      setConselhoDia(null);
+    } finally {
+      setLoadingConselho(false);
+    }
+  };
+
+  // Carrega o conselho ao chegar no passo dos temas (com o oráculo já escolhido)
+  useEffect(() => {
+    if (passo === 1 && tipoOraculo) carregarConselhoDia(tipoOraculo);
+  }, [passo, tipoOraculo]);
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
@@ -714,6 +757,32 @@ export default function OraculoJornada() {
                   <h2 className="text-2xl md:text-3xl font-serif text-[#4A3B28] text-center leading-tight drop-shadow-sm">Onde sua alma busca luz?</h2>
                 </div>
               </div>
+
+              {/* Conselho do Dia — 1 arcano do oráculo escolhido */}
+              {(loadingConselho || conselhoDia) && (
+                <div className="w-full max-w-[340px] bg-white/40 backdrop-blur-md rounded-[24px] border border-[#C4A484]/25 shadow-sm p-3 flex items-center gap-3 animate-in fade-in duration-500">
+                  {loadingConselho ? (
+                    <div className="flex items-center gap-3 w-full justify-center py-3">
+                      <Sparkles size={14} className="text-[#C4A484] animate-spin" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">Sorteando seu conselho...</span>
+                    </div>
+                  ) : conselhoDia && (
+                    <>
+                      <div className="w-12 h-[68px] rounded-lg overflow-hidden border border-[#C4A484]/30 bg-[#FDFBF7] shrink-0">
+                        <img src={conselhoDia.img} alt={conselhoDia.carta} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      </div>
+                      <div className="flex flex-col text-left gap-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles size={10} className="text-[#C4A484]" />
+                          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-[#C4A484]">Conselho do Dia · {conselhoDia.carta}</span>
+                        </div>
+                        <p className="text-[11px] italic text-[#5C4D3C] leading-snug font-medium">&quot;{conselhoDia.texto}&quot;</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
               <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
                 {TEMAS.map((t) => (
                   <button key={t.label} onClick={() => { setTema(t.label); nextPasso(); }} className="w-full h-14 rounded-[22px] bg-white/10 backdrop-blur-md border border-white/20 p-[2px] shadow-sm active:scale-[0.98] transition-all group">
