@@ -159,7 +159,7 @@ export default function OraculoJornada() {
   const carregarConselhoDia = async (oraculo: string) => {
     if (!oraculo) return;
     const hoje = new Date().toLocaleDateString('pt-BR');
-    const chave = `psique_conselho_v2_${oraculo}_${hoje}`;
+    const chave = `psique_conselho_v3_${oraculo}_${hoje}`;
     try {
       const salvo = localStorage.getItem(chave);
       if (salvo) { setConselhoDia(JSON.parse(salvo)); return; }
@@ -167,24 +167,29 @@ export default function OraculoJornada() {
     setConselhoDia(null);
     setLoadingConselho(true);
     try {
-      const cartas = await drawCards(oraculo, 1);
-      const carta = cartas[0];
+      // Sorteia a carta com proteção (não pode derrubar o presságio)
+      let carta: any = null;
+      try { const cartas = await drawCards(oraculo, 1); carta = cartas?.[0] || null; } catch {}
+      const nomeCarta = carta?.name || 'O Arcano';
+
       const { data: { session } } = await supabase.auth.getSession();
       const siteUrl = 'https://www.pisiqueoraculo.com.br';
       const apiUrl = Capacitor.isNativePlatform() ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
-        body: JSON.stringify({ tipoOraculo: oraculo, tipoLeitura: 'conselho_dia', tema: 'Conselho do Dia', cartas })
+        body: JSON.stringify({ tipoOraculo: oraculo, tipoLeitura: 'conselho_dia', tema: 'Conselho do Dia', cartas: [{ name: nomeCarta }] })
       });
       const txt = await res.text();
       let data: any = {};
       try { data = JSON.parse(txt); } catch {}
-      const conselho = { carta: carta.name, texto: data?.resposta_rapida || 'Confie no seu caminho hoje. ✨', img: carta.image_url };
+      const texto = data?.resposta_rapida;
+      const conselho = { carta: nomeCarta, texto: texto || 'Confie no seu caminho hoje. ✨', img: carta?.image_url || '' };
       setConselhoDia(conselho);
-      try { localStorage.setItem(chave, JSON.stringify(conselho)); } catch {}
+      // Só guarda no cache se veio previsão de verdade (evita cachear fallback)
+      if (texto) { try { localStorage.setItem(chave, JSON.stringify(conselho)); } catch {} }
     } catch {
-      setConselhoDia(null);
+      setConselhoDia({ carta: 'O Oráculo', texto: 'As energias pedem um instante. Tente novamente. ✨', img: '' });
     } finally {
       setLoadingConselho(false);
     }
