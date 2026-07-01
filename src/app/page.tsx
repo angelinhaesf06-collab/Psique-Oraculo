@@ -570,7 +570,10 @@ export default function OraculoJornada() {
     requestPermissions();
   }, []);
 
-  const startRecording = async () => {
+  // Toque para falar: usa a tela de voz do Google (transcreve de forma confiável
+  // e devolve o texto), em vez do modo inline que falhava em muitos aparelhos.
+  const gravarVoz = async () => {
+    if (isGravando) return;
     try {
       const isNative = Capacitor.isNativePlatform();
       if (!isNative) {
@@ -579,18 +582,17 @@ export default function OraculoJornada() {
         const recognition = new SR();
         recognition.lang = 'pt-BR';
         recognition.interimResults = true;
-        recognition.continuous = true;
         recognition.onresult = (event: any) => {
           const txt = Array.from(event.results).map((r: any) => r[0].transcript).join(' ');
           setDesabafo(txt);
         };
+        recognition.onend = () => setIsGravando(false);
         recognition.start();
-        (window as any).__rec = recognition;
         setIsGravando(true);
         return;
       }
 
-      // Garante a permissão de microfone ANTES de gravar
+      // Permissão do microfone
       let perm = await SpeechRecognition.checkPermissions();
       if (perm.speechRecognition !== 'granted') {
         perm = await SpeechRecognition.requestPermissions();
@@ -607,28 +609,23 @@ export default function OraculoJornada() {
       }
 
       setIsGravando(true);
-      SpeechRecognition.removeAllListeners();
-      SpeechRecognition.addListener("partialResults", (data: any) => {
-        if (data.matches && data.matches.length > 0) setDesabafo(data.matches[0]);
-      });
-      // popup:false = gravação inline, combina com o "segure para falar"
-      await SpeechRecognition.start({ language: "pt-BR", partialResults: true, popup: false });
+      // popup do Google + partialResults:false → devolve a transcrição final
+      const result: any = await SpeechRecognition.start({ language: 'pt-BR', popup: true, partialResults: false });
+      setIsGravando(false);
+      const texto = result?.matches?.[0];
+      if (texto) {
+        setDesabafo((prev) => (prev ? prev.trim() + ' ' : '') + texto);
+      } else {
+        toast.info('Não consegui entender. Toque e fale de novo. 🎤');
+      }
     } catch (err: any) {
       setIsGravando(false);
-      toast.error('Não consegui ouvir agora. Tente de novo ou digite. 🎤');
-    }
-  };
-
-  const stopRecording = async () => {
-    try {
-      setIsGravando(false);
-      if (Capacitor.isNativePlatform()) {
-        await SpeechRecognition.stop();
-        setTimeout(() => SpeechRecognition.removeAllListeners(), 500);
-      } else {
-        try { (window as any).__rec?.stop(); } catch {}
+      const msg = (err?.message || '').toLowerCase();
+      // Cancelamento / "sem correspondência" não são erros que precisam alarmar
+      if (msg && !msg.includes('cancel') && !msg.includes('no match') && !msg.includes('no speech')) {
+        toast.info('Não consegui ouvir agora. Tente de novo ou digite. 🎤');
       }
-    } catch (e) {}
+    }
   };
 
   return (
@@ -741,7 +738,7 @@ export default function OraculoJornada() {
               <div className="w-full max-w-[340px] bg-white/5 backdrop-blur-md rounded-[24px] border border-[#E5D9C3]/40 p-6 shadow-sm space-y-4">
                 <textarea value={desabafo} onChange={(e) => setDesabafo(e.target.value)} placeholder="Escreva sua dúvida..." className="w-full h-32 bg-transparent border-none focus:outline-none text-base md:text-lg font-medium text-[#4A3B28] resize-none placeholder:text-[#8B735B]/50" />
                 <div className="space-y-3 pt-4 border-t border-[#E5D9C3]/40">
-                  <button onMouseDown={startRecording} onMouseUp={stopRecording} onTouchStart={startRecording} onTouchEnd={stopRecording} className={`w-full py-4 rounded-full flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse' : 'bg-white/20 text-[#4A3B28] border border-[#E5D9C3]/50'}`}><Mic size={16} /> {isGravando ? 'Ouvindo...' : 'Segure para Falar'}</button>
+                  <button onClick={gravarVoz} className={`w-full py-4 rounded-full flex items-center justify-center gap-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all ${isGravando ? 'bg-red-500 text-white animate-pulse' : 'bg-white/20 text-[#4A3B28] border border-[#E5D9C3]/50'}`}><Mic size={16} /> {isGravando ? 'Ouvindo...' : 'Toque para Falar'}</button>
                   <button onClick={nextPasso} disabled={!desabafo && !isGravando} className="w-full bg-[#4A3B28] text-white py-4 rounded-full text-[9px] font-black uppercase tracking-[0.4em] shadow-md disabled:opacity-20">Prosseguir</button>
                 </div>
               </div>
