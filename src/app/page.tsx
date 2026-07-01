@@ -581,13 +581,11 @@ export default function OraculoJornada() {
   }, []);
 
   const handleLogout = async () => { localStorage.removeItem('psique_demo_mode'); await supabase.auth.signOut(); router.push('/login'); };
-  // Sair: se estiver logada faz logout; se estiver sem conta, fecha o app.
+  // Sair: faz logout (se houver) e sempre leva à tela de login/entrada.
   const handleSair = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) { await handleLogout(); }
-      else { try { await CapacitorApp.exitApp(); } catch {} }
-    } catch { try { await CapacitorApp.exitApp(); } catch {} }
+    try { localStorage.removeItem('psique_demo_mode'); } catch {}
+    try { await supabase.auth.signOut(); } catch {}
+    router.push('/login');
   };
   const nextPasso = () => setPasso(passo + 1);
   const prevPasso = () => setPasso(passo - 1);
