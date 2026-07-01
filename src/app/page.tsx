@@ -169,7 +169,7 @@ export default function OraculoJornada() {
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
-        body: JSON.stringify({ tipoOraculo: oraculo, tipoLeitura: 'resposta_rapida', tema: 'Conselho do Dia', pergunta: 'Qual conselho breve e inspirador o oráculo me dá para hoje?', cartas })
+        body: JSON.stringify({ tipoOraculo: oraculo, tipoLeitura: 'resposta_rapida', tema: 'Conselho do Dia', pergunta: `Dê um conselho breve e inspirador para hoje, baseado na energia da carta "${carta.name}". Comece citando o nome da carta e traga a mensagem dela. Máximo 2 frases.`, cartas })
       });
       const txt = await res.text();
       let data: any = {};
