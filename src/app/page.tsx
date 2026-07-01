@@ -520,6 +520,14 @@ export default function OraculoJornada() {
   }, []);
 
   const handleLogout = async () => { localStorage.removeItem('psique_demo_mode'); await supabase.auth.signOut(); router.push('/login'); };
+  // Sair: se estiver logada faz logout; se estiver sem conta, fecha o app.
+  const handleSair = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) { await handleLogout(); }
+      else { try { await CapacitorApp.exitApp(); } catch {} }
+    } catch { try { await CapacitorApp.exitApp(); } catch {} }
+  };
   const nextPasso = () => setPasso(passo + 1);
   const prevPasso = () => setPasso(passo - 1);
 
@@ -744,9 +752,7 @@ export default function OraculoJornada() {
                     <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span></button>
                     <button onClick={() => setModalAberto('ajuda')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Ajuda</span></button>
                     <button onClick={() => setModalAberto('politicas')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Políticas</span></button>
-                    {user && (
-                      <button onClick={handleLogout} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-2.5 py-1 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
-                    )}
+                    <button onClick={handleSair} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-2.5 py-1 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
                  </div>
               </div>
             </>
