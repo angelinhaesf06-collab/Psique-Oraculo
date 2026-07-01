@@ -867,7 +867,7 @@ export default function OraculoJornada() {
              <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden backdrop-blur-sm">
                 <div className="absolute top-0 right-0 p-4 opacity-10"><Sparkles className="w-12 h-12 text-[#C4A484]" /></div>
                 <h3 className="text-[#C4A484] font-serif text-xl mb-4 text-center">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
-                <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-left">{resultado.leitura_caminho?.analise_detalhada}</p>
+                <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-center">{resultado.leitura_caminho?.analise_detalhada}</p>
                 {resultado.leitura_caminho?.veredito_direto && (
                   <div className="mt-6 pt-6 border-t border-white/10 flex flex-col items-center gap-2">
                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Veredito</span>
@@ -882,25 +882,25 @@ export default function OraculoJornada() {
                   {resultado.situacao_atual && (
                     <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
                       <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">A Situação: {resultado.situacao_atual.carta}</h4>
-                      <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.situacao_atual.interpretacao}</p>
+                      <p className="text-xs text-[#5C4D3C] leading-relaxed text-center">{resultado.situacao_atual.interpretacao}</p>
                     </div>
                   )}
                   {resultado.caminho_acao && (
                     <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
                       <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">O Caminho: {resultado.caminho_acao.carta}</h4>
-                      <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.caminho_acao.interpretacao}</p>
+                      <p className="text-xs text-[#5C4D3C] leading-relaxed text-center">{resultado.caminho_acao.interpretacao}</p>
                     </div>
                   )}
                   {resultado.resultado_conselho && (
                     <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
                       <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">O Resultado: {resultado.resultado_conselho.carta}</h4>
-                      <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.resultado_conselho.interpretacao}</p>
+                      <p className="text-xs text-[#5C4D3C] leading-relaxed text-center">{resultado.resultado_conselho.interpretacao}</p>
                     </div>
                   )}
                   {resultado.carta_sorteada && (
                     <div className="bg-white/50 backdrop-blur-sm rounded-[24px] border border-[#E5D9C3] p-6 space-y-2">
                       <h4 className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest">{resultado.carta_sorteada.carta}</h4>
-                      <p className="text-xs text-[#5C4D3C] leading-relaxed">{resultado.carta_sorteada.interpretacao}</p>
+                      <p className="text-xs text-[#5C4D3C] leading-relaxed text-center">{resultado.carta_sorteada.interpretacao}</p>
                     </div>
                   )}
                </div>
@@ -921,7 +921,7 @@ export default function OraculoJornada() {
                       </span>
                     </summary>
                     <div className="animate-in fade-in slide-in-from-top-2 duration-500 pt-4">
-                      <p className="text-sm italic text-[#5C4D3C] leading-relaxed text-left font-medium">&quot;{resultado.acolhimento_psicologico.conteudo}&quot;</p>
+                      <p className="text-sm italic text-[#5C4D3C] leading-relaxed text-center font-medium">&quot;{resultado.acolhimento_psicologico.conteudo}&quot;</p>
                     </div>
                   </details>
                </div>
@@ -950,21 +950,21 @@ export default function OraculoJornada() {
                         <h5 className="text-[9px] font-black text-[#C4A484] uppercase tracking-widest flex items-center gap-2">
                            {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Sagrado' : 'Dica da Cigana'}
                         </h5>
-                        <p className="text-xs text-[#5C4D3C] leading-relaxed font-medium">{resultado.ancoragem_rituais.salmo}</p>
+                        <p className="text-xs text-[#5C4D3C] leading-relaxed font-medium text-center">{resultado.ancoragem_rituais.salmo}</p>
                       </div>
                     )}
 
                     {resultado.ancoragem_rituais.banho && (
                       <div className="bg-[#C4A484]/5 rounded-[24px] border border-[#C4A484]/20 p-6 shadow-sm space-y-2">
                         <h5 className="text-[9px] font-black text-[#C4A484] uppercase tracking-widest">Banho ou Erva Mística</h5>
-                        <p className="text-xs text-[#5C4D3C] leading-relaxed font-medium">{resultado.ancoragem_rituais.banho}</p>
+                        <p className="text-xs text-[#5C4D3C] leading-relaxed font-medium text-center">{resultado.ancoragem_rituais.banho}</p>
                       </div>
                     )}
 
                     {resultado.ancoragem_rituais.biblia && (
                       <div className="bg-white rounded-[24px] border border-[#E5D9C3] p-6 shadow-sm space-y-2 italic">
                         <h5 className="text-[9px] font-black text-[#8B735B]/60 uppercase tracking-widest not-italic">Versículo de Acolhimento</h5>
-                        <p className="text-xs text-[#5C4D3C] leading-relaxed">&quot;{resultado.ancoragem_rituais.biblia}&quot;</p>
+                        <p className="text-xs text-[#5C4D3C] leading-relaxed text-center">&quot;{resultado.ancoragem_rituais.biblia}&quot;</p>
                       </div>
                     )}
 
@@ -981,7 +981,7 @@ export default function OraculoJornada() {
                               <p className="text-[10px] font-bold text-[#5C4D3C]">{resultado.ancoragem_rituais.dica_angelical.vela_cor}</p>
                            </div>
                         </div>
-                        <p className="text-xs text-[#5C4D3C] leading-relaxed border-t border-[#4FD1C5]/10 pt-3">{resultado.ancoragem_rituais.dica_angelical.dica_texto}</p>
+                        <p className="text-xs text-[#5C4D3C] leading-relaxed border-t border-[#4FD1C5]/10 pt-3 text-center">{resultado.ancoragem_rituais.dica_angelical.dica_texto}</p>
                       </div>
                     )}
                   </div>
