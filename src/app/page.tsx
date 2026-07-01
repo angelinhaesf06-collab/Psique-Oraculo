@@ -143,7 +143,52 @@ export default function OraculoJornada() {
   const [isGravando, setIsGravando] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resultado, setResultado] = useState<any>(null);
-  const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | 'mensagem_ampliada' | null>(null);
+  const [modalAberto, setModalAberto] = useState<'politicas' | 'ajuda' | 'assinatura' | 'paywall' | 'limite_diario' | 'mensagem_ampliada' | 'historico' | null>(null);
+  const [historicoLista, setHistoricoLista] = useState<any[]>([]);
+  const [loadingHistorico, setLoadingHistorico] = useState(false);
+  const [streak, setStreak] = useState(0);
+
+  // Compartilhar a leitura (crescimento orgânico): texto + link do app.
+  const handleCompartilhar = async () => {
+    try {
+      const linkApp = 'https://play.google.com/store/apps/details?id=com.psiqueoraculo';
+      const titulo = resultado?.leitura_caminho?.titulo || 'Minha Revelação';
+      const trecho = (resultado?.leitura_caminho?.analise_detalhada || respostaRapida || 'Recebi uma mensagem linda hoje.').slice(0, 220);
+      const texto = `✨ ${titulo} — Psiquê Oráculo\n\n"${trecho}..."\n\n🔮 Faça sua leitura também, baixe grátis:\n${linkApp}`;
+      if (typeof navigator !== 'undefined' && (navigator as any).share) {
+        await (navigator as any).share({ title: 'Psiquê Oráculo', text: texto });
+      } else {
+        try { await navigator.clipboard.writeText(texto); toast.success('Leitura copiada! Cole onde quiser. ✨'); }
+        catch { toast.info('Compartilhamento não disponível neste aparelho.'); }
+      }
+    } catch { /* usuária cancelou o compartilhamento */ }
+  };
+
+  // Abrir a página do app na Play Store para avaliar
+  const abrirAvaliar = async () => {
+    const url = 'https://play.google.com/store/apps/details?id=com.psiqueoraculo';
+    try {
+      if (Capacitor.isNativePlatform()) await Browser.open({ url });
+      else window.open(url, '_blank');
+    } catch { try { window.open(url, '_blank'); } catch {} }
+  };
+
+  // Carrega o histórico de leituras (apenas para quem tem conta)
+  const carregarHistorico = async () => {
+    setLoadingHistorico(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setHistoricoLista([]); setLoadingHistorico(false); return; }
+      const { data } = await supabase
+        .from('historico_leituras')
+        .select('id, tipo_oraculo, tipo_leitura, pergunta_tema, resposta_ia, created_at')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      setHistoricoLista(data || []);
+    } catch { setHistoricoLista([]); }
+    finally { setLoadingHistorico(false); }
+  };
   const [mensagemDia, setMensagemDia] = useState<{ texto: string, autor: string } | null>(null);
   const [conselhoDia, setConselhoDia] = useState<{ carta: string, texto: string, img: string } | null>(null);
   const [loadingConselho, setLoadingConselho] = useState(false);
@@ -281,6 +326,22 @@ export default function OraculoJornada() {
         const usadas = await getFreeReadingsUsed();
         setFreeRestantes(Math.max(0, FREE_READINGS_LIMIT - usadas));
         setPaidReadings(await getPaidReadings());
+
+        // Sequência de dias (hábito): conta dias consecutivos abrindo o app
+        try {
+          const getP = async (k: string) => Capacitor.isNativePlatform() ? (await Preferences.get({ key: k })).value : localStorage.getItem(k);
+          const setP = async (k: string, v: string) => { if (Capacitor.isNativePlatform()) await Preferences.set({ key: k, value: v }); else localStorage.setItem(k, v); };
+          const hojeStr = new Date().toDateString();
+          const last = await getP('psique_last_open');
+          let s = parseInt((await getP('psique_streak')) || '0', 10) || 0;
+          if (last !== hojeStr) {
+            const ontem = new Date(Date.now() - 86400000).toDateString();
+            s = (last === ontem) ? s + 1 : 1;
+            await setP('psique_streak', String(s));
+            await setP('psique_last_open', hojeStr);
+          } else if (s === 0) { s = 1; await setP('psique_streak', '1'); }
+          setStreak(s);
+        } catch {}
 
         // Tela de boas-vindas: só na primeira vez (e não para quem já é premium)
         const welcomeSeen = Capacitor.isNativePlatform()
@@ -734,6 +795,13 @@ export default function OraculoJornada() {
               </div>
 
               <div className="flex flex-col items-center gap-3 w-full shrink-0 pt-4">
+                 {/* Selo de sequência de dias (hábito) */}
+                 {streak > 1 && (
+                   <div className="flex items-center gap-1.5 rounded-full bg-[#D69E2E]/10 border border-[#D69E2E]/25 px-3 py-1">
+                     <span className="text-[11px]">🔥</span>
+                     <span className="text-[8px] font-black uppercase tracking-widest text-[#8B735B]">{streak} dias de sintonia</span>
+                   </div>
+                 )}
                  {/* Selo de status: premium ou consultas grátis restantes */}
                  {isPremiumUser ? (
                    <div className="flex items-center gap-1.5 rounded-full bg-[#C4A484]/15 border border-[#C4A484]/30 px-3 py-1">
@@ -751,6 +819,7 @@ export default function OraculoJornada() {
                  <div className="flex items-center gap-1.5 w-full justify-center flex-wrap px-1">
                     <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black text-[#8B735B] uppercase tracking-widest">Premium</span></button>
                     <button onClick={() => setModalAberto('ajuda')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Ajuda</span></button>
+                    <button onClick={() => { setModalAberto('historico'); carregarHistorico(); }} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Histórico</span></button>
                     <button onClick={() => setModalAberto('politicas')} className="flex items-center gap-1.5 rounded-full border border-[#E5D9C3] bg-white/70 px-2.5 py-1 shadow-sm active:scale-95 transition-all group"><div className="w-3.5 h-3.5 flex-none"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div><span className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]">Políticas</span></button>
                     <button onClick={handleSair} className="text-[8px] font-black uppercase tracking-widest text-red-400 bg-white/50 px-2.5 py-1 rounded-full border border-red-100/50 active:scale-95 transition-all">Sair</button>
                  </div>
@@ -1009,6 +1078,18 @@ export default function OraculoJornada() {
                </div>
              )}
 
+             {/* Compartilhar + Avaliar */}
+             <div className="flex gap-3">
+               <button onClick={handleCompartilhar} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full bg-[#C4A484]/15 border border-[#C4A484]/40 text-[#8B735B] active:scale-95 transition-all">
+                 <Sparkles size={14} className="text-[#C4A484]" />
+                 <span className="text-[10px] font-black uppercase tracking-widest">Compartilhar</span>
+               </button>
+               <button onClick={abrirAvaliar} className="flex items-center justify-center gap-2 px-5 py-4 rounded-full bg-white/60 border border-[#E5D9C3] text-[#8B735B] active:scale-95 transition-all">
+                 <Star size={14} className="text-[#D69E2E]" />
+                 <span className="text-[10px] font-black uppercase tracking-widest">Avaliar</span>
+               </button>
+             </div>
+
              <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); setRespostaRapida(null); window.scrollTo(0,0); }} className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-white py-6 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] shadow-2xl rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
           </div>
         </div>
@@ -1126,7 +1207,7 @@ export default function OraculoJornada() {
             {/* Header do Modal */}
             <div className="flex justify-between items-center px-8 py-6 border-b border-[#E5D9C3]/50 bg-[#FDFBF7]">
               <h3 className="text-2xl font-serif text-[#C4A484]">
-                {modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Santuário de Ajuda' : 'Políticas de Luz')}
+                {modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Santuário de Ajuda' : (modalAberto === 'historico' ? 'Minhas Leituras' : 'Políticas de Luz'))}
               </h3>
               <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-[#C4A484]/10 rounded-full transition-colors">
                 <X className="w-6 h-6 text-[#C4A484]" />
@@ -1268,6 +1349,44 @@ export default function OraculoJornada() {
                        <p className="text-[11px] font-bold text-[#8B735B]/60 uppercase tracking-widest">Ainda com dúvidas?</p>
                        <a href="mailto:angelinhaesf06@gmail.com" className="inline-block px-8 py-3 bg-[#C4A484]/10 text-[#C4A484] rounded-full text-[10px] font-black uppercase tracking-widest border border-[#C4A484]/20">Suporte por E-mail</a>
                     </div>
+                 </div>
+               )}
+
+               {modalAberto === 'historico' && (
+                 <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {loadingHistorico ? (
+                      <div className="flex flex-col items-center gap-3 py-16">
+                        <Sparkles size={22} className="text-[#C4A484] animate-spin" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">Buscando suas leituras...</span>
+                      </div>
+                    ) : !user ? (
+                      <div className="flex flex-col items-center text-center gap-4 py-10">
+                        <div className="w-16 h-16"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div>
+                        <p className="text-sm text-[#5C4D3C] leading-relaxed max-w-[260px]">Crie sua conta para <span className="font-bold">guardar e rever</span> todas as suas leituras. ✨</p>
+                        <button onClick={() => { setModalAberto(null); router.push('/login'); }} className="px-8 py-3 bg-[#C4A484]/10 text-[#C4A484] rounded-full text-[10px] font-black uppercase tracking-widest border border-[#C4A484]/20">Criar conta / Entrar</button>
+                      </div>
+                    ) : historicoLista.length === 0 ? (
+                      <div className="flex flex-col items-center text-center gap-3 py-16">
+                        <Sparkles size={20} className="text-[#C4A484]" />
+                        <p className="text-sm text-[#8B735B]">Você ainda não tem leituras guardadas.<br />Faça sua primeira consulta! ✨</p>
+                      </div>
+                    ) : (
+                      historicoLista.map((h) => {
+                        const r = h.resposta_ia || {};
+                        const resumo = r?.leitura_caminho?.analise_detalhada || r?.carta_sorteada?.interpretacao || r?.acolhimento_quantum?.conteudo || 'Leitura registrada.';
+                        const data = h.created_at ? new Date(h.created_at).toLocaleDateString('pt-BR') : '';
+                        return (
+                          <div key={h.id} className="bg-white/60 rounded-[20px] border border-[#E5D9C3] p-4 space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[9px] font-black uppercase tracking-widest text-[#C4A484]">{h.tipo_oraculo}</span>
+                              <span className="text-[9px] text-[#8B735B]/60">{data}</span>
+                            </div>
+                            {h.pergunta_tema && <p className="text-[11px] font-bold text-[#4A3B28]">{h.pergunta_tema}</p>}
+                            <p className="text-[11px] text-[#5C4D3C] leading-relaxed line-clamp-3">{resumo}</p>
+                          </div>
+                        );
+                      })
+                    )}
                  </div>
                )}
 
