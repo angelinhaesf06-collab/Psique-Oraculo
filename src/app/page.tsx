@@ -153,7 +153,7 @@ export default function OraculoJornada() {
   const carregarConselhoDia = async (oraculo: string) => {
     if (!oraculo) return;
     const hoje = new Date().toLocaleDateString('pt-BR');
-    const chave = `psique_conselho_${oraculo}_${hoje}`;
+    const chave = `psique_conselho_v2_${oraculo}_${hoje}`;
     try {
       const salvo = localStorage.getItem(chave);
       if (salvo) { setConselhoDia(JSON.parse(salvo)); return; }
@@ -169,7 +169,7 @@ export default function OraculoJornada() {
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
-        body: JSON.stringify({ tipoOraculo: oraculo, tipoLeitura: 'resposta_rapida', tema: 'Conselho do Dia', pergunta: `Dê um conselho breve e inspirador para hoje, baseado na energia da carta "${carta.name}". Comece citando o nome da carta e traga a mensagem dela. Máximo 2 frases.`, cartas })
+        body: JSON.stringify({ tipoOraculo: oraculo, tipoLeitura: 'conselho_dia', tema: 'Conselho do Dia', cartas })
       });
       const txt = await res.text();
       let data: any = {};
@@ -774,7 +774,7 @@ export default function OraculoJornada() {
                       <div className="flex flex-col text-left gap-0.5">
                         <div className="flex items-center gap-1.5">
                           <Sparkles size={10} className="text-[#C4A484]" />
-                          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-[#C4A484]">Conselho do Dia · {conselhoDia.carta}</span>
+                          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-[#C4A484]">Presságio do Dia · {conselhoDia.carta}</span>
                         </div>
                         <p className="text-[11px] italic text-[#5C4D3C] leading-snug font-medium">&quot;{conselhoDia.texto}&quot;</p>
                       </div>

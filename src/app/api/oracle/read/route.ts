@@ -56,6 +56,26 @@ export async function POST(req: Request) {
       return quickResponse;
     }
 
+    // CONSELHO DO DIA (adivinhatório): previsão curta e mística baseada em 1 arcano.
+    if (tipoLeitura === 'conselho_dia') {
+      const cartaC = Array.isArray(cartas) ? (cartas[0]?.name || cartas[0]) : cartas;
+      const cModel = getGeminiModel("gemini-3.1-flash-lite");
+      const cPrompt = `Você é um oráculo místico e adivinhatório. Baseado na carta "${cartaC}" do oráculo ${tipoOraculo}, revele uma PREVISÃO curta e envolvente para o dia de hoje: o que os astros/energias sinalizam, o que pode acontecer, no que prestar atenção. Comece citando o nome da carta. Tom místico, adivinhatório e acolhedor (nada genérico). Máximo 2 frases (até 35 palavras). Português do Brasil. Apenas a previsão, sem introduções.`;
+      let cText = "";
+      try {
+        const cResult = await cModel.generateContent({
+          contents: [{ role: "user", parts: [{ text: cPrompt }] }],
+          generationConfig: { temperature: 0.9, maxOutputTokens: 90 } as any
+        });
+        cText = (cResult?.response?.text() || "").trim();
+      } catch (e: any) {
+        console.error("Erro no conselho do dia:", e?.message);
+      }
+      const cResponse = NextResponse.json({ resposta_rapida: cText || "O oráculo sussurra em silêncio hoje. Volte em instantes." });
+      cResponse.headers.set('Access-Control-Allow-Origin', '*');
+      return cResponse;
+    }
+
     console.log("--- INÍCIO DA REQUISIÇÃO ORÁCULO ---");
     console.log("Usuário ID Identificado:", userId);
     console.log("Tipo Oráculo:", tipoOraculo);
