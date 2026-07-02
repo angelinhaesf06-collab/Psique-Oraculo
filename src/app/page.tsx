@@ -747,7 +747,7 @@ export default function OraculoJornada() {
 
   return (
     <div className="w-full text-[#5C4D3C] font-sans flex flex-col items-center relative min-h-[100dvh] bg-transparent overflow-y-auto no-scrollbar">
-      <div className="relative z-10 w-full max-w-md flex flex-col items-center px-6 pt-[calc(env(safe-area-inset-top)+20px)] pb-[max(env(safe-area-inset-bottom),100px)] min-h-[100dvh]">
+      <div className="relative z-10 w-full max-w-md flex flex-col items-center px-6 pt-[calc(env(safe-area-inset-top)+20px)] pb-[max(env(safe-area-inset-bottom),130px)] min-h-[100dvh]">
 
         <div className="w-full flex flex-col items-center gap-6 animate-in fade-in duration-1000 pb-4 flex-1 justify-center">
           {passo === 0 && (
