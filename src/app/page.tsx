@@ -58,6 +58,24 @@ async function setPaidReadingsStore(n: number): Promise<void> {
   } catch {}
 }
 
+// Histórico local (funciona com ou sem conta, guardado no aparelho)
+async function getHistoricoLocal(): Promise<any[]> {
+  try {
+    const raw = Capacitor.isNativePlatform()
+      ? (await Preferences.get({ key: 'psique_historico_local' })).value
+      : localStorage.getItem('psique_historico_local');
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+async function setHistoricoLocal(arr: any[]): Promise<void> {
+  try {
+    const v = JSON.stringify(arr.slice(0, 40));
+    if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_historico_local', value: v });
+    else localStorage.setItem('psique_historico_local', v);
+  } catch {}
+}
+
 const MandalaSmallIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
     <circle cx="12" cy="12" r="3" />
@@ -183,21 +201,25 @@ export default function OraculoJornada() {
     } catch { /* usuária cancelou */ }
   };
 
-  // Salvar a imagem da leitura no aparelho
-  const handleSalvarImagem = async () => {
+  // Salvar a leitura no HISTÓRICO (para rever depois em "Minhas Leituras")
+  const handleSalvarLeitura = async () => {
     try {
-      const blob = await gerarImagemLeitura();
-      if (!blob) { toast.info('Não consegui gerar a imagem agora. Tente pelo Compartilhar.'); return; }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `leitura-psique-oraculo-${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 3000);
-      toast.success('Leitura salva! ✨');
-    } catch { toast.info('Use o Compartilhar e escolha "Salvar imagem".'); }
+      if (!resultado) return;
+      const item = {
+        id: 'local_' + Date.now(),
+        tipo_oraculo: tipoOraculo,
+        tipo_leitura: resultado.tipoLeitura || '',
+        pergunta_tema: (resultado.tema || tema || '') + (desabafo ? ': ' + desabafo : ''),
+        resposta_ia: resultado,
+        created_at: new Date().toISOString(),
+      };
+      const atual = await getHistoricoLocal();
+      const jaTem = atual.some((x) => x.pergunta_tema === item.pergunta_tema && JSON.stringify(x.resposta_ia) === JSON.stringify(item.resposta_ia));
+      if (jaTem) { toast.info('Essa leitura já está no seu histórico ✨'); return; }
+      atual.unshift(item);
+      await setHistoricoLocal(atual);
+      toast.success('Leitura salva no histórico! ✨');
+    } catch { toast.info('Não consegui salvar agora. Tente de novo.'); }
   };
 
   // Abrir a página do app na Play Store para avaliar
@@ -213,15 +235,22 @@ export default function OraculoJornada() {
   const carregarHistorico = async () => {
     setLoadingHistorico(true);
     try {
+      const locais = await getHistoricoLocal();
+      let remotos: any[] = [];
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setHistoricoLista([]); setLoadingHistorico(false); return; }
-      const { data } = await supabase
-        .from('historico_leituras')
-        .select('id, tipo_oraculo, tipo_leitura, pergunta_tema, resposta_ia, created_at')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-        .limit(20);
-      setHistoricoLista(data || []);
+      if (session) {
+        const { data } = await supabase
+          .from('historico_leituras')
+          .select('id, tipo_oraculo, tipo_leitura, pergunta_tema, resposta_ia, created_at')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(20);
+        remotos = data || [];
+      }
+      const todos = [...locais, ...remotos]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 40);
+      setHistoricoLista(todos);
     } catch { setHistoricoLista([]); }
     finally { setLoadingHistorico(false); }
   };
@@ -1118,7 +1147,7 @@ export default function OraculoJornada() {
                  <Sparkles size={14} className="text-[#C4A484]" />
                  <span className="text-[10px] font-black uppercase tracking-widest">Compartilhar</span>
                </button>
-               <button onClick={handleSalvarImagem} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full bg-white/60 border border-[#E5D9C3] text-[#8B735B] active:scale-95 transition-all">
+               <button onClick={handleSalvarLeitura} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full bg-white/60 border border-[#E5D9C3] text-[#8B735B] active:scale-95 transition-all">
                  <Heart size={14} className="text-[#C4A484]" />
                  <span className="text-[10px] font-black uppercase tracking-widest">Salvar</span>
                </button>
@@ -1416,16 +1445,13 @@ export default function OraculoJornada() {
                         <Sparkles size={22} className="text-[#C4A484] animate-spin" />
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">Buscando suas leituras...</span>
                       </div>
-                    ) : !user ? (
-                      <div className="flex flex-col items-center text-center gap-4 py-10">
-                        <div className="w-16 h-16"><img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" /></div>
-                        <p className="text-sm text-[#5C4D3C] leading-relaxed max-w-[260px]">Crie sua conta para <span className="font-bold">guardar e rever</span> todas as suas leituras. ✨</p>
-                        <button onClick={() => { setModalAberto(null); router.push('/login'); }} className="px-8 py-3 bg-[#C4A484]/10 text-[#C4A484] rounded-full text-[10px] font-black uppercase tracking-widest border border-[#C4A484]/20">Criar conta / Entrar</button>
-                      </div>
                     ) : historicoLista.length === 0 ? (
-                      <div className="flex flex-col items-center text-center gap-3 py-16">
+                      <div className="flex flex-col items-center text-center gap-3 py-14">
                         <Sparkles size={20} className="text-[#C4A484]" />
-                        <p className="text-sm text-[#8B735B]">Você ainda não tem leituras guardadas.<br />Faça sua primeira consulta! ✨</p>
+                        <p className="text-sm text-[#8B735B] leading-relaxed max-w-[270px]">Você ainda não salvou leituras.<br />Após uma consulta, toque em <span className="font-bold">Salvar</span> para guardá-la aqui. ✨</p>
+                        {!user && (
+                          <button onClick={() => { setModalAberto(null); router.push('/login'); }} className="mt-2 px-6 py-2.5 bg-[#C4A484]/10 text-[#C4A484] rounded-full text-[9px] font-black uppercase tracking-widest border border-[#C4A484]/20">Criar conta p/ guardar na nuvem</button>
+                        )}
                       </div>
                     ) : (
                       historicoLista.map((h) => {
