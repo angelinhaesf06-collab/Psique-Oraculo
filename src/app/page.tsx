@@ -148,20 +148,56 @@ export default function OraculoJornada() {
   const [loadingHistorico, setLoadingHistorico] = useState(false);
   const [streak, setStreak] = useState(0);
 
-  // Compartilhar a leitura (crescimento orgânico): texto + link do app.
+  const shareCardRef = useRef<HTMLDivElement>(null);
+
+  // Gera uma imagem bonita da leitura (pergunta em cima + resultado + marca).
+  const gerarImagemLeitura = async (): Promise<Blob | null> => {
+    try {
+      const el = shareCardRef.current;
+      if (!el) return null;
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(el, { backgroundColor: '#FDFBF7', scale: 2, useCORS: true, logging: false });
+      return await new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/png', 0.95));
+    } catch { return null; }
+  };
+
+  // Compartilhar a leitura como IMAGEM (WhatsApp, Instagram...). Fallback: texto.
   const handleCompartilhar = async () => {
     try {
       const linkApp = 'https://play.google.com/store/apps/details?id=com.psiqueoraculo';
+      const blob = await gerarImagemLeitura();
+      if (blob) {
+        const file = new File([blob], 'minha-leitura.png', { type: 'image/png' });
+        const nav: any = navigator;
+        if (nav?.canShare && nav.canShare({ files: [file] }) && nav.share) {
+          await nav.share({ files: [file], title: 'Psiquê Oráculo', text: `✨ Minha leitura no Psiquê Oráculo. Faça a sua, baixe grátis:\n${linkApp}` });
+          return;
+        }
+      }
+      // Fallback: compartilha texto
       const titulo = resultado?.leitura_caminho?.titulo || 'Minha Revelação';
       const trecho = (resultado?.leitura_caminho?.analise_detalhada || respostaRapida || 'Recebi uma mensagem linda hoje.').slice(0, 220);
       const texto = `✨ ${titulo} — Psiquê Oráculo\n\n"${trecho}..."\n\n🔮 Faça sua leitura também, baixe grátis:\n${linkApp}`;
-      if (typeof navigator !== 'undefined' && (navigator as any).share) {
-        await (navigator as any).share({ title: 'Psiquê Oráculo', text: texto });
-      } else {
-        try { await navigator.clipboard.writeText(texto); toast.success('Leitura copiada! Cole onde quiser. ✨'); }
-        catch { toast.info('Compartilhamento não disponível neste aparelho.'); }
-      }
-    } catch { /* usuária cancelou o compartilhamento */ }
+      if ((navigator as any)?.share) await (navigator as any).share({ title: 'Psiquê Oráculo', text: texto });
+      else { try { await navigator.clipboard.writeText(texto); toast.success('Leitura copiada! Cole onde quiser. ✨'); } catch {} }
+    } catch { /* usuária cancelou */ }
+  };
+
+  // Salvar a imagem da leitura no aparelho
+  const handleSalvarImagem = async () => {
+    try {
+      const blob = await gerarImagemLeitura();
+      if (!blob) { toast.info('Não consegui gerar a imagem agora. Tente pelo Compartilhar.'); return; }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `leitura-psique-oraculo-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 3000);
+      toast.success('Leitura salva! ✨');
+    } catch { toast.info('Use o Compartilhar e escolha "Salvar imagem".'); }
   };
 
   // Abrir a página do app na Play Store para avaliar
@@ -1076,16 +1112,39 @@ export default function OraculoJornada() {
                </div>
              )}
 
-             {/* Compartilhar + Avaliar */}
+             {/* Compartilhar + Salvar (como imagem) */}
              <div className="flex gap-3">
                <button onClick={handleCompartilhar} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full bg-[#C4A484]/15 border border-[#C4A484]/40 text-[#8B735B] active:scale-95 transition-all">
                  <Sparkles size={14} className="text-[#C4A484]" />
                  <span className="text-[10px] font-black uppercase tracking-widest">Compartilhar</span>
                </button>
-               <button onClick={abrirAvaliar} className="flex items-center justify-center gap-2 px-5 py-4 rounded-full bg-white/60 border border-[#E5D9C3] text-[#8B735B] active:scale-95 transition-all">
-                 <Star size={14} className="text-[#D69E2E]" />
-                 <span className="text-[10px] font-black uppercase tracking-widest">Avaliar</span>
+               <button onClick={handleSalvarImagem} className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full bg-white/60 border border-[#E5D9C3] text-[#8B735B] active:scale-95 transition-all">
+                 <Heart size={14} className="text-[#C4A484]" />
+                 <span className="text-[10px] font-black uppercase tracking-widest">Salvar</span>
                </button>
+             </div>
+             <button onClick={abrirAvaliar} className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-white/50 border border-[#E5D9C3] text-[#8B735B] active:scale-95 transition-all">
+               <Star size={13} className="text-[#D69E2E]" />
+               <span className="text-[10px] font-black uppercase tracking-widest">Avaliar o app</span>
+             </button>
+
+             {/* Card oculto que vira a imagem compartilhada/salva */}
+             <div ref={shareCardRef} style={{ position: 'fixed', left: '-9999px', top: 0, width: '480px', background: '#FDFBF7', padding: '40px 36px', boxSizing: 'border-box', fontFamily: 'Georgia, "Times New Roman", serif', color: '#4A3B28' }}>
+               <div style={{ textAlign: 'center', fontSize: '13px', letterSpacing: '6px', color: '#C4A484', fontWeight: 'bold', marginBottom: '22px' }}>✦ PSIQUÊ ORÁCULO ✦</div>
+               {(desabafo || resultado?.tema) && (
+                 <div style={{ background: 'rgba(196,164,132,0.12)', borderRadius: '18px', padding: '16px 20px', marginBottom: '22px', border: '1px solid rgba(196,164,132,0.35)' }}>
+                   <div style={{ fontSize: '11px', letterSpacing: '2px', color: '#8B735B', textTransform: 'uppercase', marginBottom: '6px', fontFamily: 'Arial, sans-serif' }}>Minha pergunta</div>
+                   <div style={{ fontSize: '17px', color: '#4A3B28', fontStyle: 'italic', lineHeight: 1.5 }}>{desabafo || resultado?.tema}</div>
+                 </div>
+               )}
+               <div style={{ textAlign: 'center', fontSize: '22px', color: '#C4A484', marginBottom: '12px' }}>{resultado?.leitura_caminho?.titulo || 'A Voz do Destino'}</div>
+               {resultado?.leitura_caminho?.veredito_direto && (
+                 <div style={{ textAlign: 'center', fontSize: '32px', fontWeight: 'bold', color: '#4A3B28', margin: '4px 0 14px', letterSpacing: '4px' }}>{resultado.leitura_caminho.veredito_direto}</div>
+               )}
+               <div style={{ fontSize: '15px', lineHeight: 1.7, color: '#5C4D3C', textAlign: 'center' }}>
+                 {(resultado?.leitura_caminho?.analise_detalhada || respostaRapida || '').slice(0, 420)}
+               </div>
+               <div style={{ textAlign: 'center', marginTop: '26px', paddingTop: '16px', borderTop: '1px solid rgba(196,164,132,0.35)', fontSize: '12px', letterSpacing: '2px', color: '#8B735B', fontFamily: 'Arial, sans-serif' }}>✨ Faça sua leitura no Psiquê Oráculo ✨</div>
              </div>
 
              <button onClick={() => { setPasso(0); setResultado(null); setDesabafo(''); setRespostaRapida(null); window.scrollTo(0,0); }} className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-white py-6 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] shadow-2xl rounded-full active:scale-95 transition-all">Novo Ciclo ✨</button>
