@@ -69,6 +69,19 @@ export default function BaixarPage() {
           <img src="/assets/lp/tela-oraculos.jpg" alt="Tela do app Psiquê Oráculo" className="w-full block" />
         </div>
 
+        {/* Vídeo */}
+        <div className="w-full mt-14 flex flex-col items-center">
+          <h2 className="text-2xl font-serif text-[#C4A484] mb-5">Veja o Psiquê em ação</h2>
+          <video
+            src="/assets/lp/video.mp4"
+            controls
+            playsInline
+            preload="none"
+            poster="/assets/lp/tela-oraculos.jpg"
+            className="w-full max-w-[300px] rounded-[28px] border border-[#E5D9C3] shadow-xl bg-black"
+          />
+        </div>
+
         {/* Oráculos */}
         <div className="w-full mt-16">
           <h2 className="text-2xl font-serif text-[#C4A484] mb-6">Três oráculos, infinitas respostas</h2>
