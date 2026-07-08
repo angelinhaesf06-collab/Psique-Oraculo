@@ -64,6 +64,11 @@ export default function BaixarPage() {
         <CTA />
         <p className="text-[11px] text-[#8B735B]/60 uppercase tracking-widest mt-4">Grátis para começar · Android</p>
 
+        {/* Mockup do app */}
+        <div className="mt-12 w-[250px] rounded-[42px] border-[7px] border-[#2C2420] bg-[#2C2420] shadow-2xl overflow-hidden">
+          <img src="/assets/lp/tela-oraculos.jpg" alt="Tela do app Psiquê Oráculo" className="w-full block" />
+        </div>
+
         {/* Oráculos */}
         <div className="w-full mt-16">
           <h2 className="text-2xl font-serif text-[#C4A484] mb-6">Três oráculos, infinitas respostas</h2>
@@ -90,6 +95,14 @@ export default function BaixarPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Mockup do resultado */}
+        <div className="w-full mt-16 flex flex-col items-center">
+          <h2 className="text-2xl font-serif text-[#C4A484] mb-6">Uma leitura que acolhe</h2>
+          <div className="w-[250px] rounded-[42px] border-[7px] border-[#2C2420] bg-[#2C2420] shadow-2xl overflow-hidden">
+            <img src="/assets/lp/tela-resultado.jpg" alt="Exemplo de leitura no Psiquê Oráculo" className="w-full block" />
           </div>
         </div>
 
