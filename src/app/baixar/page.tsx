@@ -47,7 +47,7 @@ export default function BaixarPage() {
   ];
 
   return (
-    <main className="w-full bg-[#FDFBF7] text-[#4A3B28] min-h-screen">
+    <main className="w-full bg-[#FDFBF7] text-[#4A3B28] h-[100dvh] overflow-y-auto">
       <div className="max-w-[560px] mx-auto px-6 py-12 flex flex-col items-center text-center">
 
         {/* Hero */}
