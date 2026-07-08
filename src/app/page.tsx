@@ -79,9 +79,9 @@ async function setHistoricoLocal(arr: any[]): Promise<void> {
 // Saudação conforme a hora (o card nunca fica vazio, mesmo sem a mensagem da IA)
 function saudacaoDoDia(): string {
   const h = new Date().getHours();
-  if (h < 12) return 'Bom dia';
-  if (h < 18) return 'Boa tarde';
-  return 'Boa noite';
+  if (h < 12) return 'Faça um bom dia';
+  if (h < 18) return 'Faça uma boa tarde';
+  return 'Faça uma boa noite';
 }
 
 const MandalaSmallIcon = ({ className }: { className?: string }) => (
