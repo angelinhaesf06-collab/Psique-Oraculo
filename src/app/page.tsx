@@ -240,6 +240,20 @@ export default function OraculoJornada() {
   };
 
   // Carrega o histórico de leituras (apenas para quem tem conta)
+  // Excluir uma leitura do histórico (local ou da nuvem)
+  const handleExcluirLeitura = async (item: any) => {
+    try {
+      if (String(item.id).startsWith('local_')) {
+        const atual = await getHistoricoLocal();
+        await setHistoricoLocal(atual.filter((x: any) => x.id !== item.id));
+      } else {
+        await supabase.from('historico_leituras').delete().eq('id', item.id);
+      }
+      setHistoricoLista((lista) => lista.filter((x) => x.id !== item.id));
+      toast.success('Leitura removida do histórico.');
+    } catch { toast.info('Não consegui remover agora. Tente de novo.'); }
+  };
+
   const carregarHistorico = async () => {
     setLoadingHistorico(true);
     try {
@@ -1471,9 +1485,14 @@ export default function OraculoJornada() {
                         const data = h.created_at ? new Date(h.created_at).toLocaleDateString('pt-BR') : '';
                         return (
                           <div key={h.id} className="bg-white/60 rounded-[20px] border border-[#E5D9C3] p-4 space-y-1.5">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between gap-2">
                               <span className="text-[9px] font-black uppercase tracking-widest text-[#C4A484]">{h.tipo_oraculo}</span>
-                              <span className="text-[9px] text-[#8B735B]/60">{data}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[9px] text-[#8B735B]/60">{data}</span>
+                                <button onClick={() => handleExcluirLeitura(h)} className="p-1 rounded-full hover:bg-red-50 active:scale-90 transition-all" aria-label="Excluir leitura">
+                                  <Trash size={13} className="text-red-400" />
+                                </button>
+                              </div>
                             </div>
                             {h.pergunta_tema && <p className="text-[11px] font-bold text-[#4A3B28]">{h.pergunta_tema}</p>}
                             <p className="text-[11px] text-[#5C4D3C] leading-relaxed line-clamp-3">{resumo}</p>
