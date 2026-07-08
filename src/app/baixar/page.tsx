@@ -58,11 +58,14 @@ export default function BaixarPage() {
         <h1 className="text-4xl md:text-5xl font-serif text-[#4A3B28] leading-tight mb-4">
           Uma pergunta no coração?<br />As cartas respondem. 🔮
         </h1>
-        <p className="text-base text-[#8B735B] leading-relaxed max-w-[440px] mb-8">
-          Faça sua leitura de Tarô, Baralho Cigano ou Tarô dos Anjos a qualquer hora, com sensibilidade e acolhimento. Comece com <span className="font-bold text-[#4A3B28]">leituras grátis</span>.
+        <p className="text-base text-[#8B735B] leading-relaxed max-w-[440px] mb-6">
+          Faça sua leitura de Tarô, Baralho Cigano ou Tarô dos Anjos a qualquer hora, com sensibilidade e acolhimento.
         </p>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#C4A484]/15 border border-[#C4A484]/40 px-5 py-2 mb-7">
+          <span className="text-[13px] font-black uppercase tracking-widest text-[#8B735B]">🎁 3 leituras grátis</span>
+        </div>
         <CTA />
-        <p className="text-[11px] text-[#8B735B]/60 uppercase tracking-widest mt-4">Grátis para começar · Android</p>
+        <p className="text-[11px] text-[#8B735B]/60 uppercase tracking-widest mt-4">Sem cadastro · Sem cartão · Android</p>
 
         {/* Mockup do app */}
         <div className="mt-12 w-[250px] rounded-[42px] border-[7px] border-[#2C2420] bg-[#2C2420] shadow-2xl overflow-hidden">
@@ -132,10 +135,49 @@ export default function BaixarPage() {
           </div>
         </div>
 
+        {/* Confiança */}
+        <div className="w-full mt-16">
+          <h2 className="text-2xl font-serif text-[#C4A484] mb-6">Por que Psiquê Oráculo?</h2>
+          <div className="flex flex-col gap-3">
+            {[
+              { i: "🔒", t: "Privado e seguro", d: "Suas perguntas são confidenciais e criptografadas." },
+              { i: "💛", t: "Acolhimento de verdade", d: "Une a sabedoria das cartas com uma escuta empática." },
+              { i: "🕊️", t: "Disponível 24 horas", d: "Sua resposta a qualquer momento, onde você estiver." },
+              { i: "🎁", t: "Sem compromisso", d: "Comece grátis, sem cadastro e sem cartão." },
+            ].map((c) => (
+              <div key={c.t} className="flex items-start gap-4 bg-white rounded-[22px] border border-[#E5D9C3] p-5 text-left shadow-sm">
+                <span className="text-2xl shrink-0">{c.i}</span>
+                <div>
+                  <p className="text-[14px] font-bold text-[#4A3B28]">{c.t}</p>
+                  <p className="text-[13px] text-[#8B735B] leading-relaxed">{c.d}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="w-full mt-16">
+          <h2 className="text-2xl font-serif text-[#C4A484] mb-6">Perguntas frequentes</h2>
+          <div className="flex flex-col gap-3">
+            {[
+              { q: "É grátis mesmo?", a: "Sim! Suas primeiras leituras são gratuitas e você nem precisa criar conta pra começar." },
+              { q: "Preciso pagar depois?", a: "Só se quiser mais leituras. Você escolhe: uma leitura avulsa ou um plano — sem obrigação." },
+              { q: "É confiável?", a: "Suas leituras são privadas e criptografadas. É uma ferramenta de autoconhecimento e acolhimento." },
+              { q: "Funciona no meu celular?", a: "Sim, em qualquer aparelho Android. É só baixar na Google Play." },
+            ].map((f) => (
+              <div key={f.q} className="bg-white/60 rounded-[22px] border border-[#E5D9C3] p-5 text-left">
+                <p className="text-[14px] font-bold text-[#4A3B28] mb-1">{f.q}</p>
+                <p className="text-[13px] text-[#5C4D3C] leading-relaxed">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* CTA final */}
         <div className="w-full mt-16 bg-[#2C2420] rounded-[32px] p-10 flex flex-col items-center">
-          <p className="text-2xl font-serif text-[#E5D9C3] mb-2">Comece sua jornada hoje ✨</p>
-          <p className="text-sm text-white/70 mb-8">Suas primeiras leituras são grátis.</p>
+          <p className="text-2xl font-serif text-[#E5D9C3] mb-2">Sua resposta está a um toque ✨</p>
+          <p className="text-sm text-white/70 mb-8">Comece agora com 3 leituras grátis. Sem cadastro, sem cartão.</p>
           <CTA />
         </div>
 
