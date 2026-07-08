@@ -329,6 +329,7 @@ export default function OraculoJornada() {
 
   const [isPremiumUser, setIsPremiumUser] = useState(false);
   const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
+  const [primeiroNome, setPrimeiroNome] = useState('Alma Querida');
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
   const [mostrarNovidades, setMostrarNovidades] = useState(false);
 
@@ -404,6 +405,8 @@ export default function OraculoJornada() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user ?? null);
+        const nomeCompleto = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || '';
+        setPrimeiroNome(nomeCompleto ? nomeCompleto.trim().split(' ')[0] : 'Alma Querida');
         let premium = false;
         if (session) {
           const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', session.user.id).single();
@@ -851,7 +854,7 @@ export default function OraculoJornada() {
                   <div className="flex items-center gap-2">
                     <Sparkles size={12} className="text-[#C4A484] animate-pulse" /><span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span><Sparkles size={12} className="text-[#C4A484] animate-pulse" />
                   </div>
-                  <p className="text-[15px] font-serif font-bold text-[#4A3B28]">{saudacaoDoDia()}, {(user?.user_metadata?.full_name?.split(' ')[0]) || 'Alma Querida'}! ✨</p>
+                  <p className="text-[15px] font-serif font-bold text-[#4A3B28]">{saudacaoDoDia()}, {primeiroNome}! ✨</p>
                   {mensagemDia ? (
                     <p className="text-[12px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2 font-medium">&quot;{mensagemDia.texto}&quot;</p>
                   ) : (
@@ -1335,7 +1338,7 @@ export default function OraculoJornada() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-center gap-2">
                         <Sparkles size={14} className="text-[#C4A484]" />
-                        <h4 className="text-xl font-serif text-[#C4A484] uppercase tracking-[0.2em]">{saudacaoDoDia()}, {(user?.user_metadata?.full_name?.split(' ')[0]) || 'Alma Querida'}!</h4>
+                        <h4 className="text-xl font-serif text-[#C4A484] uppercase tracking-[0.2em]">{saudacaoDoDia()}, {primeiroNome}!</h4>
                         <Sparkles size={14} className="text-[#C4A484]" />
                       </div>
                       <div className="h-px w-12 bg-[#E5D9C3] mx-auto" />
