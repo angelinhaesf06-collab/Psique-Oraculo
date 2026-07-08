@@ -1204,10 +1204,14 @@ export default function OraculoJornada() {
                  ) : null;
                })()}
                {resultado?.leitura_caminho?.veredito_direto && (
-                 <div style={{ textAlign: 'center', fontSize: '32px', fontWeight: 'bold', color: '#4A3B28', margin: '4px 0 14px', letterSpacing: '4px' }}>{resultado.leitura_caminho.veredito_direto}</div>
+                 <div style={{ textAlign: 'center', fontSize: '44px', fontWeight: 'bold', color: '#4A3B28', margin: '6px 0 16px', letterSpacing: '6px' }}>{resultado.leitura_caminho.veredito_direto}</div>
                )}
-               <div style={{ fontSize: '15px', lineHeight: 1.7, color: '#5C4D3C', textAlign: 'center' }}>
-                 {(resultado?.leitura_caminho?.analise_detalhada || respostaRapida || '').slice(0, 300)}
+               <div style={{ fontSize: '15px', lineHeight: 1.6, color: '#5C4D3C', textAlign: 'center', fontStyle: 'italic' }}>
+                 {(() => {
+                   const t = (resultado?.leitura_caminho?.analise_detalhada || respostaRapida || '').trim();
+                   const curto = t.slice(0, 150);
+                   return t.length > 150 ? curto.slice(0, curto.lastIndexOf(' ')) + '…' : curto;
+                 })()}
                </div>
                <div style={{ textAlign: 'center', marginTop: '26px', paddingTop: '16px', borderTop: '1px solid rgba(196,164,132,0.35)', fontSize: '12px', letterSpacing: '2px', color: '#8B735B', fontFamily: 'Arial, sans-serif' }}>✨ Faça sua leitura no Psiquê Oráculo ✨</div>
              </div>
