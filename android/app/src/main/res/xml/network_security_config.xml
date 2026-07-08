@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+    <!-- Exceção apenas para o servidor local do Capacitor (WebView interno) -->
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">pisiqueoraculo.com.br</domain>
-        <domain includeSubdomains="true">supabase.co</domain>
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">10.0.2.2</domain>
     </domain-config>
-    <base-config cleartextTrafficPermitted="true">
+    <!-- Todo o resto: somente HTTPS e certificados do sistema -->
+    <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system" />
-            <certificates src="user" />
         </trust-anchors>
     </base-config>
 </network-security-config>
