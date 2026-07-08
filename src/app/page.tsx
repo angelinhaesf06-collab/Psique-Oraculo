@@ -1194,12 +1194,20 @@ export default function OraculoJornada() {
                    <div style={{ fontSize: '17px', color: '#4A3B28', fontStyle: 'italic', lineHeight: 1.5 }}>{desabafo || resultado?.tema}</div>
                  </div>
                )}
-               <div style={{ textAlign: 'center', fontSize: '22px', color: '#C4A484', marginBottom: '12px' }}>{resultado?.leitura_caminho?.titulo || 'A Voz do Destino'}</div>
+               <div style={{ textAlign: 'center', fontSize: '22px', color: '#C4A484', marginBottom: '10px' }}>{resultado?.leitura_caminho?.titulo || 'A Voz do Destino'}</div>
+               {(() => {
+                 const cartas = resultado?.situacao_atual
+                   ? [resultado.situacao_atual?.carta, resultado.caminho_acao?.carta, resultado.resultado_conselho?.carta].filter(Boolean).join('  ·  ')
+                   : (resultado?.carta_sorteada?.carta || '');
+                 return cartas ? (
+                   <div style={{ textAlign: 'center', fontSize: '13px', letterSpacing: '2px', color: '#8B735B', textTransform: 'uppercase', marginBottom: '14px', fontFamily: 'Arial, sans-serif' }}>🃏 {cartas}</div>
+                 ) : null;
+               })()}
                {resultado?.leitura_caminho?.veredito_direto && (
                  <div style={{ textAlign: 'center', fontSize: '32px', fontWeight: 'bold', color: '#4A3B28', margin: '4px 0 14px', letterSpacing: '4px' }}>{resultado.leitura_caminho.veredito_direto}</div>
                )}
                <div style={{ fontSize: '15px', lineHeight: 1.7, color: '#5C4D3C', textAlign: 'center' }}>
-                 {(resultado?.leitura_caminho?.analise_detalhada || respostaRapida || '').slice(0, 420)}
+                 {(resultado?.leitura_caminho?.analise_detalhada || respostaRapida || '').slice(0, 300)}
                </div>
                <div style={{ textAlign: 'center', marginTop: '26px', paddingTop: '16px', borderTop: '1px solid rgba(196,164,132,0.35)', fontSize: '12px', letterSpacing: '2px', color: '#8B735B', fontFamily: 'Arial, sans-serif' }}>✨ Faça sua leitura no Psiquê Oráculo ✨</div>
              </div>
