@@ -76,6 +76,14 @@ async function setHistoricoLocal(arr: any[]): Promise<void> {
   } catch {}
 }
 
+// Saudação conforme a hora (o card nunca fica vazio, mesmo sem a mensagem da IA)
+function saudacaoDoDia(): string {
+  const h = new Date().getHours();
+  if (h < 12) return 'Bom dia';
+  if (h < 18) return 'Boa tarde';
+  return 'Boa noite';
+}
+
 const MandalaSmallIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
     <circle cx="12" cy="12" r="3" />
@@ -825,15 +833,18 @@ export default function OraculoJornada() {
                   </div>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight tracking-tight drop-shadow-sm">Qual arcano você escolhe hoje?</h2>
-                {mensagemDia && (
-                  <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-2.5 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Sparkles size={12} className="text-[#C4A484] animate-pulse" /><span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span><Sparkles size={12} className="text-[#C4A484] animate-pulse" />
-                    </div>
-                    <p className="text-[13px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-3 px-2 font-medium">&quot;{mensagemDia.texto}&quot;</p>
-                    <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 group-hover:text-[#C4A484] transition-colors">Toque para ler a mensagem completa ✨</span>
+                <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-2.5 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Sparkles size={12} className="text-[#C4A484] animate-pulse" /><span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span><Sparkles size={12} className="text-[#C4A484] animate-pulse" />
                   </div>
-                )}
+                  <p className="text-[15px] font-serif font-bold text-[#4A3B28]">{saudacaoDoDia()}, {(user?.user_metadata?.full_name?.split(' ')[0]) || 'Alma Querida'}! ✨</p>
+                  {mensagemDia ? (
+                    <p className="text-[12px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2 font-medium">&quot;{mensagemDia.texto}&quot;</p>
+                  ) : (
+                    <p className="text-[11px] italic text-[#8B735B]/80 font-serif px-2">Que seu dia seja leve e cheio de luz.</p>
+                  )}
+                  <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 group-hover:text-[#C4A484] transition-colors">Toque para ler a mensagem completa ✨</span>
+                </div>
               </div>
 
               <div className="flex flex-col gap-2.5 w-full max-w-[360px] shrink-0">
@@ -1293,7 +1304,7 @@ export default function OraculoJornada() {
             {/* Header do Modal */}
             <div className="flex justify-between items-center px-8 py-6 border-b border-[#E5D9C3]/50 bg-[#FDFBF7]">
               <h3 className="text-2xl font-serif text-[#C4A484]">
-                {modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Santuário de Ajuda' : (modalAberto === 'historico' ? 'Minhas Leituras' : 'Políticas de Luz'))}
+                {modalAberto === 'assinatura' ? 'Portal da Abundância' : (modalAberto === 'ajuda' ? 'Santuário de Ajuda' : (modalAberto === 'historico' ? 'Minhas Leituras' : (modalAberto === 'mensagem_ampliada' ? 'Sintonização do Dia' : 'Políticas de Luz')))}
               </h3>
               <button onClick={() => setModalAberto(null)} className="p-2 hover:bg-[#C4A484]/10 rounded-full transition-colors">
                 <X className="w-6 h-6 text-[#C4A484]" />
@@ -1301,21 +1312,21 @@ export default function OraculoJornada() {
             </div>
 
             <div className="flex-1 overflow-y-auto no-scrollbar p-8 bg-[#FDFBF7]">
-               {modalAberto === 'mensagem_ampliada' && mensagemDia && (
+               {modalAberto === 'mensagem_ampliada' && (
                  <div className="flex flex-col items-center text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div className="w-20 h-20 flex-none">
                       <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow" />
                     </div>
-                    
+
                     <div className="space-y-4">
                       <div className="flex items-center justify-center gap-2">
                         <Sparkles size={14} className="text-[#C4A484]" />
-                        <h4 className="text-xl font-serif text-[#C4A484] uppercase tracking-[0.2em]">{mensagemDia.autor || "Sintonização"}</h4>
+                        <h4 className="text-xl font-serif text-[#C4A484] uppercase tracking-[0.2em]">{saudacaoDoDia()}, {(user?.user_metadata?.full_name?.split(' ')[0]) || 'Alma Querida'}!</h4>
                         <Sparkles size={14} className="text-[#C4A484]" />
                       </div>
                       <div className="h-px w-12 bg-[#E5D9C3] mx-auto" />
                       <p className="text-lg italic text-[#4A3B28] font-serif leading-relaxed px-2 font-medium">
-                        &quot;{mensagemDia.texto}&quot;
+                        &quot;{mensagemDia?.texto || 'Que hoje você caminhe leve, confiando na sua luz. Respire, sinta e permita-se florescer. ✨'}&quot;
                       </p>
                     </div>
 
