@@ -139,8 +139,15 @@ export default function BaixarPage() {
           <CTA />
         </div>
 
+        {/* Link Play Store final */}
+        <div className="w-full mt-12 flex justify-center">
+          <a href={PLAY_URL} className="inline-flex items-center gap-3 px-7 py-4 rounded-full bg-white border border-[#E5D9C3] shadow-sm active:scale-95 transition-all">
+            <span className="text-[11px] font-black uppercase tracking-widest text-[#8B735B]">▶ Baixar na Google Play</span>
+          </a>
+        </div>
+
         {/* Rodapé */}
-        <footer className="w-full mt-14 pt-8 border-t border-[#E5D9C3] flex flex-col items-center gap-3">
+        <footer className="w-full mt-12 pt-8 border-t border-[#E5D9C3] flex flex-col items-center gap-3">
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] font-bold uppercase tracking-widest text-[#8B735B]/70">
             <a href="/privacy" className="hover:text-[#C4A484]">Privacidade</a>
             <a href="/terms" className="hover:text-[#C4A484]">Termos</a>
