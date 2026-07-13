@@ -4,4 +4,6 @@
     <string name="title_activity_main"> </string>
     <string name="package_name">com.psiqueoraculo</string>
     <string name="custom_url_scheme">psiqueoraculo</string>
+    <string name="facebook_app_id">1607614234375856</string>
+    <string name="facebook_client_token">COLE_O_CLIENT_TOKEN_AQUI</string>
 </resources>
