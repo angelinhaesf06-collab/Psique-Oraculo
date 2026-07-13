@@ -1498,19 +1498,28 @@ export default function OraculoJornada() {
                         const r = h.resposta_ia || {};
                         const resumo = r?.leitura_caminho?.analise_detalhada || r?.carta_sorteada?.interpretacao || r?.acolhimento_quantum?.conteudo || 'Leitura registrada.';
                         const data = h.created_at ? new Date(h.created_at).toLocaleDateString('pt-BR') : '';
+                        const abrirCompleta = () => {
+                          if (h.tipo_oraculo) setTipoOraculo(h.tipo_oraculo);
+                          setResultado(h.resposta_ia);
+                          setRespostaRapida(null);
+                          setModalAberto(null);
+                          setPasso(4);
+                          window.scrollTo(0, 0);
+                        };
                         return (
-                          <div key={h.id} className="bg-white/60 rounded-[20px] border border-[#E5D9C3] p-4 space-y-1.5">
+                          <div key={h.id} onClick={abrirCompleta} className="bg-white/60 rounded-[20px] border border-[#E5D9C3] p-4 space-y-1.5 cursor-pointer active:scale-[0.99] transition-all">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-[9px] font-black uppercase tracking-widest text-[#C4A484]">{h.tipo_oraculo}</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-[9px] text-[#8B735B]/60">{data}</span>
-                                <button onClick={() => handleExcluirLeitura(h)} className="p-1 rounded-full hover:bg-red-50 active:scale-90 transition-all" aria-label="Excluir leitura">
+                                <button onClick={(e) => { e.stopPropagation(); handleExcluirLeitura(h); }} className="p-1 rounded-full hover:bg-red-50 active:scale-90 transition-all" aria-label="Excluir leitura">
                                   <Trash size={13} className="text-red-400" />
                                 </button>
                               </div>
                             </div>
                             {h.pergunta_tema && <p className="text-[11px] font-bold text-[#4A3B28]">{h.pergunta_tema}</p>}
-                            <p className="text-[11px] text-[#5C4D3C] leading-relaxed line-clamp-3">{resumo}</p>
+                            <p className="text-[11px] text-[#5C4D3C] leading-relaxed line-clamp-2">{resumo}</p>
+                            <p className="text-[8px] font-black uppercase tracking-widest text-[#C4A484]/80 pt-1">Toque para ver completa ✨</p>
                           </div>
                         );
                       })
