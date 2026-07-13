@@ -854,12 +854,7 @@ export default function OraculoJornada() {
                   <div className="flex items-center gap-2">
                     <Sparkles size={12} className="text-[#C4A484] animate-pulse" /><span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span><Sparkles size={12} className="text-[#C4A484] animate-pulse" />
                   </div>
-                  <p className="text-[15px] font-serif font-bold text-[#4A3B28]">{saudacaoDoDia()}, {primeiroNome}! ✨</p>
-                  {mensagemDia ? (
-                    <p className="text-[12px] italic text-[#5C4D3C] font-serif leading-relaxed line-clamp-2 px-2 font-medium">&quot;{mensagemDia.texto}&quot;</p>
-                  ) : (
-                    <p className="text-[11px] italic text-[#8B735B]/80 font-serif px-2">Que seu dia seja leve e cheio de luz.</p>
-                  )}
+                  <p className="text-[14px] font-serif font-bold text-[#4A3B28]">{saudacaoDoDia()}, {primeiroNome}! ✨</p>
                   <span className="text-[7px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 group-hover:text-[#C4A484] transition-colors">Toque para ler a mensagem completa ✨</span>
                 </div>
               </div>
