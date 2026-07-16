@@ -126,10 +126,32 @@ export async function POST(req: Request) {
       - DEIXE os campos 'situacao_atual', 'caminho_acao' e 'resultado_conselho' como NULL.
       - Use o campo 'carta_sorteada' para o motivo técnico e 'leitura_caminho.veredito_direto' para o veredito.`;
     } else if (tipoLeitura === 'mensagem_dia') {
-      instrucaoEspecifica = `FOCO MENSAGEM DO DIA: Gere uma mensagem curta, inspiradora e poética para o início do dia. 
-      Ao final da mensagem, inclua SEMPRE uma "Dica da Alma" prática.
-      Exemplos de dicas: Caminhar ao ar livre, meditar por 5 minutos, escrever no caderno da gratidão, cozinhar sua comida preferida, dar amor aos seus bichinhos de estimação, levá-los para passear, ou ir à academia.
-      Use APENAS o campo 'acolhimento_quantum' (titulo e conteudo).`;
+      {
+        // Tema sorteado a cada dia: força variedade e evita mensagens repetitivas
+        const TEMAS_DICA = [
+          'contato com a natureza', 'movimento e corpo', 'criatividade e arte', 'silêncio e pausa',
+          'reconectar com alguém querido', 'água (banho, chuva, mar)', 'música que emociona',
+          'organizar um cantinho da casa', 'cozinhar algo afetivo', 'respiração consciente',
+          'luz do sol na pele', 'escrever um pensamento solto', 'gentileza com um desconhecido',
+          'descanso sem culpa', 'aprender algo pequeno e novo', 'cuidar de uma planta',
+          'aromas e perfumes', 'um abraço demorado', 'dançar sozinha', 'contemplar o céu',
+          'soltar algo que pesa', 'agradecer em voz alta', 'brincar com um animal',
+          'caminhar sem pressa', 'beber água com atenção', 'ouvir o próprio corpo'
+        ];
+        const temaDica = TEMAS_DICA[Math.floor(Math.random() * TEMAS_DICA.length)];
+        instrucaoEspecifica = `FOCO MENSAGEM DO DIA: Gere UMA única mensagem curta, inspiradora e poética para o início do dia (3 a 4 frases no máximo).
+
+        Ao final, inclua UMA "Dica da Alma" prática e original.
+        A dica de HOJE deve ser sobre o tema: "${temaDica}".
+
+        REGRAS IMPORTANTES:
+        - Crie a dica DENTRO desse tema, de um jeito específico e criativo (não genérico).
+        - NUNCA use clichês repetidos como "caderno de gratidão", "diário de gratidão" ou "faça uma lista".
+        - Varie o vocabulário e as imagens poéticas. Não repita estruturas de mensagens anteriores.
+        - É UMA mensagem só, com UMA dica só.
+
+        Use APENAS o campo 'acolhimento_quantum' (titulo e conteudo).`;
+      }
     } else if (tipoLeitura === 'foto') {
       instrucaoEspecifica = `FOCO IDENTIFICAÇÃO DE FOTO: Você recebeu uma foto de cartas reais de Oráculo (Tarô, Cigano ou Anjos). 
       Sua tarefa prioritária é IDENTIFICAR quais cartas estão na imagem. 

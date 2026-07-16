@@ -639,7 +639,10 @@ export default function OraculoJornada() {
     const fetchMensagemDia = async () => {
       try {
         const today = new Date().toLocaleDateString('pt-BR');
-        const savedData = localStorage.getItem('psique_mensagem_dia');
+        // Cache no armazenamento NATIVO (o localStorage some no Android e gerava 2 mensagens/dia)
+        const savedData = Capacitor.isNativePlatform()
+          ? (await Preferences.get({ key: 'psique_mensagem_dia' })).value
+          : localStorage.getItem('psique_mensagem_dia');
         if (savedData) {
           const { texto, autor, data } = JSON.parse(savedData);
           if (data === today) { setMensagemDia({ texto, autor }); return; }
@@ -661,7 +664,9 @@ export default function OraculoJornada() {
             if (dataRes.acolhimento_quantum) {
               const novaMensagem = { texto: dataRes.acolhimento_quantum.conteudo, autor: dataRes.acolhimento_quantum.titulo, data: today };
               setMensagemDia({ texto: novaMensagem.texto, autor: novaMensagem.autor });
-              localStorage.setItem('psique_mensagem_dia', JSON.stringify(novaMensagem));
+              const serial = JSON.stringify(novaMensagem);
+              if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_mensagem_dia', value: serial });
+              else localStorage.setItem('psique_mensagem_dia', serial);
             }
           } catch (e) { console.error("Erro parse mensagem dia:", e); }
         }
