@@ -17,10 +17,12 @@ import { Browser } from '@capacitor/browser';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Purchases, LOG_LEVEL, PRODUCT_CATEGORY } from '@revenuecat/purchases-capacitor';
 
-// Modelo de conversão: a pessoa usa o app sem login. Após 3 consultas grátis
-// (contadas NO APARELHO), aparece o paywall para cadastrar e assinar.
-// A "mensagem do dia" é sempre gratuita e não entra nessa conta.
-const FREE_READINGS_LIMIT = 3;
+// Modelo de conversão: a pessoa usa o app sem login. Após 1 consulta grátis
+// (contada NO APARELHO), aparece o paywall para cadastrar e assinar.
+// A "mensagem do dia" (Sintonização) é sempre gratuita e não entra nessa conta.
+const FREE_READINGS_LIMIT = 1;
+// Presságio do Dia: 1 acesso grátis por aparelho; depois, apenas assinantes.
+const FREE_PRESSAGIO_LIMIT = 1;
 
 async function getFreeReadingsUsed(): Promise<number> {
   try {
@@ -37,6 +39,25 @@ async function incFreeReadings(): Promise<void> {
     const next = String((await getFreeReadingsUsed()) + 1);
     if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_free_readings', value: next });
     else localStorage.setItem('psique_free_readings', next);
+  } catch {}
+}
+
+// Presságio do Dia: quantos acessos gratuitos já foram usados (contado no aparelho).
+async function getPressagioUsed(): Promise<number> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { value } = await Preferences.get({ key: 'psique_pressagio_used' });
+      return parseInt(value || '0', 10) || 0;
+    }
+    return parseInt(localStorage.getItem('psique_pressagio_used') || '0', 10) || 0;
+  } catch { return 0; }
+}
+
+async function incPressagioUsed(): Promise<void> {
+  try {
+    const next = String((await getPressagioUsed()) + 1);
+    if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_pressagio_used', value: next });
+    else localStorage.setItem('psique_pressagio_used', next);
   } catch {}
 }
 
@@ -282,7 +303,17 @@ export default function OraculoJornada() {
   const [loadingConselho, setLoadingConselho] = useState(false);
   const [mostrarPressagio, setMostrarPressagio] = useState(false);
 
-  const abrirPressagio = () => {
+  const abrirPressagio = async () => {
+    // Premium/VIP têm acesso livre. Para quem não assina: 1 presságio grátis
+    // por aparelho; depois disso, abre o paywall de assinatura.
+    if (!isPremiumUser) {
+      const usados = await getPressagioUsed();
+      if (usados >= FREE_PRESSAGIO_LIMIT) {
+        setModalAberto('assinatura');
+        return;
+      }
+      await incPressagioUsed();
+    }
     setMostrarPressagio(true);
     carregarConselhoDia(tipoOraculo);
   };
@@ -688,7 +719,7 @@ export default function OraculoJornada() {
   const prevPasso = () => setPasso(passo - 1);
 
   const handleLeitura = async (tipo: string, imageData?: string) => {
-    // Controle de acesso: premium libera tudo; senão, 3 consultas grátis no aparelho.
+    // Controle de acesso: premium libera tudo; senão, 1 consulta grátis no aparelho.
     const { data: { session: gateSession } } = await supabase.auth.getSession();
     let isPremium = false;
     // VIP: emails liberados têm tiragens ILIMITADAS (contam como premium aqui).
@@ -1237,7 +1268,7 @@ export default function OraculoJornada() {
 
           <div className="w-full max-w-[320px] bg-[#C4A484]/10 border border-[#C4A484]/30 rounded-[28px] p-6 mb-8 flex flex-col items-center gap-2">
             <Sparkles size={20} className="text-[#C4A484]" />
-            <span className="text-2xl font-serif font-bold text-[#4A3B28]">3 leituras grátis</span>
+            <span className="text-2xl font-serif font-bold text-[#4A3B28]">1 leitura grátis</span>
             <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">para começar sua jornada</span>
           </div>
 
