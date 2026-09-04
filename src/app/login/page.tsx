@@ -76,6 +76,29 @@ export default function LoginPage() {
       localStorage.setItem('psique_user_name', userName);
   };
 
+  // Recuperação de senha: envia um e-mail com link que leva à página /reset-password,
+  // onde a pessoa define a nova senha. O link abre no site (web).
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error('Digite seu e-mail acima para enviarmos o link de recuperação.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const siteUrl = 'https://www.pisiqueoraculo.com.br';
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${siteUrl}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success('Enviamos um link de recuperação para o seu e-mail. ✨ (confira também o spam)');
+    } catch (error: any) {
+      console.error('Erro ao enviar recuperação de senha:', error);
+      toast.error(`Não consegui enviar agora: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="h-screen w-full bg-[#FDFBF7] flex flex-col items-center relative overflow-hidden">
       <DecorationOverlay />
@@ -143,6 +166,15 @@ export default function LoginPage() {
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonizar</span>
              </button>
           </form>
+
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            disabled={loading}
+            className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/70 hover:text-[#C4A484] transition-colors underline underline-offset-4 disabled:opacity-40"
+          >
+            Esqueci minha senha
+          </button>
         </div>
 
         <div className="mt-auto pb-4">
