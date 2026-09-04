@@ -107,32 +107,37 @@ export async function POST(req: Request) {
     if (tipoLeitura !== 'mensagem_dia' && !isVip && !temCredito) {
       // Sem userId (token ausente/expirado/ inválido) não há como garantir o limite:
       // pede novo login em vez de liberar.
+      // [DIAGNÓSTICO TEMPORÁRIO] retorna 403 com mensagem clara para o app exibir.
       if (!userId) {
         const authResponse = NextResponse.json(
-          { reason: 'auth', message: 'Sua sessão expirou. Entre novamente para continuar. ✨' },
-          { status: 401 }
+          { reason: 'auth', message: 'DIAGNÓSTICO A1: o servidor NÃO reconheceu seu login (token não validado).' },
+          { status: 403 }
         );
         authResponse.headers.set('Access-Control-Allow-Origin', '*');
         return authResponse;
       }
 
       let gate: any = null;
+      let gateErrMsg: string | null = null;
       try {
         const rpc = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId });
         if (rpc.error) {
-          console.error("Erro ao validar créditos (bloqueando por segurança):", rpc.error.message);
+          gateErrMsg = rpc.error.message || JSON.stringify(rpc.error);
+          console.error("Erro ao validar créditos (bloqueando por segurança):", gateErrMsg);
         } else {
           gate = rpc.data;
         }
       } catch (gateEx: any) {
-        console.error("Exceção ao validar créditos (bloqueando por segurança):", gateEx?.message);
+        gateErrMsg = gateEx?.message || String(gateEx);
+        console.error("Exceção ao validar créditos (bloqueando por segurança):", gateErrMsg);
       }
 
       // Erro/indisponibilidade do banco → NÃO libera (erro temporário, não leitura grátis).
+      // [DIAGNÓSTICO TEMPORÁRIO] retorna 403 com o erro real do banco para o app exibir.
       if (!gate) {
         const errResponse = NextResponse.json(
-          { reason: 'error', message: 'As energias estão se recalibrando. Tente novamente em um instante. ✨' },
-          { status: 503 }
+          { reason: 'error', message: 'DIAGNÓSTICO D2 (erro no banco): ' + (gateErrMsg || 'sem detalhe') },
+          { status: 403 }
         );
         errResponse.headers.set('Access-Control-Allow-Origin', '*');
         return errResponse;
