@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl } = body;
+    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl, usarCredito } = body;
 
     // RESPOSTA RÁPIDA (pergunta de acompanhamento): prompt enxuto p/ baixo custo de tokens.
     if (tipoLeitura === 'resposta_rapida') {
@@ -87,17 +87,20 @@ export async function POST(req: Request) {
 
     // 2. Validação e Consumo de Créditos
     // Regra de negócio (função check_and_consume_reading no banco):
-    //   - Trial de 24h após cadastro: leituras liberadas
     //   - Premium: até 5 leituras por dia
-    //   - Trial expirado e sem premium: bloqueia (paywall)
+    //   - Não premium: 1 leitura grátis por conta (vitalícia); depois, paywall
     let creditStatus: any = { allowed: true, type: "open" };
 
     // VIP: emails da allowlist têm tiragens ILIMITADAS — nunca passam pelo controle
     // de créditos (nem paywall, nem limite diário).
     const isVip = isVipEmail(userEmail);
 
+    // Crédito avulso/bônus (avaliar o app): o app já debitou o crédito no aparelho,
+    // então esta leitura NÃO passa pelo controle de grátis do servidor.
+    const temCredito = usarCredito === true;
+
     // A "mensagem do dia" é sempre gratuita e nunca consome créditos.
-    if (tipoLeitura !== 'mensagem_dia' && userId && !isVip) {
+    if (tipoLeitura !== 'mensagem_dia' && userId && !isVip && !temCredito) {
       try {
         const { data: gate, error: gateError } = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId });
 

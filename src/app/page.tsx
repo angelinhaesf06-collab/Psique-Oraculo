@@ -791,14 +791,17 @@ export default function OraculoJornada() {
         isPremium = !!prof?.is_premium;
       } catch {}
     }
+    // A leitura grátis é controlada pelo SERVIDOR (1 por conta, não reseta).
+    // Aqui só decidimos se vamos usar um crédito avulso/bônus, que IGNORA esse
+    // limite grátis do servidor.
+    let usarCredito = false;
     if (!isPremium) {
       const gratisRestantes = FREE_READINGS_LIMIT - (await getFreeReadingsUsed());
       const avulsas = await getPaidReadings();
-      // Sem grátis e sem crédito avulso → paywall
-      if (gratisRestantes <= 0 && avulsas <= 0) {
-        setModalAberto('assinatura');
-        return;
-      }
+      // Se o grátis local já acabou e há crédito (avulsa/bônus), usa o crédito.
+      // Caso contrário, deixamos o servidor decidir (libera a 1ª grátis por conta
+      // ou responde com paywall).
+      if (gratisRestantes <= 0 && avulsas > 0) usarCredito = true;
     }
 
     if (tipo === 'foto' && !imageData) {
@@ -827,7 +830,7 @@ export default function OraculoJornada() {
       const res = await fetch(apiUrl, {
         method: 'POST', 
         headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
-        body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName })
+        body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName, usarCredito })
       });
       const textResponse = await res.text();
       if (!res.ok) {
@@ -851,16 +854,20 @@ export default function OraculoJornada() {
         }
       }
       setResultado(data); setPasso(4); setRespostaRapida(null);
-      // Consumiu uma consulta grátis (só conta quem ainda não é premium)
+      // Consumo (só para quem não é premium):
       if (!isPremium) {
-        // Consome grátis primeiro; se não houver, consome 1 crédito avulso pago
-        if ((await getFreeReadingsUsed()) < FREE_READINGS_LIMIT) {
-          await incFreeReadings();
-          setFreeRestantes((r) => Math.max(0, r - 1));
-        } else {
+        if (usarCredito) {
+          // Usou um crédito avulso/bônus → debita 1 crédito
           const restante = Math.max(0, (await getPaidReadings()) - 1);
           await setPaidReadingsStore(restante);
           setPaidReadings(restante);
+        } else {
+          // Usou a grátis (o servidor já marcou como usada na conta);
+          // atualiza o contador local só para refletir na tela.
+          if ((await getFreeReadingsUsed()) < FREE_READINGS_LIMIT) {
+            await incFreeReadings();
+            setFreeRestantes((r) => Math.max(0, r - 1));
+          }
         }
       }
     } catch (error: any) {
