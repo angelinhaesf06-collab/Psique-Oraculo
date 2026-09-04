@@ -532,28 +532,28 @@ export default function OraculoJornada() {
           console.log("Ofertas encontradas:", JSON.stringify(offerings));
 
           let packageToPurchase: any = null;
-          const pkgs = offerings.current?.availablePackages || [];
-          if (offerings.current) {
-            if (plano === 'mensal') {
-              packageToPurchase =
-                offerings.current.monthly ||
-                pkgs.find((p: any) => p.packageType === 'MONTHLY') ||
-                pkgs.find((p: any) => /mensal|monthly/i.test(p.identifier || p.product?.identifier || ''));
-            } else if (plano === 'semestral') {
-              packageToPurchase =
-                offerings.current.sixMonth ||
-                pkgs.find((p: any) => p.packageType === 'SIX_MONTH') ||
-                pkgs.find((p: any) => /semestral|6.?mes|six.?month/i.test(p.identifier || p.product?.identifier || ''));
-            } else {
-              packageToPurchase =
-                offerings.current.annual ||
-                pkgs.find((p: any) => p.packageType === 'ANNUAL') ||
-                pkgs.find((p: any) => /anual|annual/i.test(p.identifier || p.product?.identifier || ''));
-            }
-            // Último recurso dentro da oferta: primeiro pacote disponível
-            if (!packageToPurchase && pkgs.length > 0) packageToPurchase = pkgs[0];
-            console.log(`Plano ${plano} -> pacote escolhido:`, packageToPurchase?.identifier);
+
+          // Junta os pacotes de TODAS as offerings (default, Monthly, semestral...),
+          // não só a "current". Assim cada plano encontra o pacote certo mesmo quando
+          // estão separados em offerings diferentes — e nunca cobramos o plano errado.
+          const todasOfertas: any[] = [];
+          if (offerings.current) todasOfertas.push(offerings.current);
+          if (offerings.all) todasOfertas.push(...Object.values(offerings.all));
+          const todosPacotes: any[] = [];
+          for (const off of todasOfertas) {
+            for (const p of ((off as any)?.availablePackages || [])) todosPacotes.push(p);
           }
+
+          const tipoDesejado = plano === 'mensal' ? 'MONTHLY' : plano === 'semestral' ? 'SIX_MONTH' : 'ANNUAL';
+          const nomeDesejado = plano === 'mensal' ? /mensal|monthly/i
+            : plano === 'semestral' ? /semestral|6.?mes|six.?month/i
+            : /anual|annual/i;
+
+          packageToPurchase =
+            todosPacotes.find((p: any) => p.packageType === tipoDesejado) ||
+            todosPacotes.find((p: any) => nomeDesejado.test(p.identifier || p.product?.identifier || '')) ||
+            null;
+          console.log(`Plano ${plano} -> pacote escolhido:`, packageToPurchase?.identifier);
 
           if (!packageToPurchase) {
             // Último recurso: busca direto por ID do produto
