@@ -80,6 +80,24 @@ async function setPaidReadingsStore(n: number): Promise<void> {
   } catch {}
 }
 
+// Recompensa por avaliar o app: 1 tiragem grátis, resgatável uma única vez.
+async function getJaAvaliou(): Promise<boolean> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { value } = await Preferences.get({ key: 'psique_avaliou' });
+      return value === '1';
+    }
+    return localStorage.getItem('psique_avaliou') === '1';
+  } catch { return false; }
+}
+
+async function setJaAvaliou(): Promise<void> {
+  try {
+    if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_avaliou', value: '1' });
+    else localStorage.setItem('psique_avaliou', '1');
+  } catch {}
+}
+
 // Histórico local (funciona com ou sem conta, guardado no aparelho)
 async function getHistoricoLocal(): Promise<any[]> {
   try {
@@ -261,6 +279,24 @@ export default function OraculoJornada() {
     } catch { try { window.open(url, '_blank'); } catch {} }
   };
 
+  // Avaliar o app e ganhar 1 tiragem grátis (resgatável uma única vez por aparelho).
+  const avaliarEGanhar = async () => {
+    // Abre a Play Store para a pessoa avaliar
+    await abrirAvaliar();
+    // Concede o bônus só uma vez
+    if (await getJaAvaliou()) {
+      toast.info('Você já resgatou sua tiragem por avaliar. 💛');
+      return;
+    }
+    await setJaAvaliou();
+    setJaAvaliouState(true);
+    const novo = (await getPaidReadings()) + 1;
+    await setPaidReadingsStore(novo);
+    setPaidReadings(novo);
+    setModalAberto(null);
+    toast.success('Obrigada por avaliar! Você ganhou 1 tiragem grátis. ✨');
+  };
+
   // Carrega o histórico de leituras (apenas para quem tem conta)
   // Excluir uma leitura do histórico (local ou da nuvem)
   const handleExcluirLeitura = async (item: any) => {
@@ -375,6 +411,7 @@ export default function OraculoJornada() {
   const [respostaRapida, setRespostaRapida] = useState<string | null>(null);
   const [loadingRapida, setLoadingRapida] = useState(false);
   const [paidReadings, setPaidReadings] = useState(0);
+  const [jaAvaliou, setJaAvaliouState] = useState(false);
 
   // Compra avulsa: paga R$ 2,06 e libera 1 leitura (produto consumível 'leitura_avulsa').
   const handleComprarAvulsa = async () => {
@@ -449,6 +486,7 @@ export default function OraculoJornada() {
         const usadas = await getFreeReadingsUsed();
         setFreeRestantes(Math.max(0, FREE_READINGS_LIMIT - usadas));
         setPaidReadings(await getPaidReadings());
+        setJaAvaliouState(await getJaAvaliou());
 
         // Sequência de dias (hábito): conta dias consecutivos abrindo o app
         try {
@@ -1489,6 +1527,19 @@ export default function OraculoJornada() {
                         <span className="text-[8px] font-bold uppercase tracking-widest text-[#8B735B]/50">ou</span>
                         <div className="h-px flex-1 bg-[#E5D9C3]/60" />
                       </div>
+
+                      {/* Avaliar o app e ganhar 1 tiragem grátis (só enquanto não resgatou) */}
+                      {!jaAvaliou && (
+                        <button
+                          onClick={avaliarEGanhar}
+                          disabled={loading}
+                          className="w-full py-3 rounded-[20px] border border-[#D69E2E]/40 bg-[#D69E2E]/10 text-[#8B735B] active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                        >
+                          <Star size={14} className="text-[#D69E2E]" />
+                          <span className="text-[11px] font-bold">Avaliar o app e ganhar 1 tiragem grátis ✨</span>
+                        </button>
+                      )}
+
                       <button
                         onClick={handleComprarAvulsa}
                         disabled={loading}
