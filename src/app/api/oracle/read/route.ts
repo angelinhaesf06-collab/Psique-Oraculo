@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     if (tipoLeitura === 'conselho_dia') {
       const cartaC = Array.isArray(cartas) ? (cartas[0]?.name || cartas[0]) : cartas;
       const cModel = getGeminiModel("gemini-3.1-flash-lite");
-      const cPrompt = `Você é um oráculo místico e adivinhatório. Baseado na carta "${cartaC}" do oráculo ${tipoOraculo}, revele uma PREVISÃO curta e envolvente para o dia de hoje: o que os astros/energias sinalizam, o que pode acontecer, no que prestar atenção. Comece citando o nome da carta. Tom místico, adivinhatório e acolhedor (nada genérico). Máximo 2 frases (até 35 palavras). Português do Brasil. Apenas a previsão, sem introduções.`;
+      const cPrompt = `Você é um oráculo místico e adivinhatório. A carta sorteada do oráculo ${tipoOraculo} foi "${cartaC}" (ATENÇÃO: "${cartaC}" é o NOME DA CARTA/ARCANO/ANJO — NUNCA é o nome da pessoa; jamais trate a pessoa por esse nome nem a chame assim). Revele uma PREVISÃO curta e envolvente para o dia de hoje: o que os astros/energias sinalizam, o que pode acontecer, no que prestar atenção. Comece se referindo à CARTA de forma clara, por exemplo "A carta ${cartaC} revela..." ou "O anjo ${cartaC} anuncia...". Tom místico, adivinhatório e acolhedor (nada genérico). Máximo 2 frases (até 35 palavras). Português do Brasil. Apenas a previsão, sem introduções e sem chamar a pessoa por nenhum nome.`;
       let cText = "";
       try {
         const cResult = await cModel.generateContent({
