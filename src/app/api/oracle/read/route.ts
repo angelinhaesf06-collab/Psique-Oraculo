@@ -100,28 +100,53 @@ export async function POST(req: Request) {
     const temCredito = usarCredito === true;
 
     // A "mensagem do dia" é sempre gratuita e nunca consome créditos.
-    if (tipoLeitura !== 'mensagem_dia' && userId && !isVip && !temCredito) {
-      try {
-        const { data: gate, error: gateError } = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId });
+    // Para qualquer OUTRA leitura de conta comum (não VIP, sem crédito avulso), o
+    // acesso SÓ é liberado se o servidor confirmar pela regra "1 grátis por conta".
+    // FAIL-CLOSED: sem identidade válida ou com erro no banco, NÃO liberamos — caso
+    // contrário a trava perde o efeito e a pessoa faz leituras ilimitadas de graça.
+    if (tipoLeitura !== 'mensagem_dia' && !isVip && !temCredito) {
+      // Sem userId (token ausente/expirado/ inválido) não há como garantir o limite:
+      // pede novo login em vez de liberar.
+      if (!userId) {
+        const authResponse = NextResponse.json(
+          { reason: 'auth', message: 'Sua sessão expirou. Entre novamente para continuar. ✨' },
+          { status: 401 }
+        );
+        authResponse.headers.set('Access-Control-Allow-Origin', '*');
+        return authResponse;
+      }
 
-        if (gateError) {
-          // Falha ao consultar o banco: libera por segurança para não quebrar a experiência,
-          // mas registra para investigação.
-          console.error("Erro ao validar créditos (liberando por segurança):", gateError.message);
-        } else if (gate) {
-          creditStatus = gate;
-          if (!gate.allowed) {
-            console.log("Leitura bloqueada pela regra de acesso:", gate);
-            const blockResponse = NextResponse.json(
-              { reason: gate.reason || 'paywall', message: gate.message || 'Acesso premium necessário para continuar.' },
-              { status: 403 }
-            );
-            blockResponse.headers.set('Access-Control-Allow-Origin', '*');
-            return blockResponse;
-          }
+      let gate: any = null;
+      try {
+        const rpc = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId });
+        if (rpc.error) {
+          console.error("Erro ao validar créditos (bloqueando por segurança):", rpc.error.message);
+        } else {
+          gate = rpc.data;
         }
       } catch (gateEx: any) {
-        console.error("Exceção ao validar créditos (liberando por segurança):", gateEx?.message);
+        console.error("Exceção ao validar créditos (bloqueando por segurança):", gateEx?.message);
+      }
+
+      // Erro/indisponibilidade do banco → NÃO libera (erro temporário, não leitura grátis).
+      if (!gate) {
+        const errResponse = NextResponse.json(
+          { reason: 'error', message: 'As energias estão se recalibrando. Tente novamente em um instante. ✨' },
+          { status: 503 }
+        );
+        errResponse.headers.set('Access-Control-Allow-Origin', '*');
+        return errResponse;
+      }
+
+      creditStatus = gate;
+      if (!gate.allowed) {
+        console.log("Leitura bloqueada pela regra de acesso:", gate);
+        const blockResponse = NextResponse.json(
+          { reason: gate.reason || 'paywall', message: gate.message || 'Acesso premium necessário para continuar.' },
+          { status: 403 }
+        );
+        blockResponse.headers.set('Access-Control-Allow-Origin', '*');
+        return blockResponse;
       }
     }
 
