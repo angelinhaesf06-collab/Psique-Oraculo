@@ -767,8 +767,21 @@ export default function OraculoJornada() {
   const prevPasso = () => setPasso(passo - 1);
 
   const handleLeitura = async (tipo: string, imageData?: string) => {
-    // Controle de acesso: premium libera tudo; senão, 1 consulta grátis no aparelho.
+    // Controle de acesso: premium libera tudo; senão, limite grátis por CONTA.
     const { data: { session: gateSession } } = await supabase.auth.getSession();
+
+    // Exige login para fazer a leitura. Assim o limite grátis é controlado no
+    // servidor (por conta) e NÃO pode ser resetado navegando ou reinstalando.
+    if (!gateSession) {
+      try {
+        if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_pending_leitura', value: '1' });
+        else localStorage.setItem('psique_pending_leitura', '1');
+      } catch {}
+      toast.info('Crie sua conta ou entre para fazer sua leitura. ✨');
+      router.push('/login');
+      return;
+    }
+
     let isPremium = false;
     // VIP: emails liberados têm tiragens ILIMITADAS (contam como premium aqui).
     if (isVipEmail(gateSession?.user?.email)) isPremium = true;
@@ -1326,7 +1339,7 @@ export default function OraculoJornada() {
           >
             Começar minha jornada
           </button>
-          <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-widest mt-4">Sem cadastro · É só escolher seu arcano</p>
+          <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-widest mt-4">Cadastro rápido · Sua leitura em segundos</p>
         </div>
       )}
 
