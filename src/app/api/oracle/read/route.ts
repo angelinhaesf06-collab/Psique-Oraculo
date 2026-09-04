@@ -3,7 +3,10 @@ import { getGeminiModel } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
 import { isVipEmail } from "@/lib/vip";
 
-export const dynamic = 'force-static';
+// IMPORTANTE: esta rota PRECISA rodar por requisição (lê o header Authorization e
+// consulta o banco). Com 'force-static' o Next 16 zera os headers em runtime, o
+// que fazia o token nunca ser lido (userId nulo) e a trava/identificação falhar.
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   return NextResponse.json({ status: "online", message: "Portal Oráculo está pronto para sintonização." });
