@@ -496,7 +496,7 @@ export default function OraculoJornada() {
     agendarMensagemDiaria();
   }, []);
 
-  const handleSubscribe = async (plano: 'anual' | 'mensal' = 'anual') => {
+  const handleSubscribe = async (plano: 'anual' | 'mensal' | 'semestral' = 'anual') => {
     try {
       setLoading(true);
       let { data: { session } } = await supabase.auth.getSession();
@@ -539,6 +539,11 @@ export default function OraculoJornada() {
                 offerings.current.monthly ||
                 pkgs.find((p: any) => p.packageType === 'MONTHLY') ||
                 pkgs.find((p: any) => /mensal|monthly/i.test(p.identifier || p.product?.identifier || ''));
+            } else if (plano === 'semestral') {
+              packageToPurchase =
+                offerings.current.sixMonth ||
+                pkgs.find((p: any) => p.packageType === 'SIX_MONTH') ||
+                pkgs.find((p: any) => /semestral|6.?mes|six.?month/i.test(p.identifier || p.product?.identifier || ''));
             } else {
               packageToPurchase =
                 offerings.current.annual ||
@@ -553,7 +558,10 @@ export default function OraculoJornada() {
           if (!packageToPurchase) {
             // Último recurso: busca direto por ID do produto
             try {
-              const fallbackIds = plano === 'mensal' ? ['mensal', 'premium_mensal', 'psique_premium_mensal'] : ['premium_anual', 'psique_premium_anual'];
+              const fallbackIds =
+                plano === 'mensal' ? ['mensal', 'premium_mensal', 'psique_premium_mensal']
+                : plano === 'semestral' ? ['semestral', 'premium_semestral', 'psique_premium_semestral']
+                : ['premium_anual', 'psique_premium_anual'];
               const { products } = await Purchases.getProducts({ productIdentifiers: fallbackIds });
               if (products && products.length > 0) {
                 console.log("Produto encontrado via getProducts:", products[0].identifier);
@@ -625,7 +633,7 @@ export default function OraculoJornada() {
         const res = await fetch('/api/stripe/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: session.user.id, email: session.user.email, isNative: false }),
+          body: JSON.stringify({ userId: session.user.id, email: session.user.email, isNative: false, plano }),
         });
 
         const textResponse = await res.text();
@@ -1295,7 +1303,7 @@ export default function OraculoJornada() {
             </div>
             <div className="space-y-3 mb-6">
               {[
-                { t: 'Plano mensal', d: 'Agora por R$ 19,90/mês, além do anual' },
+                { t: 'Novos planos', d: 'Mensal R$ 9,90, 6 meses R$ 39,90 e Anual R$ 59,90' },
                 { t: 'Leitura avulsa', d: 'Pague só por uma consulta quando quiser' },
                 { t: 'Pergunta rápida', d: 'Uma resposta extra no fim de cada leitura' },
                 { t: 'App mais leve e rápido', d: 'Atualizado para abrir e rodar melhor' },
@@ -1432,7 +1440,7 @@ export default function OraculoJornada() {
                     </div>
 
                     <div className="w-full space-y-3 pt-2">
-                      {/* Plano Anual - destaque */}
+                      {/* Plano Anual - destaque (melhor valor) */}
                       <button
                         onClick={() => handleSubscribe('anual')}
                         disabled={loading}
@@ -1440,10 +1448,24 @@ export default function OraculoJornada() {
                       >
                         <div className="flex flex-col text-left">
                           <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-80">Anual · Melhor valor</span>
-                          <span className="text-lg font-black leading-tight">R$ 89,90 <span className="text-[11px] font-medium opacity-80">/ano</span></span>
-                          <span className="text-[9px] font-medium opacity-70">Equivale a R$ 7,49/mês</span>
+                          <span className="text-lg font-black leading-tight">R$ 59,90 <span className="text-[11px] font-medium opacity-80">/ano</span></span>
+                          <span className="text-[9px] font-medium opacity-70">Equivale a R$ 4,99/mês</span>
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-3 py-1.5 rounded-full">{loading ? '...' : 'Assinar'}</span>
+                      </button>
+
+                      {/* Plano Semestral (6 meses) */}
+                      <button
+                        onClick={() => handleSubscribe('semestral')}
+                        disabled={loading}
+                        className="w-full py-4 px-5 bg-white border border-[#C4A484]/40 rounded-[24px] shadow-sm active:scale-95 transition-all flex items-center justify-between disabled:opacity-60"
+                      >
+                        <div className="flex flex-col text-left">
+                          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#8B735B]/70">6 Meses · Equilíbrio</span>
+                          <span className="text-lg font-black text-[#4A3B28] leading-tight">R$ 39,90 <span className="text-[11px] font-medium opacity-70">/6 meses</span></span>
+                          <span className="text-[9px] font-medium text-[#8B735B]/60">Equivale a R$ 6,65/mês</span>
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[#C4A484]">{loading ? '...' : 'Assinar'}</span>
                       </button>
 
                       {/* Plano Mensal */}
@@ -1454,7 +1476,7 @@ export default function OraculoJornada() {
                       >
                         <div className="flex flex-col text-left">
                           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#8B735B]/70">Mensal · Flexível</span>
-                          <span className="text-lg font-black text-[#4A3B28] leading-tight">R$ 19,90 <span className="text-[11px] font-medium opacity-70">/mês</span></span>
+                          <span className="text-lg font-black text-[#4A3B28] leading-tight">R$ 9,90 <span className="text-[11px] font-medium opacity-70">/mês</span></span>
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#C4A484]">{loading ? '...' : 'Assinar'}</span>
                       </button>

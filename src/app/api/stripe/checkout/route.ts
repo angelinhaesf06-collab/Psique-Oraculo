@@ -11,10 +11,23 @@ export async function POST(req: Request) {
       apiVersion: '2025-01-27-acacia' as any,
     });
 
-    const { userId, email, isNative } = await req.json();
+    const { userId, email, isNative, plano } = await req.json();
 
     if (!userId || !email) {
       return NextResponse.json({ error: 'Usuário não identificado.' }, { status: 400 });
+    }
+
+    // Escolhe o Price do Stripe conforme o plano. O valor cobrado é o definido
+    // no próprio Price dentro do Stripe (mensal, semestral ou anual).
+    const priceByPlano: Record<string, string | undefined> = {
+      mensal: process.env.NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID,
+      semestral: process.env.NEXT_PUBLIC_STRIPE_SEMESTRAL_PRICE_ID,
+      anual: process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID,
+    };
+    const priceId = priceByPlano[plano as string] || process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID;
+
+    if (!priceId) {
+      return NextResponse.json({ error: 'Plano indisponível no momento.' }, { status: 400 });
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.pisiqueoraculo.com.br';
@@ -27,7 +40,7 @@ export async function POST(req: Request) {
       customer_email: email,
       line_items: [
         {
-          price: process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID, 
+          price: priceId,
           quantity: 1,
         },
       ],
