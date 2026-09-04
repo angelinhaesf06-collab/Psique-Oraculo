@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { drawCards, getAngelAttributes, getFallbackImageUrl } from '@/lib/cards';
+import { isVipEmail } from '@/lib/vip';
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
 import { agendarMensagemDiaria } from '@/lib/notifications';
@@ -408,7 +409,8 @@ export default function OraculoJornada() {
         const nomeCompleto = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || '';
         setPrimeiroNome(nomeCompleto ? nomeCompleto.trim().split(' ')[0] : 'Alma Querida');
         let premium = false;
-        if (session) {
+        if (isVipEmail(session?.user?.email)) premium = true;
+        if (!premium && session) {
           const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', session.user.id).single();
           premium = !!prof?.is_premium;
         }
@@ -689,7 +691,9 @@ export default function OraculoJornada() {
     // Controle de acesso: premium libera tudo; senão, 3 consultas grátis no aparelho.
     const { data: { session: gateSession } } = await supabase.auth.getSession();
     let isPremium = false;
-    if (gateSession) {
+    // VIP: emails liberados têm tiragens ILIMITADAS (contam como premium aqui).
+    if (isVipEmail(gateSession?.user?.email)) isPremium = true;
+    if (!isPremium && gateSession) {
       try {
         const { data: prof } = await supabase.from('profiles').select('is_premium').eq('id', gateSession.user.id).single();
         isPremium = !!prof?.is_premium;

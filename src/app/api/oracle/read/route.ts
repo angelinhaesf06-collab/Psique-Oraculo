@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getGeminiModel } from "@/lib/gemini";
 import { createClient } from "@supabase/supabase-js";
+import { isVipEmail } from "@/lib/vip";
 
 export const dynamic = 'force-static';
 
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
     // 1. Verificar Autenticação (Bearer Token)
     const authHeader = req.headers.get("Authorization");
     let userId = null;
+    let userEmail: string | null = null;
 
     if (authHeader && authHeader.startsWith("Bearer ") && authHeader !== "Bearer undefined" && authHeader !== "Bearer null" && authHeader.length > 15) {
       const token = authHeader.split(" ")[1];
@@ -25,6 +27,7 @@ export async function POST(req: Request) {
         const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
         if (!authError && user) {
           userId = user.id;
+          userEmail = user.email ?? null;
         } else {
           console.warn("Token inválido ou expirado:", authError?.message);
         }
@@ -89,8 +92,12 @@ export async function POST(req: Request) {
     //   - Trial expirado e sem premium: bloqueia (paywall)
     let creditStatus: any = { allowed: true, type: "open" };
 
+    // VIP: emails da allowlist têm tiragens ILIMITADAS — nunca passam pelo controle
+    // de créditos (nem paywall, nem limite diário).
+    const isVip = isVipEmail(userEmail);
+
     // A "mensagem do dia" é sempre gratuita e nunca consome créditos.
-    if (tipoLeitura !== 'mensagem_dia' && userId) {
+    if (tipoLeitura !== 'mensagem_dia' && userId && !isVip) {
       try {
         const { data: gate, error: gateError } = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId });
 
