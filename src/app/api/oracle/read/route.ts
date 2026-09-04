@@ -4,8 +4,10 @@ import { createClient } from "@supabase/supabase-js";
 import { isVipEmail } from "@/lib/vip";
 
 // IMPORTANTE: esta rota PRECISA rodar por requisição (lê o header Authorization e
-// consulta o banco). Com 'force-static' o Next 16 zera os headers em runtime, o
-// que fazia o token nunca ser lido (userId nulo) e a trava/identificação falhar.
+// consulta o banco). Com 'force-static' o Next 16 zera os headers em runtime, e o
+// token nunca era lido (userId nulo) -> a trava/identificação falhava. Por isso
+// 'force-dynamic'. No build do APP (output: export) a pasta /api é excluída pelo
+// script scripts/build-app.mjs, pois o app usa a API remota, não estas rotas.
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
@@ -24,29 +26,19 @@ export async function POST(req: Request) {
     let userId = null;
     let userEmail: string | null = null;
 
-    // [DIAGNÓSTICO TEMPORÁRIO] pistas sobre por que o login não é validado.
-    const svcKeyPresent = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const urlPresent = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
-    let authDebug = 'sem header';
-
     if (authHeader && authHeader.startsWith("Bearer ") && authHeader !== "Bearer undefined" && authHeader !== "Bearer null" && authHeader.length > 15) {
       const token = authHeader.split(" ")[1];
-      authDebug = 'header ok';
       try {
         const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
         if (!authError && user) {
           userId = user.id;
           userEmail = user.email ?? null;
         } else {
-          authDebug = 'getUser erro: ' + (authError?.message || 'sem usuario');
           console.warn("Token inválido ou expirado:", authError?.message);
         }
-      } catch (e: any) {
-        authDebug = 'excecao: ' + (e?.message || String(e));
+      } catch (e) {
         console.error("Erro ao validar token:", e);
       }
-    } else {
-      authDebug = 'header ausente/curto: ' + (authHeader ? authHeader.substring(0, 14) : 'null');
     }
 
     const body = await req.json();
@@ -118,39 +110,34 @@ export async function POST(req: Request) {
     // FAIL-CLOSED: sem identidade válida ou com erro no banco, NÃO liberamos — caso
     // contrário a trava perde o efeito e a pessoa faz leituras ilimitadas de graça.
     if (tipoLeitura !== 'mensagem_dia' && !isVip && !temCredito) {
-      // Sem userId (token ausente/expirado/ inválido) não há como garantir o limite:
+      // Sem userId (token ausente/expirado/inválido) não há como garantir o limite:
       // pede novo login em vez de liberar.
-      // [DIAGNÓSTICO TEMPORÁRIO] retorna 403 com mensagem clara para o app exibir.
       if (!userId) {
         const authResponse = NextResponse.json(
-          { reason: 'auth', message: `A1 | svcKey=${svcKeyPresent} url=${urlPresent} | ${authDebug}` },
-          { status: 403 }
+          { reason: 'auth', message: 'Sua sessão expirou. Entre novamente para continuar. ✨' },
+          { status: 401 }
         );
         authResponse.headers.set('Access-Control-Allow-Origin', '*');
         return authResponse;
       }
 
       let gate: any = null;
-      let gateErrMsg: string | null = null;
       try {
         const rpc = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId });
         if (rpc.error) {
-          gateErrMsg = rpc.error.message || JSON.stringify(rpc.error);
-          console.error("Erro ao validar créditos (bloqueando por segurança):", gateErrMsg);
+          console.error("Erro ao validar créditos (bloqueando por segurança):", rpc.error.message);
         } else {
           gate = rpc.data;
         }
       } catch (gateEx: any) {
-        gateErrMsg = gateEx?.message || String(gateEx);
-        console.error("Exceção ao validar créditos (bloqueando por segurança):", gateErrMsg);
+        console.error("Exceção ao validar créditos (bloqueando por segurança):", gateEx?.message);
       }
 
       // Erro/indisponibilidade do banco → NÃO libera (erro temporário, não leitura grátis).
-      // [DIAGNÓSTICO TEMPORÁRIO] retorna 403 com o erro real do banco para o app exibir.
       if (!gate) {
         const errResponse = NextResponse.json(
-          { reason: 'error', message: 'DIAGNÓSTICO D2 (erro no banco): ' + (gateErrMsg || 'sem detalhe') },
-          { status: 403 }
+          { reason: 'error', message: 'As energias estão se recalibrando. Tente novamente em um instante. ✨' },
+          { status: 503 }
         );
         errResponse.headers.set('Access-Control-Allow-Origin', '*');
         return errResponse;
