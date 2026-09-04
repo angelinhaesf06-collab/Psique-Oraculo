@@ -60,13 +60,14 @@ export default function ResetPasswordPage() {
       if (error) throw error;
       toast.success('Senha alterada com sucesso! Portal reaberto. ✨');
       router.push('/');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro ao trocar a senha:', error);
-      const msg = (error?.message || '').toLowerCase();
+      const detalhe = error instanceof Error ? error.message : '';
+      const msg = detalhe.toLowerCase();
       if (msg.includes('session') || msg.includes('missing') || msg.includes('expired')) {
         toast.error('Seu link de recuperação expirou. Volte ao login e peça um novo. 💫');
       } else {
-        toast.error(`Não consegui alterar: ${error.message}`);
+        toast.error(`Não consegui alterar: ${detalhe || 'tente novamente'}`);
       }
     } finally {
       setLoading(false);

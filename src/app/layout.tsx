@@ -4,7 +4,6 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import DecorationOverlay from "./DecorationOverlay";
 import CapgoReady from "./CapgoReady";
-import OneSignalInit from "./OneSignalInit";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -51,7 +50,6 @@ export default function RootLayout({
       <body className={`${montserrat.variable} ${cormorant.variable} antialiased font-sans text-foreground relative min-h-screen bg-[#FDFBF7] flex justify-center`}>
         <div className="w-full max-w-md relative flex flex-col min-h-screen overflow-hidden">
           <CapgoReady />
-          <OneSignalInit />
           <DecorationOverlay />
           <Toaster position="top-center" richColors />
           <div className="relative z-10 flex-1 flex flex-col overflow-hidden bg-transparent">
