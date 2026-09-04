@@ -21,19 +21,29 @@ export async function POST(req: Request) {
     let userId = null;
     let userEmail: string | null = null;
 
+    // [DIAGNÓSTICO TEMPORÁRIO] pistas sobre por que o login não é validado.
+    const svcKeyPresent = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const urlPresent = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+    let authDebug = 'sem header';
+
     if (authHeader && authHeader.startsWith("Bearer ") && authHeader !== "Bearer undefined" && authHeader !== "Bearer null" && authHeader.length > 15) {
       const token = authHeader.split(" ")[1];
+      authDebug = 'header ok';
       try {
         const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
         if (!authError && user) {
           userId = user.id;
           userEmail = user.email ?? null;
         } else {
+          authDebug = 'getUser erro: ' + (authError?.message || 'sem usuario');
           console.warn("Token inválido ou expirado:", authError?.message);
         }
-      } catch (e) {
+      } catch (e: any) {
+        authDebug = 'excecao: ' + (e?.message || String(e));
         console.error("Erro ao validar token:", e);
       }
+    } else {
+      authDebug = 'header ausente/curto: ' + (authHeader ? authHeader.substring(0, 14) : 'null');
     }
 
     const body = await req.json();
@@ -110,7 +120,7 @@ export async function POST(req: Request) {
       // [DIAGNÓSTICO TEMPORÁRIO] retorna 403 com mensagem clara para o app exibir.
       if (!userId) {
         const authResponse = NextResponse.json(
-          { reason: 'auth', message: 'DIAGNÓSTICO A1: o servidor NÃO reconheceu seu login (token não validado).' },
+          { reason: 'auth', message: `A1 | svcKey=${svcKeyPresent} url=${urlPresent} | ${authDebug}` },
           { status: 403 }
         );
         authResponse.headers.set('Access-Control-Allow-Origin', '*');
