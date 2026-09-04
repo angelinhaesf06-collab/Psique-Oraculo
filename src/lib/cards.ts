@@ -163,7 +163,12 @@ export async function drawCards(deckName: string, count: number = 3) {
       return `/assets/decks/anjos/${file}`;
     }
 
-    let filename = CIGANO_MAP[name] || CUSTOM_MAP[name] || `${name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '')}.jpg`;
+    // Usa o mapa do baralho correto: nomes como "A Torre", "A Estrela", "A Lua"
+    // e "O Sol" existem no Tar\u00f4 E no Baralho Cigano. Consultar o CIGANO_MAP antes
+    // do CUSTOM_MAP fazia essas 4 cartas do Tar\u00f4 apontarem para o arquivo do cigano
+    // (inexistente na pasta taro/), deixando a carta em branco.
+    const deckMap = deckName === 'Baralho Cigano' ? CIGANO_MAP : CUSTOM_MAP;
+    let filename = deckMap[name] || `${name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\s_]+/g, '-').replace(/[^\w-]/g, '')}.jpg`;
     return `/assets/decks/${folder}/${filename}`;
   };
 
