@@ -1,0 +1,61 @@
+name: Publicar atualizacao (Capgo OTA)
+
+# Publica automaticamente uma atualizacao OTA no Capgo a cada mudanca no main.
+# Tambem pode ser disparado manualmente pelo site do GitHub (aba Actions > Run workflow).
+#
+# NAO gera AAB nem passa pela Play: leva as mudancas de JS direto para os
+# celulares que ja tem o app instalado (o app usa Capgo com autoUpdate).
+#
+# Secrets necessarios (Settings > Secrets and variables > Actions > New repository secret):
+#   - CAPGO_TOKEN                          (token do painel do Capgo)
+#   - NEXT_PUBLIC_SUPABASE_URL             (mesmo valor do Vercel)
+#   - NEXT_PUBLIC_SUPABASE_ANON_KEY        (mesmo valor do Vercel)
+#   - NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY(mesmo valor do Vercel, comeca com goog_)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o codigo
+        uses: actions/checkout@v4
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Buildar o app (export para Capacitor)
+        env:
+          NEXT_PUBLIC_EXPORT: 'true'
+          # --- Variaveis do APP (vem dos Secrets do GitHub) ---
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY: ${{ secrets.NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY }}
+          NEXT_PUBLIC_SITE_URL: 'https://www.pisiqueoraculo.com.br'
+          # Stripe e so para a WEB (o app usa RevenueCat). Placeholders no build do app:
+          NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID: 'price_web_only'
+          NEXT_PUBLIC_STRIPE_MONTHLY_PRICE_ID: 'price_web_only'
+          NEXT_PUBLIC_STRIPE_SEMESTRAL_PRICE_ID: 'price_web_only'
+          # Variaveis so de SERVIDOR: placeholders so para o build nao quebrar.
+          # O app NUNCA executa estas rotas (elas rodam no Vercel).
+          SUPABASE_SERVICE_ROLE_KEY: 'build_placeholder'
+          STRIPE_SECRET_KEY: 'sk_test_build_placeholder'
+          STRIPE_WEBHOOK_SECRET: 'whsec_build_placeholder'
+          GEMINI_API_KEY: 'build_placeholder'
+        run: npm run build
+
+      - name: Publicar no Capgo (OTA)
+        env:
+          CAPGO_TOKEN: ${{ secrets.CAPGO_TOKEN }}
+        # channel: confirme no painel do Capgo qual canal os celulares escutam (geralmente "production").
+        # bundle: precisa ser MAIOR que a ultima versao no Capgo para os celulares atualizarem.
+        #         1.2.<numero da execucao> cresce sozinho a cada publicacao.
+        run: npx @capgo/cli@latest bundle upload --apikey "$CAPGO_TOKEN" --channel production --bundle "1.2.${{ github.run_number }}"
