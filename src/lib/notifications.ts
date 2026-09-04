@@ -65,3 +65,44 @@ export async function agendarMensagemDiaria() {
     console.warn('Falha ao agendar notificação diária:', e);
   }
 }
+
+// Aviso ÚNICO das novas ofertas de assinatura. Dispara algumas horas depois
+// da pessoa abrir o app e é agendado apenas uma vez por aparelho.
+// Para reenviar no futuro (nova campanha), troque a versão da chave (v1 -> v2).
+export async function agendarAvisoOferta() {
+  if (!Capacitor.isNativePlatform()) return;
+  try {
+    const chave = 'psique_aviso_oferta_v1';
+    const jaAvisou = (await Preferences.get({ key: chave })).value;
+    if (jaAvisou === '1') return;
+
+    // Garante o canal (idempotente) e a permissão
+    try {
+      await LocalNotifications.createChannel({
+        id: 'mensagem_dia',
+        name: 'Mensagem do Dia',
+        description: 'Lembrete diário da sua mensagem do oráculo',
+        importance: 5,
+        visibility: 1,
+      });
+    } catch {}
+
+    let perm = await LocalNotifications.checkPermissions();
+    if (perm.display !== 'granted') perm = await LocalNotifications.requestPermissions();
+    if (perm.display !== 'granted') return;
+
+    // Dispara em ~3h: traz a pessoa de volta ainda no mesmo dia.
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: 780,
+        channelId: 'mensagem_dia',
+        title: 'Novos planos no Psiquê Oráculo ✨',
+        body: 'Agora a partir de R$ 9,90/mês. Toque para conhecer e desbloquear todas as tiragens. 🔮',
+        schedule: { at: new Date(Date.now() + 3 * 60 * 60 * 1000), allowWhileIdle: true },
+      }],
+    });
+    await Preferences.set({ key: chave, value: '1' });
+  } catch (e) {
+    console.warn('Falha ao agendar aviso de oferta:', e);
+  }
+}

@@ -9,7 +9,7 @@ import { drawCards, getAngelAttributes, getFallbackImageUrl } from '@/lib/cards'
 import { isVipEmail } from '@/lib/vip';
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
-import { agendarMensagemDiaria } from '@/lib/notifications';
+import { agendarMensagemDiaria, agendarAvisoOferta } from '@/lib/notifications';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
@@ -403,8 +403,8 @@ export default function OraculoJornada() {
 
   const fecharNovidades = async () => {
     try {
-      if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_novidades_v1', value: '1' });
-      else localStorage.setItem('psique_novidades_v1', '1');
+      if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_novidades_v2', value: '1' });
+      else localStorage.setItem('psique_novidades_v2', '1');
     } catch {}
     setMostrarNovidades(false);
   };
@@ -513,8 +513,8 @@ export default function OraculoJornada() {
         } else {
           // Usuário que já conhece o app: mostra "Novidades" 1x
           const novidadesVistas = Capacitor.isNativePlatform()
-            ? (await Preferences.get({ key: 'psique_novidades_v1' })).value
-            : localStorage.getItem('psique_novidades_v1');
+            ? (await Preferences.get({ key: 'psique_novidades_v2' })).value
+            : localStorage.getItem('psique_novidades_v2');
           if (novidadesVistas !== '1') setMostrarNovidades(true);
         }
 
@@ -532,6 +532,8 @@ export default function OraculoJornada() {
     carregarAcesso();
     // Agenda o lembrete diário da "mensagem do dia" (retém quem ainda não assinou)
     agendarMensagemDiaria();
+    // Aviso único das novas ofertas de assinatura (agenda 1x por aparelho)
+    agendarAvisoOferta();
   }, []);
 
   const handleSubscribe = async (plano: 'anual' | 'mensal' | 'semestral' = 'anual') => {
