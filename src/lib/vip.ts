@@ -5,6 +5,7 @@
 // Para liberar mais alguém, basta adicionar o email nesta lista (em minúsculas).
 export const VIP_EMAILS: string[] = [
   'renovabio520@gmail.com',
+  'angelinhaesf06@gmail.com',
 ];
 
 export function isVipEmail(email?: string | null): boolean {
