@@ -275,11 +275,11 @@ export async function POST(req: Request) {
     `;
 
     const modelName = "gemini-3.1-flash-lite";
-    // A API do Gemini fica instável ao combinar IMAGEM + ferramenta de busca + resposta JSON.
-    // Quando há foto (tiragem física), desligamos o googleSearch para a identificação funcionar.
-    const temImagem = typeof imagem === 'string' && imagem.includes("base64,");
-    const tools = temImagem ? undefined : [{ googleSearch: {} }];
-    const model = getGeminiModel(modelName, systemInstruction, tools);
+    // NÃO usar googleSearch: o Gemini REJEITA busca na web + resposta em JSON
+    // (responseMimeType application/json) na MESMA chamada. Era isso que fazia a
+    // tiragem falhar com "As energias estão se recalibrando". A leitura não
+    // precisa de busca na web — o modelo interpreta as cartas com o próprio saber.
+    const model = getGeminiModel(modelName, systemInstruction, undefined);
 
     const nomesDasCartas = Array.isArray(cartas) 
       ? cartas.map(c => typeof c === 'string' ? c : (c.name || c.carta)).join(", ") 
@@ -322,11 +322,7 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
           generationConfig: {
             responseMimeType: "application/json",
             temperature: 0.9,
-            maxOutputTokens: 2000,
-            thinkingConfig: {
-               includeThoughts: true,
-               thinkingLevel: "MINIMAL"
-            }
+            maxOutputTokens: 2000
           } as any
         });
 
