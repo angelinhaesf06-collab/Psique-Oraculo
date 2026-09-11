@@ -836,8 +836,16 @@ export default function OraculoJornada() {
       if (!res.ok) {
         let dataErr; try { dataErr = JSON.parse(textResponse); } catch (e) {}
         if (res.status === 403 && dataErr?.reason === 'paywall') { setModalAberto('assinatura'); return; }
+        if (res.status === 401) {
+          toast.info(dataErr?.message || 'Sua sessão expirou. Entre novamente para continuar. ✨');
+          router.push('/login');
+          return;
+        }
         if (res.status === 403) { toast.info(dataErr?.message || 'Você atingiu seu limite de leituras por hoje. Volte amanhã. ✨'); return; }
-        throw new Error(`Erro do Servidor (${res.status})`);
+        // Falha temporária (IA/servidor): NADA foi consumido. Deixamos isso claro
+        // para a pessoa não achar que perdeu o crédito ou o pagamento.
+        toast.info('Não consegui gerar sua leitura agora. Fique tranquila: nenhum crédito seu foi usado. Tente novamente em instantes. ✨');
+        return;
       }
       let data = JSON.parse(textResponse);
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
@@ -871,7 +879,8 @@ export default function OraculoJornada() {
         }
       }
     } catch (error: any) {
-      toast.info("As energias estão se recalibrando. Tente novamente em um momento de paz. ✨"); 
+      // Erro de rede/inesperado: também não consumimos nada — reforça para a pessoa.
+      toast.info('Não consegui gerar sua leitura agora. Fique tranquila: nenhum crédito seu foi usado. Tente novamente em instantes. ✨');
     } finally { setLoading(false); }
   };
 
