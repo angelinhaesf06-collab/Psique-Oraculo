@@ -366,6 +366,15 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
       throw new Error(`O Oráculo retornou um formato inesperado. Detalhes: ${responseText.substring(0, 50)}...`);
     }
 
+    // Marca como cada leitura foi liberada (para relatório grátis x pago no Supabase).
+    let tipoAcesso = 'gratis';
+    if (tipoLeitura === 'mensagem_dia') tipoAcesso = 'mensagem_dia';
+    else if (isVip) tipoAcesso = 'vip';
+    else if (temCredito) tipoAcesso = 'avulsa';
+    else if (creditStatus?.type === 'premium') tipoAcesso = 'premium';
+    else if (creditStatus?.type === 'free_once') tipoAcesso = 'gratis';
+    else if (creditStatus?.type) tipoAcesso = creditStatus.type;
+
     // 5. Salvando no Histórico
     try {
         console.log("Salvando leitura no histórico...");
@@ -374,11 +383,12 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
             tipo_oraculo: tipoOraculo,
             tipo_leitura: tipoLeitura,
             pergunta_tema: tema + (pergunta ? ": " + pergunta : ""),
-            resposta_ia: jsonResponse
+            resposta_ia: jsonResponse,
+            tipo_acesso: tipoAcesso
         });
         console.log("Histórico salvo com sucesso.");
-    } catch (e) { 
-      console.warn("Falha ao salvar histórico:", e); 
+    } catch (e) {
+      console.warn("Falha ao salvar histórico:", e);
     }
 
     const response = NextResponse.json({
