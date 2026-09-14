@@ -425,8 +425,8 @@ export default function OraculoJornada() {
 
   const fecharNovidades = async () => {
     try {
-      if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_novidades_v2', value: '1' });
-      else localStorage.setItem('psique_novidades_v2', '1');
+      if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_novidades_v3', value: '1' });
+      else localStorage.setItem('psique_novidades_v3', '1');
     } catch {}
     setMostrarNovidades(false);
   };
@@ -539,8 +539,8 @@ export default function OraculoJornada() {
         } else {
           // Usuário que já conhece o app: mostra "Novidades" 1x
           const novidadesVistas = Capacitor.isNativePlatform()
-            ? (await Preferences.get({ key: 'psique_novidades_v2' })).value
-            : localStorage.getItem('psique_novidades_v2');
+            ? (await Preferences.get({ key: 'psique_novidades_v3' })).value
+            : localStorage.getItem('psique_novidades_v3');
           if (novidadesVistas !== '1') setMostrarNovidades(true);
         }
 
@@ -1398,10 +1398,10 @@ export default function OraculoJornada() {
             </div>
             <div className="space-y-3 mb-6">
               {[
-                { t: 'Novos planos', d: 'Mensal R$ 9,90, 6 meses R$ 39,90 e Anual R$ 59,90' },
-                { t: 'Leitura avulsa', d: 'Pague só por uma consulta quando quiser' },
-                { t: 'Pergunta rápida', d: 'Uma resposta extra no fim de cada leitura' },
-                { t: 'App mais leve e rápido', d: 'Atualizado para abrir e rodar melhor' },
+                { t: 'Recuperação de senha', d: 'Esqueceu a senha? Agora dá pra recuperar em segundos' },
+                { t: 'Planos pra todo bolso', d: 'Mensal R$ 9,90, 6 meses R$ 39,90 e Anual R$ 59,90' },
+                { t: 'Avalie e ganhe', d: 'Avalie o app e ganhe 1 tiragem grátis 💜' },
+                { t: 'Mais estável e rápido', d: 'Correções para sua leitura sair sempre certinha' },
               ].map((n) => (
                 <div key={n.t} className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#48BB78] shrink-0 mt-0.5" />
