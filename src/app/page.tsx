@@ -498,6 +498,8 @@ export default function OraculoJornada() {
         setIsPremiumUser(premium);
         // Teste de 24h ativo se ainda não começou (null) ou dentro do prazo.
         setTrialAtivo(!trialFim || new Date(trialFim).getTime() > Date.now());
+        // Notificação diária das 9h com tom certo (premium x convite ao grátis).
+        agendarMensagemDiaria(premium);
         setPaidReadings(await getPaidReadings());
         setJaAvaliouState(await getJaAvaliou());
         setAvulsasCompradas(await getAvulsasCompradas());
@@ -544,8 +546,8 @@ export default function OraculoJornada() {
       } catch {}
     };
     carregarAcesso();
-    // Agenda o lembrete diário da "mensagem do dia" (retém quem ainda não assinou)
-    agendarMensagemDiaria();
+    // (A notificação diária das 9h é agendada dentro de carregarAcesso, com o
+    //  tom certo conforme premium x não premium.)
     // Aviso único das novas ofertas de assinatura (agenda 1x por aparelho)
     agendarAvisoOferta();
   }, []);
