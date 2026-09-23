@@ -72,7 +72,8 @@ export async function agendarMensagemDiaria() {
 export async function agendarAvisoOferta() {
   if (!Capacitor.isNativePlatform()) return;
   try {
-    const chave = 'psique_aviso_oferta_v1';
+    // v2 = campanha do teste de 24h (troca da versão faz reenviar para todos).
+    const chave = 'psique_aviso_oferta_v2';
     const jaAvisou = (await Preferences.get({ key: chave })).value;
     if (jaAvisou === '1') return;
 
@@ -96,9 +97,9 @@ export async function agendarAvisoOferta() {
       notifications: [{
         id: 780,
         channelId: 'mensagem_dia',
-        title: 'Novos planos no Psiquê Oráculo ✨',
-        body: 'Agora a partir de R$ 9,90/mês. Toque para conhecer e desbloquear todas as tiragens. 🔮',
-        schedule: { at: new Date(Date.now() + 3 * 60 * 60 * 1000), allowWhileIdle: true },
+        title: '24h grátis liberado no Psiquê Oráculo ✨',
+        body: 'Ganhe 24 horas de tiragens ILIMITADAS! Toque e faça quantas leituras quiser hoje. 🔮',
+        schedule: { at: new Date(Date.now() + 2 * 60 * 60 * 1000), allowWhileIdle: true },
       }],
     });
     await Preferences.set({ key: chave, value: '1' });
