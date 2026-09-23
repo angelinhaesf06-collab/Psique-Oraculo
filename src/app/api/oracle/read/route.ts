@@ -93,7 +93,7 @@ export async function POST(req: Request) {
     // 2. Validação e Consumo de Créditos
     // Regra de negócio (função check_and_consume_reading no banco):
     //   - Premium: até 5 leituras por dia
-    //   - Não premium: 1 leitura grátis por conta (vitalícia); depois, paywall
+    //   - Não premium: teste de 24h ILIMITADO a partir da 1ª leitura; depois, paywall
     let creditStatus: any = { allowed: true, type: "open" };
 
     // VIP: emails da allowlist têm tiragens ILIMITADAS — nunca passam pelo controle
@@ -201,6 +201,12 @@ export async function POST(req: Request) {
       instrucaoEspecifica = `FOCO LEITURA COMPLETA: Analise profundamente as 3 cartas enviadas. Use os campos 'situacao_atual', 'caminho_acao' e 'resultado_conselho'.`;
     }
 
+    // Primeiro nome do consulente (para a leitura chamar a pessoa pelo nome).
+    const nomeConsulente = (body.userName || '').trim();
+    const primeiroNome = (nomeConsulente && nomeConsulente.toLowerCase() !== 'consulente')
+      ? nomeConsulente.split(/\s+/)[0]
+      : 'Alma Querida';
+
     const systemInstruction = `
       Você é o "Psiquê Oráculo", um mentor de alma e autoridade mística (Voz: Junguiana, Poética, Empática).
       Responda RIGOROSAMENTE em PORTUGUÊS DO BRASIL em formato JSON puro, sem marcações de markdown.
@@ -208,6 +214,10 @@ export async function POST(req: Request) {
       ORÁCULO ATUAL: ${tipoOraculo}
       TIPO DE LEITURA: ${tipoLeitura}
       ${instrucaoEspecifica}
+
+      ACOLHIMENTO PESSOAL:
+      - Dirija-se ao consulente pelo PRIMEIRO NOME, "${primeiroNome}", de forma calorosa ao menos uma vez na leitura (por exemplo na síntese/voz do destino ou no acolhimento psicológico).
+      - ATENÇÃO CRÍTICA: o nome do consulente é APENAS "${primeiroNome}". NUNCA use o nome de uma carta, arcano ou anjo (ex.: "Daniel", "O Sol", "A Lua") como se fosse o nome da pessoa.
 
       IDENTIFICAÇÃO VISUAL (PARA FOTOS):
       - Se uma imagem for fornecida, analise-a com extremo cuidado para identificar as cartas.
@@ -275,11 +285,11 @@ export async function POST(req: Request) {
     `;
 
     const modelName = "gemini-3.1-flash-lite";
-    // A API do Gemini fica instável ao combinar IMAGEM + ferramenta de busca + resposta JSON.
-    // Quando há foto (tiragem física), desligamos o googleSearch para a identificação funcionar.
-    const temImagem = typeof imagem === 'string' && imagem.includes("base64,");
-    const tools = temImagem ? undefined : [{ googleSearch: {} }];
-    const model = getGeminiModel(modelName, systemInstruction, tools);
+    // NÃO usar googleSearch: o Gemini REJEITA busca na web + resposta em JSON
+    // (responseMimeType application/json) na MESMA chamada. Era isso que fazia a
+    // tiragem falhar com "As energias estão se recalibrando". A leitura não
+    // precisa de busca na web — o modelo interpreta as cartas com o próprio saber.
+    const model = getGeminiModel(modelName, systemInstruction, undefined);
 
     const nomesDasCartas = Array.isArray(cartas) 
       ? cartas.map(c => typeof c === 'string' ? c : (c.name || c.carta)).join(", ") 
@@ -322,11 +332,7 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
           generationConfig: {
             responseMimeType: "application/json",
             temperature: 0.9,
-            maxOutputTokens: 2000,
-            thinkingConfig: {
-               includeThoughts: true,
-               thinkingLevel: "MINIMAL"
-            }
+            maxOutputTokens: 2000
           } as any
         });
 
@@ -370,6 +376,15 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
       throw new Error(`O Oráculo retornou um formato inesperado. Detalhes: ${responseText.substring(0, 50)}...`);
     }
 
+    // Marca como cada leitura foi liberada (para relatório grátis x pago no Supabase).
+    let tipoAcesso = 'gratis';
+    if (tipoLeitura === 'mensagem_dia') tipoAcesso = 'mensagem_dia';
+    else if (isVip) tipoAcesso = 'vip';
+    else if (temCredito) tipoAcesso = 'avulsa';
+    else if (creditStatus?.type === 'premium') tipoAcesso = 'premium';
+    else if (creditStatus?.type === 'free_once') tipoAcesso = 'gratis';
+    else if (creditStatus?.type) tipoAcesso = creditStatus.type;
+
     // 5. Salvando no Histórico
     try {
         console.log("Salvando leitura no histórico...");
@@ -378,11 +393,12 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
             tipo_oraculo: tipoOraculo,
             tipo_leitura: tipoLeitura,
             pergunta_tema: tema + (pergunta ? ": " + pergunta : ""),
-            resposta_ia: jsonResponse
+            resposta_ia: jsonResponse,
+            tipo_acesso: tipoAcesso
         });
         console.log("Histórico salvo com sucesso.");
-    } catch (e) { 
-      console.warn("Falha ao salvar histórico:", e); 
+    } catch (e) {
+      console.warn("Falha ao salvar histórico:", e);
     }
 
     const response = NextResponse.json({

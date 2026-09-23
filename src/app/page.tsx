@@ -62,6 +62,28 @@ async function setPaidReadingsStore(n: number): Promise<void> {
   } catch {}
 }
 
+// Quantas avulsas a pessoa JÁ COMPROU na vida (não é saldo — só cresce). Usado
+// para o empurrão "compre o plano" para quem já paga avulso com frequência.
+const PRECO_AVULSA = 2.06;
+async function getAvulsasCompradas(): Promise<number> {
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const { value } = await Preferences.get({ key: 'psique_avulsas_compradas' });
+      return parseInt(value || '0', 10) || 0;
+    }
+    return parseInt(localStorage.getItem('psique_avulsas_compradas') || '0', 10) || 0;
+  } catch { return 0; }
+}
+
+async function incAvulsasCompradas(): Promise<number> {
+  try {
+    const next = (await getAvulsasCompradas()) + 1;
+    if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_avulsas_compradas', value: String(next) });
+    else localStorage.setItem('psique_avulsas_compradas', String(next));
+    return next;
+  } catch { return 0; }
+}
+
 // Recompensa por avaliar o app: 1 tiragem grátis, resgatável uma única vez.
 async function getJaAvaliou(): Promise<boolean> {
   try {
@@ -396,6 +418,7 @@ export default function OraculoJornada() {
   const [loadingRapida, setLoadingRapida] = useState(false);
   const [paidReadings, setPaidReadings] = useState(0);
   const [jaAvaliou, setJaAvaliouState] = useState(false);
+  const [avulsasCompradas, setAvulsasCompradas] = useState(0);
 
   // Compra avulsa: paga R$ 2,06 e libera 1 leitura (produto consumível 'leitura_avulsa').
   const handleComprarAvulsa = async () => {
@@ -408,6 +431,8 @@ export default function OraculoJornada() {
       const novo = (await getPaidReadings()) + 1;
       await setPaidReadingsStore(novo);
       setPaidReadings(novo);
+      // Conta a avulsa comprada (para o empurrão de assinatura).
+      setAvulsasCompradas(await incAvulsasCompradas());
       toast.success('Leitura liberada! ✨');
       setModalAberto(null);
     } catch (e: any) {
@@ -473,6 +498,7 @@ export default function OraculoJornada() {
         setTrialAtivo(!trialFim || new Date(trialFim).getTime() > Date.now());
         setPaidReadings(await getPaidReadings());
         setJaAvaliouState(await getJaAvaliou());
+        setAvulsasCompradas(await getAvulsasCompradas());
 
         // Sequência de dias (hábito): conta dias consecutivos abrindo o app
         try {
@@ -820,8 +846,16 @@ export default function OraculoJornada() {
       if (!res.ok) {
         let dataErr; try { dataErr = JSON.parse(textResponse); } catch (e) {}
         if (res.status === 403 && dataErr?.reason === 'paywall') { setModalAberto('assinatura'); return; }
+        if (res.status === 401) {
+          toast.info(dataErr?.message || 'Sua sessão expirou. Entre novamente para continuar. ✨');
+          router.push('/login');
+          return;
+        }
         if (res.status === 403) { toast.info(dataErr?.message || 'Você atingiu seu limite de leituras por hoje. Volte amanhã. ✨'); return; }
-        throw new Error(`Erro do Servidor (${res.status})`);
+        // Falha temporária (IA/servidor): NADA foi consumido. Deixamos isso claro
+        // para a pessoa não achar que perdeu o crédito ou o pagamento.
+        toast.info('Não consegui gerar sua leitura agora. Fique tranquila: nenhum crédito seu foi usado. Tente novamente em instantes. ✨');
+        return;
       }
       let data = JSON.parse(textResponse);
       if (cartasSorteadas && Array.isArray(cartasSorteadas)) {
@@ -846,7 +880,8 @@ export default function OraculoJornada() {
         setPaidReadings(restante);
       }
     } catch (error: any) {
-      toast.info("As energias estão se recalibrando. Tente novamente em um momento de paz. ✨"); 
+      // Erro de rede/inesperado: também não consumimos nada — reforça para a pessoa.
+      toast.info('Não consegui gerar sua leitura agora. Fique tranquila: nenhum crédito seu foi usado. Tente novamente em instantes. ✨');
     } finally { setLoading(false); }
   };
 
@@ -1341,6 +1376,7 @@ export default function OraculoJornada() {
                 { t: '24 horas de tiragens ILIMITADAS', d: 'Faça quantas leituras quiser por 24h, a partir da sua próxima consulta 🔮' },
                 { t: 'Três oráculos pra explorar', d: 'Tarô, Baralho Cigano e Tarô dos Anjos' },
                 { t: 'Depois, planos a partir de R$ 9,90', d: 'Continue sua jornada quando o teste terminar' },
+                { t: 'Avalie e ganhe', d: 'Avalie o app e ganhe 1 tiragem grátis 💜' },
               ].map((n) => (
                 <div key={n.t} className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#48BB78] shrink-0 mt-0.5" />
@@ -1454,6 +1490,16 @@ export default function OraculoJornada() {
                         Desbloqueie <span className="font-bold">todos os oráculos</span>, rituais e leituras. Escolha o plano que combina com você.
                       </p>
                     </div>
+
+                    {/* Empurrão: quem já comprou 2+ avulsas provavelmente economiza assinando */}
+                    {avulsasCompradas >= 2 && (
+                      <div className="w-full bg-[#C4A484]/10 border border-[#C4A484]/40 rounded-[24px] p-5 text-center space-y-1.5">
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#C4A484]">Feito pra você ✨</span>
+                        <p className="text-sm text-[#4A3B28] leading-relaxed">
+                          Você já investiu <span className="font-bold">R$ {(avulsasCompradas * PRECO_AVULSA).toFixed(2).replace('.', ',')}</span> em leituras avulsas. Com o plano <span className="font-bold">mensal de R$ 9,90</span> você teria leituras o mês inteiro. 💜
+                        </p>
+                      </div>
+                    )}
 
                     <div className="w-full bg-white rounded-[32px] border border-[#E5D9C3] p-6 shadow-sm">
                       <div className="space-y-4 text-left">
