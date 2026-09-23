@@ -10,6 +10,7 @@ import { isVipEmail } from '@/lib/vip';
 import { Capacitor } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
 import { agendarMensagemDiaria, agendarAvisoOferta } from '@/lib/notifications';
+import { initOneSignal } from '@/lib/onesignal';
 import { SpeechRecognition } from '@capacitor-community/speech-recognition';
 import { VoiceRecorder } from 'capacitor-voice-recorder';
 import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
@@ -727,6 +728,8 @@ export default function OraculoJornada() {
       }
     };
     initRevenueCat();
+    // Inicializa o push do OneSignal (avisos/campanhas). Nativo apenas.
+    initOneSignal();
   }, []);
 
   useEffect(() => {

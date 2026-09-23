@@ -21,7 +21,7 @@ dependencies {
     implementation project(':capacitor-voice-recorder')
 
 }
-
+apply from: "../../node_modules/onesignal-cordova-plugin/build-extras-onesignal.gradle"
 
 if (hasProperty('postBuildExtras')) {
   postBuildExtras()
