@@ -406,6 +406,7 @@ export default function OraculoJornada() {
   const [primeiroNome, setPrimeiroNome] = useState('Alma Querida');
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
   const [mostrarNovidades, setMostrarNovidades] = useState(false);
+  const [mostrarFimTeste, setMostrarFimTeste] = useState(false);
 
   const fecharNovidades = async () => {
     try {
@@ -845,7 +846,7 @@ export default function OraculoJornada() {
       const textResponse = await res.text();
       if (!res.ok) {
         let dataErr; try { dataErr = JSON.parse(textResponse); } catch (e) {}
-        if (res.status === 403 && dataErr?.reason === 'paywall') { setModalAberto('assinatura'); return; }
+        if (res.status === 403 && dataErr?.reason === 'paywall') { setMostrarFimTeste(true); return; }
         if (res.status === 401) {
           toast.info(dataErr?.message || 'Sua sessão expirou. Entre novamente para continuar. ✨');
           router.push('/login');
@@ -1389,6 +1390,41 @@ export default function OraculoJornada() {
             </div>
             <button onClick={fecharNovidades} className="w-full py-4 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
               Explorar agora
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mostrarFimTeste && (
+        <div className="fixed inset-0 z-[121] flex items-center justify-center p-5 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-[#2C2420]/85 backdrop-blur-md" onClick={() => setMostrarFimTeste(false)} />
+          <div className="relative w-full max-w-sm bg-[#FDFBF7] rounded-[32px] border border-[#E5D9C3] shadow-2xl p-7 z-[122] animate-in slide-in-from-bottom-4 duration-500 text-center">
+            <div className="w-16 h-16 rounded-[20px] overflow-hidden border border-[#E5D9C3] mb-3 mx-auto">
+              <img src="/assets/brand/icon-512.png" alt="" className="w-full h-full object-cover" />
+            </div>
+            <h3 className="text-xl font-serif text-[#C4A484]">Seu teste de 24h terminou 🌙</h3>
+            <p className="text-[12px] text-[#8B735B] leading-relaxed mt-2">
+              Você aproveitou suas tiragens grátis. Gostou do Psiquê Oráculo? ✨
+            </p>
+
+            <div className="mt-5 rounded-2xl bg-[#C4A484]/10 border border-[#C4A484]/25 p-4 text-left space-y-2">
+              <p className="text-[12px] text-[#4A3B28] leading-relaxed">
+                💰 Uma consulta com cartomante custa de <b>R$ 50 a R$ 150</b> — e responde <b>uma única pergunta</b>.
+              </p>
+              <p className="text-[12px] text-[#4A3B28] leading-relaxed">
+                🔮 Aqui, por <b>R$ 9,90/mês</b> você tem <b>tiragens ILIMITADAS</b>: amor, trabalho, saúde, o que quiser, quando quiser.
+              </p>
+            </div>
+
+            <p className="text-[11px] text-[#8B735B]/80 leading-relaxed mt-4">
+              Assinando, você ainda ajuda a manter o app vivo e recebendo melhorias 💛
+            </p>
+
+            <button onClick={() => { setMostrarFimTeste(false); setModalAberto('assinatura'); }} className="w-full py-4 mt-5 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
+              Quero continuar • Ver planos
+            </button>
+            <button onClick={() => setMostrarFimTeste(false)} className="mt-3 text-[9px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 hover:text-[#C4A484] transition-colors">
+              Agora não
             </button>
           </div>
         </div>
