@@ -11,13 +11,15 @@ const FRASES_PREMIUM = [
   'Respire fundo e ouça o oráculo antes de descansar 🌙',
 ];
 
-// Frases para NÃO PREMIUM (tom de NOITE): engajamento + convite ao teste grátis.
+// Frases para NÃO PREMIUM (tom de NOITE): curiosidade/engajamento SEM prometer
+// "grátis" (o grátis é só o teste de 24h; depois é paywall — prometer grátis todo
+// dia seria enganoso pra quem já usou o teste). Inclui empurrão sutil ao premium.
 const FRASES_GRATIS = [
-  'Antes de dormir, faça sua leitura GRÁTIS no oráculo 🌙',
-  'Bateu aquela dúvida? Pergunte ao oráculo agora — de graça ✨',
-  'A noite é sua: amor, trabalho ou saúde? Consulte grátis 🔮',
-  'Feche o dia com uma tiragem grátis e clareza pra amanhã 🌙',
-  'Aproveite seu teste grátis do oráculo ✨ Toque e faça sua leitura.',
+  'Seu oráculo tem um recado pra você hoje 🌙 Toque e veja.',
+  'Bateu aquela dúvida? O oráculo espera por você ✨',
+  'A noite pede reflexão 🔮 Consulte as cartas antes de dormir.',
+  'Amor, trabalho, saúde... pergunte ao oráculo hoje 🌙',
+  'Feche o dia com clareza ✨ Veja o que as cartas trazem.',
   'Continue sua jornada: tiragens ilimitadas te esperam no app 🔮',
 ];
 
