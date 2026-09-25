@@ -47,6 +47,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>O microfone é usado para você fazer sua pergunta ao oráculo por voz.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
