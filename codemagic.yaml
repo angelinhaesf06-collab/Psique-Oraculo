@@ -19,6 +19,9 @@ workflows:
     integrations:
       app_store_connect: AppStoreConnectKey   # <-- nome da integração criada no Codemagic
     environment:
+      ios_signing:
+        distribution_type: app_store     # assinatura AUTOMÁTICA gerenciada pelo Codemagic
+        bundle_identifier: com.psiqueoraculo
       groups:
         - psique_env            # variáveis NEXT_PUBLIC_* (adicionadas no painel do Codemagic)
       vars:
@@ -43,14 +46,8 @@ workflows:
           else
             echo "Sem Podfile (Capacitor usa Swift Package Manager) — pulando."
           fi
-      - name: Assinatura — busca/cria certificado e perfil (App Store)
-        script: |
-          keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-          keychain add-certificates
-          xcode-project use-profiles
+      - name: Aplica os perfis de assinatura (automático)
+        script: xcode-project use-profiles
       - name: Incrementa o build number (evita conflito no TestFlight)
         script: |
           LATEST=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" 2>/dev/null || echo "0")
