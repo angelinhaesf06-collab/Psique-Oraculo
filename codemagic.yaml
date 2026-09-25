@@ -19,6 +19,8 @@ workflows:
     integrations:
       app_store_connect: AppStoreConnectKey   # <-- nome da integração criada no Codemagic
     environment:
+      groups:
+        - psique_env            # variáveis NEXT_PUBLIC_* (adicionadas no painel do Codemagic)
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
