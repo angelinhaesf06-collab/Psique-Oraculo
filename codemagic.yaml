@@ -73,3 +73,43 @@ workflows:
         auth: integration
         submit_to_testflight: true            # sobe pro TestFlight automaticamente
         # submit_to_app_store: false          # (ligar só quando quiser enviar pra revisão da loja)
+
+  # ------------------------------------------------------------------
+  # Build de SIMULADOR para testar no Appetize.io (grátis, sem iPhone).
+  # NÃO precisa de assinatura (CODE_SIGNING_ALLOWED=NO). Gera App-sim.zip;
+  # baixe o zip nos Artifacts e faça upload no Appetize.
+  # ------------------------------------------------------------------
+  ios-simulator:
+    name: Psiquê Oráculo iOS (Simulador p/ Appetize)
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      groups:
+        - psique_env
+      node: 22
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Instala dependências (npm)
+        script: npm ci
+      - name: Gera o web (export) e sincroniza o iOS
+        script: |
+          npm run build:app
+          npx cap sync ios
+      - name: Build para o Simulador (sem assinatura)
+        script: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Compacta o .app para o Appetize
+        script: |
+          cd build/Build/Products/Debug-iphonesimulator
+          zip -r App-sim.zip App.app
+    artifacts:
+      - build/Build/Products/Debug-iphonesimulator/App-sim.zip
+      - /tmp/xcodebuild_logs/*.log
