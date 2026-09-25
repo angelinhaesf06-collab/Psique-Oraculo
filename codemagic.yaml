@@ -46,8 +46,12 @@ workflows:
       - name: Assinatura — cria certificado + perfil (App Store) e aplica
         script: |
           keychain initialize
+          # Usa NOSSA chave privada (guardada no Codemagic como CERTIFICATE_PRIVATE_KEY),
+          # assim o certificado tem chave persistente entre builds (resolve o
+          # "Cannot save Signing Certificates without certificate private key").
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
+            --certificate-key @env:CERTIFICATE_PRIVATE_KEY \
             --create
           keychain add-certificates
           xcode-project use-profiles
