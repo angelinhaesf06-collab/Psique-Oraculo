@@ -1352,8 +1352,8 @@ export default function OraculoJornada() {
 
           <div className="w-full max-w-[320px] bg-[#C4A484]/10 border border-[#C4A484]/30 rounded-[28px] p-6 mb-8 flex flex-col items-center gap-2">
             <Sparkles size={20} className="text-[#C4A484]" />
-            <span className="text-2xl font-serif font-bold text-[#4A3B28]">1 leitura grátis</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">para começar sua jornada</span>
+            <span className="text-2xl font-serif font-bold text-[#4A3B28]">24 horas grátis</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">de leituras ilimitadas para começar</span>
           </div>
 
           <button

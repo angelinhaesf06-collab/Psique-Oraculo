@@ -2,6 +2,9 @@
   "appId": "com.psiqueoraculo",
   "appName": "Psiquê Oráculo",
   "webDir": "out",
+  "server": {
+    "iosScheme": "https"
+  },
   "plugins": {
     "CapacitorUpdater": {
       "autoUpdate": true,
