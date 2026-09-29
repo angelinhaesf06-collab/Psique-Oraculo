@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { Preferences } from '@capacitor/preferences';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -31,6 +31,37 @@ const capacitorStorage = {
   },
 };
 
+// No iOS, o fetch do WebView falha ao chamar o Supabase ("TypeError: Load failed" /
+// "Type error") — problema conhecido de CORS/rede do WKWebView. Solução: no iOS,
+// as chamadas do Supabase passam pela REDE NATIVA (CapacitorHttp), contornando o
+// WebView. Android e web continuam com o fetch padrão (que já funciona) — sem risco.
+const isIOS = Capacitor.getPlatform() === 'ios';
+
+const nativeFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+  const url = typeof input === 'string' ? input : (input instanceof URL ? input.toString() : (input as Request).url);
+  const method = (init?.method || 'GET').toUpperCase();
+
+  // Normaliza os headers para objeto simples
+  const headers: Record<string, string> = {};
+  const h = init?.headers;
+  if (h instanceof Headers) h.forEach((v, k) => { headers[k] = v; });
+  else if (Array.isArray(h)) for (const [k, v] of h as [string, string][]) headers[k] = v;
+  else if (h) Object.assign(headers, h as Record<string, string>);
+
+  // Corpo: o Supabase envia string JSON
+  let data: any = undefined;
+  if (typeof init?.body === 'string') {
+    try { data = JSON.parse(init.body); } catch { data = init.body; }
+  }
+
+  const res = await CapacitorHttp.request({ url, method, headers, data });
+  const bodyStr = typeof res.data === 'string' ? res.data : JSON.stringify(res.data ?? '');
+  return new Response(bodyStr, {
+    status: res.status,
+    headers: (res.headers as Record<string, string>) || {},
+  });
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: isNative ? capacitorStorage : undefined,
@@ -39,4 +70,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     // Em app nativo não há sessão na URL; na web mantemos o comportamento padrão.
     detectSessionInUrl: !isNative,
   },
+  // Só no iOS trocamos o fetch pelo nativo (Android/web usam o padrão).
+  global: isIOS ? { fetch: nativeFetch as unknown as typeof fetch } : undefined,
 });
