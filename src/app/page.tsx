@@ -775,12 +775,14 @@ export default function OraculoJornada() {
     fetchMensagemDia();
   }, []);
 
-  const handleLogout = async () => { localStorage.removeItem('psique_demo_mode'); await supabase.auth.signOut(); router.push('/login'); };
+  // replace (não push) para o logout: assim o botão "voltar" do Android NÃO
+  // retorna à home já deslogado (a home sai do histórico).
+  const handleLogout = async () => { localStorage.removeItem('psique_demo_mode'); await supabase.auth.signOut(); router.replace('/login'); };
   // Sair: faz logout (se houver) e sempre leva à tela de login/entrada.
   const handleSair = async () => {
     try { localStorage.removeItem('psique_demo_mode'); } catch {}
     try { await supabase.auth.signOut(); } catch {}
-    router.push('/login');
+    router.replace('/login');
   };
   const nextPasso = () => setPasso(passo + 1);
   const prevPasso = () => setPasso(passo - 1);
