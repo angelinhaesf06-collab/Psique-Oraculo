@@ -345,9 +345,10 @@ export default function OraculoJornada() {
   const [mostrarPressagio, setMostrarPressagio] = useState(false);
 
   const abrirPressagio = async () => {
-    // Premium/VIP têm acesso livre. Para quem não assina: 1 presságio grátis
-    // por aparelho; depois disso, abre o paywall de assinatura.
-    if (!isPremiumUser) {
+    // Premium/VIP e quem está no TESTE DE 24H têm acesso livre ao presságio.
+    // Só fora disso (teste expirado e não assinante): 1 presságio grátis por
+    // aparelho; depois, abre o paywall de assinatura.
+    if (!isPremiumUser && !trialAtivo) {
       const usados = await getPressagioUsed();
       if (usados >= FREE_PRESSAGIO_LIMIT) {
         setModalAberto('assinatura');
