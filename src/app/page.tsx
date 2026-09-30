@@ -1376,14 +1376,14 @@ export default function OraculoJornada() {
               <div className="w-16 h-16 rounded-[20px] overflow-hidden border border-[#E5D9C3] mb-3">
                 <img src="/assets/brand/icon-512.png" alt="" className="w-full h-full object-cover" />
               </div>
-              <h3 className="text-xl font-serif text-[#C4A484]">24h Grátis Liberado ✨</h3>
-              <p className="text-[11px] text-[#8B735B]/70 mt-1">Um presente pra você explorar o oráculo</p>
+              <h3 className="text-xl font-serif text-[#C4A484]">2 Leituras Grátis ✨</h3>
+              <p className="text-[11px] text-[#8B735B]/70 mt-1">Um presente pra você experimentar o oráculo</p>
             </div>
             <div className="space-y-3 mb-6">
               {[
-                { t: '24 horas de tiragens ILIMITADAS', d: 'Faça quantas leituras quiser por 24h, a partir da sua próxima consulta 🔮' },
+                { t: '2 leituras grátis pra começar', d: 'Experimente o oráculo sem pagar nada 🔮' },
                 { t: 'Três oráculos pra explorar', d: 'Tarô, Baralho Cigano e Tarô dos Anjos' },
-                { t: 'Depois, planos a partir de R$ 9,90', d: 'Continue sua jornada quando o teste terminar' },
+                { t: 'Depois, planos a partir de R$ 9,90', d: 'Continue sua jornada quando as grátis acabarem' },
                 { t: 'Avalie e ganhe', d: 'Avalie o app e ganhe 1 tiragem grátis 💜' },
               ].map((n) => (
                 <div key={n.t} className="flex items-start gap-3">

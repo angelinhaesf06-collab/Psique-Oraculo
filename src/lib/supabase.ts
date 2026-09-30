@@ -55,6 +55,15 @@ const nativeFetch = async (input: RequestInfo | URL, init?: RequestInit): Promis
     headers['apikey'] = supabaseAnonKey;
   }
 
+  // Reforço: manda a apikey também na URL (o Supabase aceita no header OU na query).
+  // Isso garante o login mesmo que o CapacitorHttp não envie o header no iOS.
+  let finalUrl = url;
+  try {
+    const u = new URL(url);
+    if (!u.searchParams.has('apikey')) u.searchParams.set('apikey', supabaseAnonKey);
+    finalUrl = u.toString();
+  } catch {}
+
   // Corpo: o Supabase envia string JSON (no init.body ou no próprio Request).
   let data: any = undefined;
   let bodyStrIn: string | undefined;
@@ -62,7 +71,7 @@ const nativeFetch = async (input: RequestInfo | URL, init?: RequestInit): Promis
   else if (req && !init?.body) { try { bodyStrIn = await req.clone().text(); } catch {} }
   if (bodyStrIn) { try { data = JSON.parse(bodyStrIn); } catch { data = bodyStrIn; } }
 
-  const res = await CapacitorHttp.request({ url, method, headers, data });
+  const res = await CapacitorHttp.request({ url: finalUrl, method, headers, data });
   const bodyStr = typeof res.data === 'string' ? res.data : JSON.stringify(res.data ?? '');
   return new Response(bodyStr, {
     status: res.status,
