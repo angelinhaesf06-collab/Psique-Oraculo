@@ -38,21 +38,29 @@ const capacitorStorage = {
 const isIOS = Capacitor.getPlatform() === 'ios';
 
 const nativeFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-  const url = typeof input === 'string' ? input : (input instanceof URL ? input.toString() : (input as Request).url);
-  const method = (init?.method || 'GET').toUpperCase();
+  const req = input instanceof Request ? input : null;
+  const url = typeof input === 'string' ? input : (input instanceof URL ? input.toString() : (req as Request).url);
+  const method = (init?.method || req?.method || 'GET').toUpperCase();
 
-  // Normaliza os headers para objeto simples
+  // Normaliza os headers para objeto simples — junta os do Request (se houver) E os do init.
   const headers: Record<string, string> = {};
+  if (req) req.headers.forEach((v, k) => { headers[k] = v; });
   const h = init?.headers;
   if (h instanceof Headers) h.forEach((v, k) => { headers[k] = v; });
   else if (Array.isArray(h)) for (const [k, v] of h as [string, string][]) headers[k] = v;
   else if (h) Object.assign(headers, h as Record<string, string>);
 
-  // Corpo: o Supabase envia string JSON
-  let data: any = undefined;
-  if (typeof init?.body === 'string') {
-    try { data = JSON.parse(init.body); } catch { data = init.body; }
+  // Garante a apikey do Supabase (o CapacitorHttp às vezes não repassa esse header).
+  if (!headers['apikey'] && !headers['apiKey'] && !headers['Apikey']) {
+    headers['apikey'] = supabaseAnonKey;
   }
+
+  // Corpo: o Supabase envia string JSON (no init.body ou no próprio Request).
+  let data: any = undefined;
+  let bodyStrIn: string | undefined;
+  if (typeof init?.body === 'string') bodyStrIn = init.body;
+  else if (req && !init?.body) { try { bodyStrIn = await req.clone().text(); } catch {} }
+  if (bodyStrIn) { try { data = JSON.parse(bodyStrIn); } catch { data = bodyStrIn; } }
 
   const res = await CapacitorHttp.request({ url, method, headers, data });
   const bodyStr = typeof res.data === 'string' ? res.data : JSON.stringify(res.data ?? '');
