@@ -93,7 +93,7 @@ export async function POST(req: Request) {
     // 2. Validação e Consumo de Créditos
     // Regra de negócio (função check_and_consume_reading no banco):
     //   - Premium: até 5 leituras por dia
-    //   - Não premium: teste de 24h ILIMITADO a partir da 1ª leitura; depois, paywall
+    //   - Não premium: 2 leituras grátis no total; depois, paywall
     let creditStatus: any = { allowed: true, type: "open" };
 
     // VIP: emails da allowlist têm tiragens ILIMITADAS — nunca passam pelo controle
@@ -382,7 +382,7 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
     else if (isVip) tipoAcesso = 'vip';
     else if (temCredito) tipoAcesso = 'avulsa';
     else if (creditStatus?.type === 'premium') tipoAcesso = 'premium';
-    else if (creditStatus?.type === 'free_once') tipoAcesso = 'gratis';
+    else if (creditStatus?.type === 'free_once' || creditStatus?.type === 'free') tipoAcesso = 'gratis';
     else if (creditStatus?.type) tipoAcesso = creditStatus.type;
 
     // 5. Salvando no Histórico

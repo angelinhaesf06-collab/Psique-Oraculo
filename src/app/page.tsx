@@ -20,8 +20,9 @@ import { Purchases, LOG_LEVEL, PRODUCT_CATEGORY } from '@revenuecat/purchases-ca
 
 // Modelo de conversão: a pessoa usa o app sem login. Após 1 consulta grátis
 // (contada NO APARELHO), aparece o paywall para cadastrar e assinar.
-// Acesso grátis agora é um TESTE DE 24H por conta, controlado pelo servidor
-// (função check_and_consume_reading). Não há mais contagem local de leituras.
+// Acesso grátis: 2 leituras no total por conta, controlado pelo SERVIDOR
+// (função check_and_consume_reading, coluna free_count). Depois, paywall.
+const FREE_READINGS_LIMIT = 2;
 // Presságio do Dia: 1 acesso grátis por aparelho; depois, apenas assinantes.
 const FREE_PRESSAGIO_LIMIT = 1;
 
@@ -345,10 +346,9 @@ export default function OraculoJornada() {
   const [mostrarPressagio, setMostrarPressagio] = useState(false);
 
   const abrirPressagio = async () => {
-    // Premium/VIP e quem está no TESTE DE 24H têm acesso livre ao presságio.
-    // Só fora disso (teste expirado e não assinante): 1 presságio grátis por
-    // aparelho; depois, abre o paywall de assinatura.
-    if (!isPremiumUser && !trialAtivo) {
+    // Premium/VIP têm acesso livre. Para quem não assina: 1 presságio grátis
+    // por aparelho; depois disso, abre o paywall de assinatura.
+    if (!isPremiumUser) {
       const usados = await getPressagioUsed();
       if (usados >= FREE_PRESSAGIO_LIMIT) {
         setModalAberto('assinatura');
@@ -402,9 +402,9 @@ export default function OraculoJornada() {
   };
 
   const [isPremiumUser, setIsPremiumUser] = useState(false);
-  // Teste de 24h: ativo enquanto não começou (null) ou dentro do prazo. O servidor
-  // é a fonte da verdade; aqui é só para exibir o aviso na tela.
-  const [trialAtivo, setTrialAtivo] = useState<boolean>(true);
+  // Leituras grátis restantes (2 no total). O servidor é a fonte da verdade;
+  // aqui é só para exibir na tela.
+  const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
   const [primeiroNome, setPrimeiroNome] = useState('Alma Querida');
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
   const [mostrarNovidades, setMostrarNovidades] = useState(false);
@@ -489,16 +489,15 @@ export default function OraculoJornada() {
         const nomeCompleto = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || '';
         setPrimeiroNome(nomeCompleto ? nomeCompleto.trim().split(' ')[0] : 'Alma Querida');
         let premium = false;
-        let trialFim: string | null = null;
+        let freeUsados = 0;
         if (isVipEmail(session?.user?.email)) premium = true;
         if (!premium && session) {
-          const { data: prof } = await supabase.from('profiles').select('is_premium, trial_expires_at').eq('id', session.user.id).single();
+          const { data: prof } = await supabase.from('profiles').select('is_premium, free_count').eq('id', session.user.id).single();
           premium = !!prof?.is_premium;
-          trialFim = prof?.trial_expires_at ?? null;
+          freeUsados = prof?.free_count ?? 0;
         }
         setIsPremiumUser(premium);
-        // Teste de 24h ativo se ainda não começou (null) ou dentro do prazo.
-        setTrialAtivo(!trialFim || new Date(trialFim).getTime() > Date.now());
+        setFreeRestantes(Math.max(0, FREE_READINGS_LIMIT - freeUsados));
         // Notificação diária das 9h com tom certo (premium x convite ao grátis).
         agendarMensagemDiaria(premium);
         setPaidReadings(await getPaidReadings());
@@ -804,23 +803,22 @@ export default function OraculoJornada() {
     }
 
     let isPremium = false;
-    let trialFim: string | null = null;
+    let freeUsados = 0;
     // VIP: emails liberados têm tiragens ILIMITADAS (contam como premium aqui).
     if (isVipEmail(gateSession?.user?.email)) isPremium = true;
     if (!isPremium && gateSession) {
       try {
-        const { data: prof } = await supabase.from('profiles').select('is_premium, trial_expires_at').eq('id', gateSession.user.id).single();
+        const { data: prof } = await supabase.from('profiles').select('is_premium, free_count').eq('id', gateSession.user.id).single();
         isPremium = !!prof?.is_premium;
-        trialFim = prof?.trial_expires_at ?? null;
+        freeUsados = prof?.free_count ?? 0;
       } catch {}
     }
-    // O teste de 24h é controlado pelo SERVIDOR. Aqui só decidimos usar um crédito
-    // avulso/bônus quando o teste JÁ expirou (o crédito ignora o limite do teste).
+    // As 2 leituras grátis são controladas pelo SERVIDOR. Aqui só decidimos usar um
+    // crédito de BÔNUS (avaliar o app) quando as grátis já acabaram.
     let usarCredito = false;
     if (!isPremium) {
-      const trialAindaAtivo = !trialFim || new Date(trialFim).getTime() > Date.now();
       const avulsas = await getPaidReadings();
-      if (!trialAindaAtivo && avulsas > 0) usarCredito = true;
+      if (freeUsados >= FREE_READINGS_LIMIT && avulsas > 0) usarCredito = true;
     }
 
     if (tipo === 'foto' && !imageData) {
@@ -881,8 +879,9 @@ export default function OraculoJornada() {
         }
       }
       setResultado(data); setPasso(4); setRespostaRapida(null);
-      // Consumo: o teste de 24h é controlado pelo servidor (nada a contar aqui).
-      // Só debitamos crédito avulso/bônus quando ele foi usado (teste expirado).
+      // Consumo: as 2 grátis são contadas no servidor; aqui só refletimos na tela.
+      if (!isPremium && !usarCredito) setFreeRestantes((r) => Math.max(0, r - 1));
+      // Debita o crédito de bônus só quando ele foi usado (grátis já acabaram).
       if (!isPremium && usarCredito) {
         const restante = Math.max(0, (await getPaidReadings()) - 1);
         await setPaidReadingsStore(restante);
@@ -1025,7 +1024,7 @@ export default function OraculoJornada() {
                    <button onClick={() => setModalAberto('assinatura')} className="flex items-center gap-1.5 rounded-full bg-[#C4A484]/10 border border-[#C4A484]/25 px-3 py-1 active:scale-95 transition-all">
                      <Sparkles size={11} className="text-[#C4A484]" />
                      <span className="text-[8px] font-black uppercase tracking-widest text-[#8B735B]">
-                       {trialAtivo ? 'Teste grátis por 24h ✨' : 'Seja Premium para continuar'}
+                       {freeRestantes > 0 ? `${freeRestantes} ${freeRestantes === 1 ? 'leitura grátis' : 'leituras grátis'} ✨` : 'Seja Premium para continuar'}
                      </span>
                    </button>
                  )}
@@ -1355,8 +1354,8 @@ export default function OraculoJornada() {
 
           <div className="w-full max-w-[320px] bg-[#C4A484]/10 border border-[#C4A484]/30 rounded-[28px] p-6 mb-8 flex flex-col items-center gap-2">
             <Sparkles size={20} className="text-[#C4A484]" />
-            <span className="text-2xl font-serif font-bold text-[#4A3B28]">24 horas grátis</span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">de leituras ilimitadas para começar</span>
+            <span className="text-2xl font-serif font-bold text-[#4A3B28]">2 leituras grátis</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">para começar sua jornada</span>
           </div>
 
           <button
@@ -1410,9 +1409,9 @@ export default function OraculoJornada() {
             <div className="w-16 h-16 rounded-[20px] overflow-hidden border border-[#E5D9C3] mb-3 mx-auto">
               <img src="/assets/brand/icon-512.png" alt="" className="w-full h-full object-cover" />
             </div>
-            <h3 className="text-xl font-serif text-[#C4A484]">Seu teste de 24h terminou 🌙</h3>
+            <h3 className="text-xl font-serif text-[#C4A484]">Suas leituras grátis acabaram 🌙</h3>
             <p className="text-[12px] text-[#8B735B] leading-relaxed mt-2">
-              Você aproveitou suas tiragens grátis. Gostou do Psiquê Oráculo? ✨
+              Você aproveitou suas leituras grátis. Gostou do Psiquê Oráculo? ✨
             </p>
 
             <div className="mt-5 rounded-2xl bg-[#C4A484]/10 border border-[#C4A484]/25 p-4 text-left space-y-2">
@@ -1625,14 +1624,6 @@ export default function OraculoJornada() {
                           <span className="text-[11px] font-bold">Avaliar o app e ganhar 1 tiragem grátis ✨</span>
                         </button>
                       )}
-
-                      <button
-                        onClick={handleComprarAvulsa}
-                        disabled={loading}
-                        className="w-full py-3 rounded-[20px] border border-[#E5D9C3] bg-white/60 text-[#8B735B] active:scale-95 transition-all disabled:opacity-60"
-                      >
-                        <span className="text-[11px] font-bold">Só hoje? Liberar 1 leitura · R$ 2,06</span>
-                      </button>
                     </div>
                  </div>
                )}
