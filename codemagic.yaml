@@ -69,8 +69,10 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true            # sobe pro TestFlight automaticamente
-        # submit_to_app_store: false          # (ligar só quando quiser enviar pra revisão da loja)
+        # Só faz upload pro App Store Connect. NÃO envia pra revisão beta EXTERNA
+        # (usamos teste INTERNO, que recebe o build na hora sem revisão). Isso evita
+        # o erro "Another build is in review".
+        submit_to_testflight: false
 
   # ------------------------------------------------------------------
   # Build de SIMULADOR para testar no Appetize.io (grátis, sem iPhone).
