@@ -36,7 +36,8 @@ export const viewport: Viewport = {
   themeColor: "#FDFBF7",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5, // Permite zoom mas mantém o padrão nítido
+  maximumScale: 1, // Trava o zoom por pinça (evita a tela "desarrumar" no iOS)
+  userScalable: false,
   viewportFit: "cover", // Essencial para apps em tela cheia (APK)
 };
 
