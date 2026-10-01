@@ -5,8 +5,21 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { Mail, Lock, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Capacitor } from '@capacitor/core';
 
 import DecorationOverlay from '../DecorationOverlay';
+
+// No iOS (WKWebView + export estático), o router.push do Next às vezes NÃO navega
+// (a tela fica travada no login mesmo com o login OK). A navegação "dura" via
+// window.location carrega a index.html de forma confiável. A sessão não se perde:
+// fica guardada no armazenamento nativo (Capacitor Preferences) e é relida na home.
+const irParaHome = (router: ReturnType<typeof useRouter>) => {
+  if (Capacitor.isNativePlatform()) {
+    window.location.href = '/';
+  } else {
+    router.push('/');
+  }
+};
 
 export default function LoginPage() {
   const [nome, setNome] = useState('');
@@ -55,7 +68,7 @@ export default function LoginPage() {
         const userFullName = nome || email.split('@')[0];
         toast.success('Alma registrada! Portal aberto.');
         await saveCredentials(userFullName);
-        router.push('/');
+        irParaHome(router);
         return;
       }
 
@@ -63,7 +76,7 @@ export default function LoginPage() {
       const userFullName = nome || signInData.user?.user_metadata?.full_name || email.split('@')[0];
       toast.success('Portal Aberto!');
       await saveCredentials(userFullName);
-      router.push('/');
+      irParaHome(router);
     } catch (error: any) {
       console.error("Erro Geral no Login:", error);
       toast.error(`Falha no Portal: ${error.message}`);
