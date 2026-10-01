@@ -422,6 +422,14 @@ export default function OraculoJornada() {
   const [paidReadings, setPaidReadings] = useState(0);
   const [jaAvaliou, setJaAvaliouState] = useState(false);
   const [avulsasCompradas, setAvulsasCompradas] = useState(0);
+  // Preços dos planos. Começam com o fallback do Android; na inicialização do
+  // RevenueCat (abaixo) viram os preços REAIS da loja (iOS mostra 79,90/49,90/14,90).
+  // Isso evita a Apple rejeitar o app por preço na tela diferente do que ela cobra.
+  const [precos, setPrecos] = useState({
+    anual: 'R$ 59,90', anualMes: 'R$ 4,99',
+    semestral: 'R$ 39,90', semestralMes: 'R$ 6,65',
+    mensal: 'R$ 9,90',
+  });
 
   // Compra avulsa: paga R$ 2,06 e libera 1 leitura (produto consumível 'leitura_avulsa').
   const handleComprarAvulsa = async () => {
@@ -725,10 +733,45 @@ export default function OraculoJornada() {
       const apiKey = isIOS
         ? process.env.NEXT_PUBLIC_REVENUECAT_APPLE_API_KEY
         : process.env.NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
+      // Fallback por plataforma: no iOS os preços são diferentes do Android.
+      // (Se a loja não responder, pelo menos mostramos o preço certo da plataforma.)
+      if (isIOS) {
+        setPrecos({
+          anual: 'R$ 79,90', anualMes: 'R$ 6,66',
+          semestral: 'R$ 49,90', semestralMes: 'R$ 8,32',
+          mensal: 'R$ 14,90',
+        });
+      }
       if (isNative && apiKey && apiKey !== 'sua_chave_publica_google_do_revenuecat_aqui') {
         try {
           await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
           await Purchases.configure({ apiKey });
+
+          // Busca os preços REAIS da loja (sempre batem com o que será cobrado).
+          try {
+            const offerings = await Purchases.getOfferings();
+            const todas: any[] = [];
+            if (offerings.current) todas.push(offerings.current);
+            if (offerings.all) todas.push(...Object.values(offerings.all));
+            const pkgs: any[] = [];
+            for (const off of todas) for (const p of ((off as any)?.availablePackages || [])) pkgs.push(p);
+            const achar = (tipo: string, re: RegExp) =>
+              pkgs.find((p: any) => p.packageType === tipo) ||
+              pkgs.find((p: any) => re.test(p.identifier || p.product?.identifier || ''));
+            const pAnual = achar('ANNUAL', /anual|annual/i);
+            const pSem = achar('SIX_MONTH', /semestral|six.?month|6.?mes/i);
+            const pMen = achar('MONTHLY', /mensal|monthly/i);
+            const fmt = (n: number) => `R$ ${n.toFixed(2).replace('.', ',')}`;
+            setPrecos((prev) => ({
+              anual: pAnual?.product?.priceString || prev.anual,
+              anualMes: pAnual?.product?.price ? fmt(pAnual.product.price / 12) : prev.anualMes,
+              semestral: pSem?.product?.priceString || prev.semestral,
+              semestralMes: pSem?.product?.price ? fmt(pSem.product.price / 6) : prev.semestralMes,
+              mensal: pMen?.product?.priceString || prev.mensal,
+            }));
+          } catch (e) {
+            console.error("Não consegui buscar os preços da loja", e);
+          }
         } catch (e) {
           console.error("Falha ao inicializar o RevenueCat", e);
         }
@@ -1388,7 +1431,7 @@ export default function OraculoJornada() {
               {[
                 { t: '2 leituras grátis pra começar', d: 'Experimente o oráculo sem pagar nada 🔮' },
                 { t: 'Três oráculos pra explorar', d: 'Tarô, Baralho Cigano e Tarô dos Anjos' },
-                { t: 'Depois, planos a partir de R$ 9,90', d: 'Continue sua jornada quando as grátis acabarem' },
+                { t: `Depois, planos a partir de ${precos.mensal}`, d: 'Continue sua jornada quando as grátis acabarem' },
                 { t: 'Avalie e ganhe', d: 'Avalie o app e ganhe 1 tiragem grátis 💜' },
               ].map((n) => (
                 <div key={n.t} className="flex items-start gap-3">
@@ -1424,7 +1467,7 @@ export default function OraculoJornada() {
                 💰 Uma consulta com cartomante custa de <b>R$ 50 a R$ 150</b> — e responde <b>uma única pergunta</b>.
               </p>
               <p className="text-[12px] text-[#4A3B28] leading-relaxed">
-                🔮 Aqui, por <b>R$ 9,90/mês</b> você tem <b>tiragens ILIMITADAS</b>: amor, trabalho, saúde, o que quiser, quando quiser.
+                🔮 Aqui, por <b>{precos.mensal}/mês</b> você tem <b>tiragens ILIMITADAS</b>: amor, trabalho, saúde, o que quiser, quando quiser.
               </p>
             </div>
 
@@ -1544,7 +1587,7 @@ export default function OraculoJornada() {
                       <div className="w-full bg-[#C4A484]/10 border border-[#C4A484]/40 rounded-[24px] p-5 text-center space-y-1.5">
                         <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#C4A484]">Feito pra você ✨</span>
                         <p className="text-sm text-[#4A3B28] leading-relaxed">
-                          Você já investiu <span className="font-bold">R$ {(avulsasCompradas * PRECO_AVULSA).toFixed(2).replace('.', ',')}</span> em leituras avulsas. Com o plano <span className="font-bold">mensal de R$ 9,90</span> você teria leituras o mês inteiro. 💜
+                          Você já investiu <span className="font-bold">R$ {(avulsasCompradas * PRECO_AVULSA).toFixed(2).replace('.', ',')}</span> em leituras avulsas. Com o plano <span className="font-bold">mensal de {precos.mensal}</span> você teria leituras o mês inteiro. 💜
                         </p>
                       </div>
                     )}
@@ -1576,8 +1619,8 @@ export default function OraculoJornada() {
                       >
                         <div className="flex flex-col text-left">
                           <span className="text-[9px] font-black uppercase tracking-[0.2em] opacity-80">Anual · Melhor valor</span>
-                          <span className="text-lg font-black leading-tight">R$ 59,90 <span className="text-[11px] font-medium opacity-80">/ano</span></span>
-                          <span className="text-[9px] font-medium opacity-70">Equivale a R$ 4,99/mês</span>
+                          <span className="text-lg font-black leading-tight">{precos.anual} <span className="text-[11px] font-medium opacity-80">/ano</span></span>
+                          <span className="text-[9px] font-medium opacity-70">Equivale a {precos.anualMes}/mês</span>
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-3 py-1.5 rounded-full">{loading ? '...' : 'Assinar'}</span>
                       </button>
@@ -1590,8 +1633,8 @@ export default function OraculoJornada() {
                       >
                         <div className="flex flex-col text-left">
                           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#8B735B]/70">6 Meses · Equilíbrio</span>
-                          <span className="text-lg font-black text-[#4A3B28] leading-tight">R$ 39,90 <span className="text-[11px] font-medium opacity-70">/6 meses</span></span>
-                          <span className="text-[9px] font-medium text-[#8B735B]/60">Equivale a R$ 6,65/mês</span>
+                          <span className="text-lg font-black text-[#4A3B28] leading-tight">{precos.semestral} <span className="text-[11px] font-medium opacity-70">/6 meses</span></span>
+                          <span className="text-[9px] font-medium text-[#8B735B]/60">Equivale a {precos.semestralMes}/mês</span>
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#C4A484]">{loading ? '...' : 'Assinar'}</span>
                       </button>
@@ -1604,7 +1647,7 @@ export default function OraculoJornada() {
                       >
                         <div className="flex flex-col text-left">
                           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[#8B735B]/70">Mensal · Flexível</span>
-                          <span className="text-lg font-black text-[#4A3B28] leading-tight">R$ 9,90 <span className="text-[11px] font-medium opacity-70">/mês</span></span>
+                          <span className="text-lg font-black text-[#4A3B28] leading-tight">{precos.mensal} <span className="text-[11px] font-medium opacity-70">/mês</span></span>
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#C4A484]">{loading ? '...' : 'Assinar'}</span>
                       </button>
