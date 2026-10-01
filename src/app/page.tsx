@@ -719,7 +719,12 @@ export default function OraculoJornada() {
   useEffect(() => {
     const initRevenueCat = async () => {
       const isNative = Capacitor.isNativePlatform();
-      const apiKey = process.env.NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
+      // Cada loja usa uma chave PÚBLICA diferente no RevenueCat:
+      // iOS (App Store) = chave appl_... ; Android (Play) = chave goog_...
+      const isIOS = Capacitor.getPlatform() === 'ios';
+      const apiKey = isIOS
+        ? process.env.NEXT_PUBLIC_REVENUECAT_APPLE_API_KEY
+        : process.env.NEXT_PUBLIC_REVENUECAT_GOOGLE_API_KEY;
       if (isNative && apiKey && apiKey !== 'sua_chave_publica_google_do_revenuecat_aqui') {
         try {
           await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
