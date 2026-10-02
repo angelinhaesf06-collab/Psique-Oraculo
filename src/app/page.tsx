@@ -86,7 +86,8 @@ async function incAvulsasCompradas(): Promise<number> {
   } catch { return 0; }
 }
 
-// Recompensa por avaliar o app: 1 tiragem grátis, resgatável uma única vez.
+// Recompensa por avaliar o app (legado/offline): fallback local só pra quem NÃO está
+// logado. Para quem tem conta, a verdade é o servidor (profiles.rated_bonus_claimed).
 async function getJaAvaliou(): Promise<boolean> {
   try {
     if (Capacitor.isNativePlatform()) {
@@ -95,13 +96,6 @@ async function getJaAvaliou(): Promise<boolean> {
     }
     return localStorage.getItem('psique_avaliou') === '1';
   } catch { return false; }
-}
-
-async function setJaAvaliou(): Promise<void> {
-  try {
-    if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_avaliou', value: '1' });
-    else localStorage.setItem('psique_avaliou', '1');
-  } catch {}
 }
 
 // Histórico local (funciona com ou sem conta, guardado no aparelho)
@@ -285,22 +279,42 @@ export default function OraculoJornada() {
     } catch { try { window.open(url, '_blank'); } catch {} }
   };
 
-  // Avaliar o app e ganhar 1 tiragem grátis (resgatável uma única vez por aparelho).
+  // Avaliar o app e ganhar 1 tiragem grátis — resgatável uma única vez por CONTA
+  // (validado no servidor, à prova de reinstalação).
   const avaliarEGanhar = async () => {
     // Abre a Play Store para a pessoa avaliar
     await abrirAvaliar();
-    // Concede o bônus só uma vez
-    if (await getJaAvaliou()) {
+
+    const { data: { session } } = await supabase.auth.getSession();
+    // Sem conta não há como registrar o bônus na conta — pede login.
+    if (!session) {
+      toast.info('Entre na sua conta para ganhar a tiragem por avaliar. ✨');
+      return;
+    }
+    if (jaAvaliou) {
       toast.info('Você já resgatou sua tiragem por avaliar. 💛');
       return;
     }
-    await setJaAvaliou();
-    setJaAvaliouState(true);
-    const novo = (await getPaidReadings()) + 1;
-    await setPaidReadingsStore(novo);
-    setPaidReadings(novo);
-    setModalAberto(null);
-    toast.success('Obrigada por avaliar! Você ganhou 1 tiragem grátis. ✨');
+
+    try {
+      const siteUrl = 'https://www.pisiqueoraculo.com.br';
+      const url = Capacitor.isNativePlatform() ? `${siteUrl}/api/oracle/claim-bonus` : `/api/oracle/claim-bonus`;
+      const res = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${session.access_token}` } });
+      const data = await res.json().catch(() => ({}));
+      if (data?.granted) {
+        setJaAvaliouState(true);
+        setPaidReadings((n) => n + 1);
+        setModalAberto(null);
+        toast.success('Obrigada por avaliar! Você ganhou 1 tiragem grátis. ✨');
+      } else if (data?.reason === 'already_claimed') {
+        setJaAvaliouState(true);
+        toast.info('Você já resgatou sua tiragem por avaliar. 💛');
+      } else {
+        toast.info('Não consegui registrar o bônus agora. Tente de novo. ✨');
+      }
+    } catch {
+      toast.info('Não consegui registrar o bônus agora. Tente de novo. ✨');
+    }
   };
 
   // Carrega o histórico de leituras (apenas para quem tem conta)
@@ -498,18 +512,32 @@ export default function OraculoJornada() {
         setPrimeiroNome(nomeCompleto ? nomeCompleto.trim().split(' ')[0] : 'Alma Querida');
         let premium = false;
         let freeUsados = 0;
+        let bonusSaldo = 0;
+        let jaAvaliouServidor = false;
         if (isVipEmail(session?.user?.email)) premium = true;
-        if (!premium && session) {
-          const { data: prof } = await supabase.from('profiles').select('is_premium, free_count').eq('id', session.user.id).single();
-          premium = !!prof?.is_premium;
+        if (session) {
+          // Lê tudo da CONTA: premium, grátis usados e o bônus (agora server-side).
+          const { data: prof } = await supabase.from('profiles')
+            .select('is_premium, free_count, bonus_readings, rated_bonus_claimed')
+            .eq('id', session.user.id).single();
+          if (!premium) premium = !!prof?.is_premium;
           freeUsados = prof?.free_count ?? 0;
+          bonusSaldo = prof?.bonus_readings ?? 0;
+          jaAvaliouServidor = !!prof?.rated_bonus_claimed;
         }
         setIsPremiumUser(premium);
         setFreeRestantes(Math.max(0, FREE_READINGS_LIMIT - freeUsados));
         // Notificação diária das 9h com tom certo (premium x convite ao grátis).
         agendarMensagemDiaria(premium);
-        setPaidReadings(await getPaidReadings());
-        setJaAvaliouState(await getJaAvaliou());
+        // Bônus de avaliar o app agora vem do SERVIDOR (por conta, à prova de reinstalação).
+        // Sem sessão, usa o estado local legado (a leitura exige login de qualquer forma).
+        if (session) {
+          setPaidReadings(bonusSaldo);
+          setJaAvaliouState(jaAvaliouServidor);
+        } else {
+          setPaidReadings(await getPaidReadings());
+          setJaAvaliouState(await getJaAvaliou());
+        }
         setAvulsasCompradas(await getAvulsasCompradas());
 
         // Sequência de dias (hábito): conta dias consecutivos abrindo o app
@@ -856,22 +884,22 @@ export default function OraculoJornada() {
 
     let isPremium = false;
     let freeUsados = 0;
+    let bonusSaldo = 0;
     // VIP: emails liberados têm tiragens ILIMITADAS (contam como premium aqui).
     if (isVipEmail(gateSession?.user?.email)) isPremium = true;
     if (!isPremium && gateSession) {
       try {
-        const { data: prof } = await supabase.from('profiles').select('is_premium, free_count').eq('id', gateSession.user.id).single();
+        const { data: prof } = await supabase.from('profiles').select('is_premium, free_count, bonus_readings').eq('id', gateSession.user.id).single();
         isPremium = !!prof?.is_premium;
         freeUsados = prof?.free_count ?? 0;
+        bonusSaldo = prof?.bonus_readings ?? 0;
       } catch {}
     }
-    // As 2 leituras grátis são controladas pelo SERVIDOR. Aqui só decidimos usar um
-    // crédito de BÔNUS (avaliar o app) quando as grátis já acabaram.
+    // As 2 leituras grátis são controladas pelo SERVIDOR. Aqui só sinalizamos a INTENÇÃO
+    // de usar um crédito de BÔNUS (avaliar o app) quando as grátis já acabaram — mas quem
+    // VALIDA e debita o bônus é o servidor (saldo por conta), então não dá pra forjar.
     let usarCredito = false;
-    if (!isPremium) {
-      const avulsas = await getPaidReadings();
-      if (freeUsados >= FREE_READINGS_LIMIT && avulsas > 0) usarCredito = true;
-    }
+    if (!isPremium && freeUsados >= FREE_READINGS_LIMIT && bonusSaldo > 0) usarCredito = true;
 
     if (tipo === 'foto' && !imageData) {
       try {
@@ -933,12 +961,8 @@ export default function OraculoJornada() {
       setResultado(data); setPasso(4); setRespostaRapida(null);
       // Consumo: as 2 grátis são contadas no servidor; aqui só refletimos na tela.
       if (!isPremium && !usarCredito) setFreeRestantes((r) => Math.max(0, r - 1));
-      // Debita o crédito de bônus só quando ele foi usado (grátis já acabaram).
-      if (!isPremium && usarCredito) {
-        const restante = Math.max(0, (await getPaidReadings()) - 1);
-        await setPaidReadingsStore(restante);
-        setPaidReadings(restante);
-      }
+      // O bônus é debitado no SERVIDOR (saldo por conta). Aqui só atualizamos o visual.
+      if (!isPremium && usarCredito) setPaidReadings((n) => Math.max(0, n - 1));
     } catch (error: any) {
       // Erro de rede/inesperado: também não consumimos nada — reforça para a pessoa.
       toast.info('Não consegui gerar sua leitura agora. Fique tranquila: nenhum crédito seu foi usado. Tente novamente em instantes. ✨');

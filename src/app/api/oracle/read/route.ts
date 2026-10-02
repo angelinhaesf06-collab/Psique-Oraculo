@@ -100,16 +100,29 @@ export async function POST(req: Request) {
     // de créditos (nem paywall, nem limite diário).
     const isVip = isVipEmail(userEmail);
 
-    // Crédito avulso/bônus (avaliar o app): o app já debitou o crédito no aparelho,
-    // então esta leitura NÃO passa pelo controle de grátis do servidor.
-    const temCredito = usarCredito === true;
+    // Crédito de BÔNUS (avaliar o app): agora validado no SERVIDOR (não confia no
+    // cliente). Antes o app mandava usarCredito=true e o servidor liberava sem checar,
+    // então bastava reinstalar (zerando a trava local) pra ganhar leituras. Agora o
+    // saldo de bônus vive na CONTA: só libera se o banco confirmar e consumir 1.
+    let usouBonus = false;
+    if (usarCredito === true && !isVip && userId && tipoLeitura !== 'mensagem_dia') {
+      try {
+        const b = await supabaseAdmin.rpc('consume_bonus_reading', { p_user_id: userId });
+        if (!b.error && b.data?.allowed) {
+          usouBonus = true;
+          creditStatus = { allowed: true, type: 'bonus' };
+        }
+      } catch (e: any) {
+        console.error("Erro ao consumir bônus (cai no controle normal):", e?.message);
+      }
+    }
 
     // A "mensagem do dia" é sempre gratuita e nunca consome créditos.
-    // Para qualquer OUTRA leitura de conta comum (não VIP, sem crédito avulso), o
-    // acesso SÓ é liberado se o servidor confirmar pela regra "1 grátis por conta".
+    // Para qualquer OUTRA leitura de conta comum (não VIP, sem bônus confirmado), o
+    // acesso SÓ é liberado se o servidor confirmar pela regra "2 grátis por conta".
     // FAIL-CLOSED: sem identidade válida ou com erro no banco, NÃO liberamos — caso
     // contrário a trava perde o efeito e a pessoa faz leituras ilimitadas de graça.
-    if (tipoLeitura !== 'mensagem_dia' && !isVip && !temCredito) {
+    if (tipoLeitura !== 'mensagem_dia' && !isVip && !usouBonus) {
       // Sem userId (token ausente/expirado/inválido) não há como garantir o limite:
       // pede novo login em vez de liberar.
       if (!userId) {
@@ -380,7 +393,7 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
     let tipoAcesso = 'gratis';
     if (tipoLeitura === 'mensagem_dia') tipoAcesso = 'mensagem_dia';
     else if (isVip) tipoAcesso = 'vip';
-    else if (temCredito) tipoAcesso = 'avulsa';
+    else if (usouBonus) tipoAcesso = 'bonus';
     else if (creditStatus?.type === 'premium') tipoAcesso = 'premium';
     else if (creditStatus?.type === 'free_once' || creditStatus?.type === 'free') tipoAcesso = 'gratis';
     else if (creditStatus?.type) tipoAcesso = creditStatus.type;
