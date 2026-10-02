@@ -683,12 +683,16 @@ export default function OraculoJornada() {
           if (!foiCancelada) {
             console.error('Erro detalhado RevenueCat:', nativeError);
 
+            const loja = Capacitor.getPlatform() === 'ios' ? 'App Store' : 'Play Store';
             let msgErro = "Falha na compra. Tente novamente.";
-            if (nativeError.code === "2") msgErro = "Problema com a loja (Play Store). Verifique sua conta Google.";
+            if (nativeError.code === "2") msgErro = `Problema com a loja (${loja}). Verifique sua conta.`;
             if (nativeError.code === "7") msgErro = "Este produto já foi adquirido.";
             if (nativeError.code === "5") msgErro = "Produto não disponível para compra no momento.";
 
-            toast.error(`Erro na Play Store: ${msgErro}`);
+            // Diagnóstico: anexa o motivo real da loja (código + mensagem) pra identificar a causa.
+            const detalhe = [nativeError?.code != null ? `cód ${nativeError.code}` : '', nativeError?.message || '']
+              .filter(Boolean).join(' · ');
+            toast.error(`Erro na ${loja}: ${msgErro}${detalhe ? ` (${detalhe})` : ''}`);
           }
           // Se foi cancelada: não mostra nada (experiência tranquila).
         }
