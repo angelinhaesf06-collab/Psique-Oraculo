@@ -1826,7 +1826,18 @@ export default function OraculoJornada() {
                        </div>
                     </div>
 
-                    <div className="pt-8 border-t border-[#E5D9C3]/50 text-center">
+                    <div className="pt-6 border-t border-[#E5D9C3]/50 space-y-3">
+                       <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">Sua Conta</h5>
+                       <p className="text-sm text-[#5C4D3C] leading-relaxed">Você pode excluir permanentemente sua conta e todos os seus dados a qualquer momento.</p>
+                       <button
+                         onClick={() => { if (Capacitor.isNativePlatform()) { window.location.href = '/delete-account'; } else { router.push('/delete-account'); } }}
+                         className="w-full py-3 rounded-full border border-red-300 bg-red-50 text-red-500 text-[11px] font-black uppercase tracking-widest active:scale-95 transition-all"
+                       >
+                         Excluir minha conta
+                       </button>
+                    </div>
+
+                    <div className="pt-6 border-t border-[#E5D9C3]/50 text-center">
                        <button onClick={() => setModalAberto(null)} className="text-[10px] font-black text-[#C4A484] uppercase tracking-widest underline underline-offset-4">Entendido</button>
                     </div>
                  </div>
