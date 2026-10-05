@@ -793,12 +793,22 @@ export default function OraculoJornada() {
             const pAnual = achar('ANNUAL', /anual|annual/i);
             const pSem = achar('SIX_MONTH', /semestral|six.?month|6.?mes/i);
             const pMen = achar('MONTHLY', /mensal|monthly/i);
-            const fmt = (n: number) => `R$ ${n.toFixed(2).replace('.', ',')}`;
+            // Formata o "por mês" na MOEDA REAL do produto (R$ pra Brasil, US$ pros EUA
+            // etc.) — antes fixava "R$" e misturava com valor em dólar no teste.
+            const fmtMes = (price?: number, meses?: number, currency?: string): string | null => {
+              if (!price || !meses) return null;
+              const perMonth = price / meses;
+              try {
+                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: currency || 'BRL' }).format(perMonth);
+              } catch {
+                return `R$ ${perMonth.toFixed(2).replace('.', ',')}`;
+              }
+            };
             setPrecos((prev) => ({
               anual: pAnual?.product?.priceString || prev.anual,
-              anualMes: pAnual?.product?.price ? fmt(pAnual.product.price / 12) : prev.anualMes,
+              anualMes: fmtMes(pAnual?.product?.price, 12, pAnual?.product?.currencyCode) || prev.anualMes,
               semestral: pSem?.product?.priceString || prev.semestral,
-              semestralMes: pSem?.product?.price ? fmt(pSem.product.price / 6) : prev.semestralMes,
+              semestralMes: fmtMes(pSem?.product?.price, 6, pSem?.product?.currencyCode) || prev.semestralMes,
               mensal: pMen?.product?.priceString || prev.mensal,
             }));
           } catch (e) {
