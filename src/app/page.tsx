@@ -98,21 +98,12 @@ async function getJaAvaliou(): Promise<boolean> {
   } catch { return false; }
 }
 
-// Histórico local (funciona com ou sem conta, guardado no aparelho)
-async function getHistoricoLocal(): Promise<any[]> {
+// Limpa o histórico LOCAL antigo do aparelho (era compartilhado entre contas = vazamento).
+// Agora o histórico é só na nuvem, por conta. Esta limpeza remove o resíduo no logout.
+async function limparHistoricoLocalAntigo(): Promise<void> {
   try {
-    const raw = Capacitor.isNativePlatform()
-      ? (await Preferences.get({ key: 'psique_historico_local' })).value
-      : localStorage.getItem('psique_historico_local');
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-async function setHistoricoLocal(arr: any[]): Promise<void> {
-  try {
-    const v = JSON.stringify(arr.slice(0, 40));
-    if (Capacitor.isNativePlatform()) await Preferences.set({ key: 'psique_historico_local', value: v });
-    else localStorage.setItem('psique_historico_local', v);
+    if (Capacitor.isNativePlatform()) await Preferences.remove({ key: 'psique_historico_local' });
+    else localStorage.removeItem('psique_historico_local');
   } catch {}
 }
 
@@ -253,19 +244,15 @@ export default function OraculoJornada() {
   const handleSalvarLeitura = async () => {
     try {
       if (!resultado) return;
-      const item = {
-        id: 'local_' + Date.now(),
-        tipo_oraculo: tipoOraculo,
-        tipo_leitura: resultado.tipoLeitura || '',
-        pergunta_tema: (resultado.tema || tema || '') + (desabafo ? ': ' + desabafo : ''),
-        resposta_ia: resultado,
-        created_at: new Date().toISOString(),
-      };
-      const atual = await getHistoricoLocal();
-      const jaTem = atual.some((x) => x.pergunta_tema === item.pergunta_tema && JSON.stringify(x.resposta_ia) === JSON.stringify(item.resposta_ia));
-      if (jaTem) { toast.info('Essa leitura já está no seu histórico ✨'); return; }
-      atual.unshift(item);
-      await setHistoricoLocal(atual);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { toast.info('Entre na sua conta para salvar no histórico. ✨'); return; }
+      if (!ultimaLeituraId) { toast.info('Faça a leitura novamente para poder salvá-la. ✨'); return; }
+      // Marca ESTA leitura como salva (só as salvas aparecem em "Minhas Leituras").
+      const { error } = await supabase.from('historico_leituras')
+        .update({ salvo: true })
+        .eq('id', ultimaLeituraId)
+        .eq('user_id', session.user.id);
+      if (error) { toast.info('Não consegui salvar agora. Tente de novo.'); return; }
       toast.success('Leitura salva no histórico! ✨');
     } catch { toast.info('Não consegui salvar agora. Tente de novo.'); }
   };
@@ -330,12 +317,8 @@ export default function OraculoJornada() {
   // Excluir uma leitura do histórico (local ou da nuvem)
   const handleExcluirLeitura = async (item: any) => {
     try {
-      if (String(item.id).startsWith('local_')) {
-        const atual = await getHistoricoLocal();
-        await setHistoricoLocal(atual.filter((x: any) => x.id !== item.id));
-      } else {
-        await supabase.from('historico_leituras').delete().eq('id', item.id);
-      }
+      const { error } = await supabase.from('historico_leituras').delete().eq('id', item.id);
+      if (error) { toast.info('Não consegui remover agora. Tente de novo.'); return; }
       setHistoricoLista((lista) => lista.filter((x) => x.id !== item.id));
       toast.success('Leitura removida do histórico.');
     } catch { toast.info('Não consegui remover agora. Tente de novo.'); }
@@ -344,22 +327,18 @@ export default function OraculoJornada() {
   const carregarHistorico = async () => {
     setLoadingHistorico(true);
     try {
-      const locais = await getHistoricoLocal();
-      let remotos: any[] = [];
+      // SÓ a nuvem, filtrado pela CONTA logada e apenas as leituras SALVAS.
+      // (Antes misturava um histórico local do aparelho — que vazava entre contas.)
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const { data } = await supabase
-          .from('historico_leituras')
-          .select('id, tipo_oraculo, tipo_leitura, pergunta_tema, resposta_ia, created_at')
-          .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false })
-          .limit(20);
-        remotos = data || [];
-      }
-      const todos = [...locais, ...remotos]
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 40);
-      setHistoricoLista(todos);
+      if (!session) { setHistoricoLista([]); return; }
+      const { data } = await supabase
+        .from('historico_leituras')
+        .select('id, tipo_oraculo, tipo_leitura, pergunta_tema, resposta_ia, created_at')
+        .eq('user_id', session.user.id)
+        .eq('salvo', true)
+        .order('created_at', { ascending: false })
+        .limit(40);
+      setHistoricoLista(data || []);
     } catch { setHistoricoLista([]); }
     finally { setLoadingHistorico(false); }
   };
@@ -432,6 +411,11 @@ export default function OraculoJornada() {
   const [mostrarBoasVindas, setMostrarBoasVindas] = useState(false);
   const [mostrarNovidades, setMostrarNovidades] = useState(false);
   const [mostrarFimTeste, setMostrarFimTeste] = useState(false);
+  // Exclusão de conta DENTRO do app (sem trocar de página — evita o problema de rota do iOS).
+  const [mostrarExcluirConta, setMostrarExcluirConta] = useState(false);
+  const [confirmarExclusao, setConfirmarExclusao] = useState('');
+  // Id da leitura atual no servidor — usado pelo botão "Salvar" (marca salvo=true).
+  const [ultimaLeituraId, setUltimaLeituraId] = useState<string | null>(null);
 
   const fecharNovidades = async () => {
     try {
@@ -875,13 +859,51 @@ export default function OraculoJornada() {
 
   // replace (não push) para o logout: assim o botão "voltar" do Android NÃO
   // retorna à home já deslogado (a home sai do histórico).
-  const handleLogout = async () => { localStorage.removeItem('psique_demo_mode'); await supabase.auth.signOut(); router.replace('/login'); };
+  const handleLogout = async () => { localStorage.removeItem('psique_demo_mode'); await limparHistoricoLocalAntigo(); await supabase.auth.signOut(); router.replace('/login'); };
   // Sair: faz logout (se houver) e sempre leva à tela de login/entrada.
   const handleSair = async () => {
     try { localStorage.removeItem('psique_demo_mode'); } catch {}
+    try { await limparHistoricoLocalAntigo(); } catch {}
     try { await supabase.auth.signOut(); } catch {}
     router.replace('/login');
   };
+  // Exclui a conta DE VERDADE (apaga dados + usuário de auth) via endpoint seguro.
+  const handleExcluirConta = async () => {
+    if (confirmarExclusao.trim().toUpperCase() !== 'EXCLUIR') {
+      toast.error('Digite EXCLUIR para confirmar.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('Sua sessão expirou. Entre novamente para excluir a conta.');
+        setLoading(false);
+        return;
+      }
+      const isNative = Capacitor.isNativePlatform();
+      const siteUrl = 'https://www.pisiqueoraculo.com.br';
+      const url = isNative ? `${siteUrl}/api/account/delete` : `/api/account/delete`;
+      const res = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${session.access_token}` } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.success) {
+        toast.error(data?.message || 'Não consegui excluir a conta agora. Tente novamente.');
+        setLoading(false);
+        return;
+      }
+      // Conta apagada: encerra a sessão e volta pra tela de entrada.
+      try { await supabase.auth.signOut(); } catch {}
+      try { localStorage.clear(); } catch {}
+      try { if (Capacitor.isNativePlatform()) await Preferences.clear(); } catch {}
+      toast.success('Sua conta e seus dados foram excluídos.');
+      setMostrarExcluirConta(false);
+      if (Capacitor.isNativePlatform()) { window.location.href = '/'; } else { router.replace('/login'); }
+    } catch (e: any) {
+      toast.error('Erro ao excluir: ' + (e?.message || 'tente novamente.'));
+      setLoading(false);
+    }
+  };
+
   const nextPasso = () => setPasso(passo + 1);
   const prevPasso = () => setPasso(passo - 1);
 
@@ -977,7 +999,7 @@ export default function OraculoJornada() {
           data.resultado_conselho = null;
         }
       }
-      setResultado(data); setPasso(4); setRespostaRapida(null);
+      setResultado(data); setUltimaLeituraId(data?.historicoId || null); setPasso(4); setRespostaRapida(null);
       // Consumo: as 2 grátis são contadas no servidor; aqui só refletimos na tela.
       if (!isPremium && !usarCredito) setFreeRestantes((r) => Math.max(0, r - 1));
       // O bônus é debitado no SERVIDOR (saldo por conta). Aqui só atualizamos o visual.
@@ -1532,6 +1554,44 @@ export default function OraculoJornada() {
         </div>
       )}
 
+      {mostrarExcluirConta && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center p-5 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-[#2C2420]/85 backdrop-blur-md" onClick={() => { if (!loading) setMostrarExcluirConta(false); }} />
+          <div className="relative w-full max-w-sm bg-[#FDFBF7] rounded-[32px] border border-[#E5D9C3] shadow-2xl p-7 z-[131] animate-in slide-in-from-bottom-4 duration-500 text-center">
+            <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-3 text-red-500">
+              <Trash size={26} />
+            </div>
+            <h3 className="text-xl font-serif text-[#5C4D3C]">Excluir sua conta</h3>
+            <p className="text-[12px] text-[#8B735B] leading-relaxed mt-2">
+              Esta ação é <b>permanente</b>. Sua conta, histórico de leituras e dados serão apagados para sempre, em conformidade com a LGPD.
+            </p>
+
+            <div className="mt-5 text-left space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]">Digite EXCLUIR para confirmar:</label>
+              <input
+                type="text"
+                value={confirmarExclusao}
+                onChange={(e) => setConfirmarExclusao(e.target.value)}
+                placeholder="EXCLUIR"
+                autoCapitalize="characters"
+                className="w-full bg-white border border-[#E5D9C3] rounded-2xl p-4 text-center font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-red-200 transition-all"
+              />
+            </div>
+
+            <button
+              onClick={handleExcluirConta}
+              disabled={loading || confirmarExclusao.trim().toUpperCase() !== 'EXCLUIR'}
+              className="w-full py-4 mt-5 bg-red-500 text-white rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all disabled:opacity-30 flex items-center justify-center gap-2"
+            >
+              {loading ? 'Excluindo...' : 'Excluir minha conta'}
+            </button>
+            <button onClick={() => { if (!loading) setMostrarExcluirConta(false); }} className="mt-3 text-[9px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 hover:text-[#C4A484] transition-colors">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
       {mostrarPressagio && (
         <div className="fixed inset-0 z-[118] flex items-center justify-center p-5 animate-in fade-in duration-300">
           <div className="absolute inset-0 bg-[#2C2420]/80 backdrop-blur-md" onClick={() => setMostrarPressagio(false)} />
@@ -1849,7 +1909,7 @@ export default function OraculoJornada() {
                        <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">Sua Conta</h5>
                        <p className="text-sm text-[#5C4D3C] leading-relaxed">Você pode excluir permanentemente sua conta e todos os seus dados a qualquer momento.</p>
                        <button
-                         onClick={() => { if (Capacitor.isNativePlatform()) { window.location.href = '/delete-account'; } else { router.push('/delete-account'); } }}
+                         onClick={() => { setConfirmarExclusao(''); setModalAberto(null); setMostrarExcluirConta(true); }}
                          className="w-full py-3 rounded-full border border-red-300 bg-red-50 text-red-500 text-[11px] font-black uppercase tracking-widest active:scale-95 transition-all"
                        >
                          Excluir minha conta

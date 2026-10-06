@@ -398,25 +398,29 @@ Por favor, analise as cartas acima (ou identifique-as na imagem fornecida) e res
     else if (creditStatus?.type === 'free_once' || creditStatus?.type === 'free') tipoAcesso = 'gratis';
     else if (creditStatus?.type) tipoAcesso = creditStatus.type;
 
-    // 5. Salvando no Histórico
+    // 5. Registra a leitura (salvo=false). Fica pros dados de conversão (tipo_acesso),
+    //    mas só aparece em "Minhas Leituras" quando a pessoa aperta Salvar (vira salvo=true).
+    //    Retornamos o id pra o botão Salvar marcar esta leitura.
+    let historicoId: string | null = null;
     try {
-        console.log("Salvando leitura no histórico...");
-        await supabaseAdmin.from("historico_leituras").insert({
+        const { data: insData } = await supabaseAdmin.from("historico_leituras").insert({
             user_id: userId,
             tipo_oraculo: tipoOraculo,
             tipo_leitura: tipoLeitura,
             pergunta_tema: tema + (pergunta ? ": " + pergunta : ""),
             resposta_ia: jsonResponse,
-            tipo_acesso: tipoAcesso
-        });
-        console.log("Histórico salvo com sucesso.");
+            tipo_acesso: tipoAcesso,
+            salvo: false
+        }).select('id').single();
+        historicoId = insData?.id ?? null;
     } catch (e) {
-      console.warn("Falha ao salvar histórico:", e);
+      console.warn("Falha ao registrar histórico:", e);
     }
 
     const response = NextResponse.json({
       ...jsonResponse,
-      usage: creditStatus
+      usage: creditStatus,
+      historicoId
     });
 
     response.headers.set('Access-Control-Allow-Origin', '*');
