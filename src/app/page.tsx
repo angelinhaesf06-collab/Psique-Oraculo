@@ -279,6 +279,15 @@ export default function OraculoJornada() {
     } catch { try { window.open(url, '_blank'); } catch {} }
   };
 
+  // Abre um link externo (Termos/Privacidade) no navegador. Exigido pela Apple na
+  // tela de assinatura (Guideline 3.1.2): link para Termos de Uso e Política de Privacidade.
+  const abrirLink = async (url: string) => {
+    try {
+      if (Capacitor.isNativePlatform()) await Browser.open({ url });
+      else window.open(url, '_blank');
+    } catch { try { window.open(url, '_blank'); } catch {} }
+  };
+
   // Avaliar o app e ganhar 1 tiragem grátis — resgatável uma única vez por CONTA
   // (validado no servidor, à prova de reinstalação).
   const avaliarEGanhar = async () => {
@@ -1691,6 +1700,16 @@ export default function OraculoJornada() {
                       </button>
 
                       <p className="text-[9px] text-[#8B735B]/50 uppercase tracking-tighter text-center">Cancele quando quiser • Renovação automática</p>
+
+                      {/* Aviso de renovação + links obrigatórios (Apple 3.1.2) */}
+                      <p className="text-[9px] text-[#8B735B]/50 leading-relaxed text-center px-2">
+                        A assinatura renova automaticamente pelo mesmo período, pelo preço indicado, a menos que seja cancelada até 24h antes do fim do período. O pagamento é cobrado na sua conta da App Store. Gerencie ou cancele nos Ajustes da conta.
+                      </p>
+                      <div className="flex items-center justify-center gap-3">
+                        <button onClick={() => abrirLink('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')} className="text-[9px] font-bold text-[#8B735B]/70 underline underline-offset-2">Termos de Uso</button>
+                        <span className="text-[8px] text-[#8B735B]/40">•</span>
+                        <button onClick={() => abrirLink('https://www.pisiqueoraculo.com.br/privacy')} className="text-[9px] font-bold text-[#8B735B]/70 underline underline-offset-2">Política de Privacidade</button>
+                      </div>
 
                       {/* Opção avulsa - discreta, para quem não quer assinar */}
                       <div className="flex items-center gap-2 pt-2">
