@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl, usarCredito } = body;
+    const { tipoOraculo, tipoLeitura, tema, pergunta, cartas, imagem, imageUrl, usarCredito, deviceId } = body;
 
     // RESPOSTA RÁPIDA (pergunta de acompanhamento): prompt enxuto p/ baixo custo de tokens.
     if (tipoLeitura === 'resposta_rapida') {
@@ -136,7 +136,8 @@ export async function POST(req: Request) {
 
       let gate: any = null;
       try {
-        const rpc = await supabaseAdmin.rpc('check_and_consume_reading', { p_user_id: userId });
+        // Trava por CONTA + por APARELHO (device id) — impede farmar grátis com vários e-mails.
+        const rpc = await supabaseAdmin.rpc('check_and_consume_reading_device', { p_user_id: userId, p_device_id: deviceId || '' });
         if (rpc.error) {
           console.error("Erro ao validar créditos (bloqueando por segurança):", rpc.error.message);
         } else {

@@ -45,6 +45,24 @@ async function incPressagioUsed(): Promise<void> {
   } catch {}
 }
 
+// Id único do APARELHO (gerado uma vez e guardado). Usado pela trava anti-abuso:
+// limita as 2 leituras grátis por celular, não só por conta (barra vários e-mails falsos).
+async function getDeviceId(): Promise<string> {
+  const key = 'psique_device_id';
+  try {
+    const existente = Capacitor.isNativePlatform()
+      ? (await Preferences.get({ key })).value
+      : localStorage.getItem(key);
+    if (existente) return existente;
+    const novo: string = (typeof crypto !== 'undefined' && (crypto as any).randomUUID)
+      ? (crypto as any).randomUUID()
+      : 'dev-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+    if (Capacitor.isNativePlatform()) await Preferences.set({ key, value: novo });
+    else localStorage.setItem(key, novo);
+    return novo;
+  } catch { return ''; }
+}
+
 // Créditos de leitura avulsa (comprados a R$ 2,06 cada), guardados no aparelho.
 async function getPaidReadings(): Promise<number> {
   try {
@@ -965,10 +983,11 @@ export default function OraculoJornada() {
       const isNative = Capacitor.isNativePlatform();
       const siteUrl = 'https://www.pisiqueoraculo.com.br';
       const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
+      const deviceId = await getDeviceId(); // trava anti-abuso: 2 grátis por aparelho
       const res = await fetch(apiUrl, {
-        method: 'POST', 
+        method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
-        body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName, usarCredito })
+        body: JSON.stringify({ tipoOraculo, tipoLeitura: tipo, tema, pergunta: desabafo, cartas: cartasSorteadas, imagem: imageData || null, userName, usarCredito, deviceId })
       });
       const textResponse = await res.text();
       if (!res.ok) {
