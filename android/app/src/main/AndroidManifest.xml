@@ -37,6 +37,9 @@
         <meta-data android:name="com.facebook.sdk.AutoLogAppEventsEnabled" android:value="true" />
         <meta-data android:name="com.facebook.sdk.AdvertiserIDCollectionEnabled" android:value="true" />
 
+        <!-- AdMob: ID do app (anúncio recompensado "assista e ganhe 1 leitura") -->
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" android:value="ca-app-pub-5816565543895408~8550200512" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

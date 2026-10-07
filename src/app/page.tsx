@@ -17,6 +17,7 @@ import { Camera as CapacitorCamera, CameraResultType } from '@capacitor/camera';
 import { Browser } from '@capacitor/browser';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Purchases, LOG_LEVEL, PRODUCT_CATEGORY } from '@revenuecat/purchases-capacitor';
+import { AdMob, RewardAdPluginEvents } from '@capacitor-community/admob';
 
 // Modelo de conversão: a pessoa usa o app sem login. Após 1 consulta grátis
 // (contada NO APARELHO), aparece o paywall para cadastrar e assinar.
@@ -331,6 +332,63 @@ export default function OraculoJornada() {
     }
   };
 
+  // Assistir anúncio recompensado (AdMob) e ganhar +1 leitura. Só Android por ora.
+  // A leitura é creditada no SERVIDOR (com limite diário anti-abuso).
+  const AD_UNIT_RECOMPENSADO = 'ca-app-pub-5816565543895408/5433082589';
+  const assistirAnuncioGanhar = async () => {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
+      toast.info('Disponível no app Android. ✨');
+      return;
+    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.info('Entre na sua conta para ganhar a leitura. ✨');
+      return;
+    }
+    setLoading(true);
+    let ganhouRecompensa = false;
+    let listener: any = null;
+    try {
+      // A recompensa (Rewarded) só dispara se a pessoa assistir até o ponto de recompensa.
+      listener = await AdMob.addListener(RewardAdPluginEvents.Rewarded, () => { ganhouRecompensa = true; });
+      // VIP/dona veem anúncio de TESTE (seguro p/ testar); usuários reais veem anúncio real.
+      const isTeste = isVipEmail(session.user.email);
+      await AdMob.prepareRewardVideoAd({ adId: AD_UNIT_RECOMPENSADO, isTesting: isTeste });
+      await AdMob.showRewardVideoAd();
+    } catch (e: any) {
+      console.error('Erro no anúncio recompensado:', e?.message);
+    } finally {
+      try { if (listener) await listener.remove(); } catch {}
+    }
+
+    if (!ganhouRecompensa) {
+      toast.info('Assista o anúncio até o fim para ganhar a leitura. ✨');
+      setLoading(false);
+      return;
+    }
+
+    // Recompensa ganha → credita no servidor (+1 leitura bônus, com limite diário).
+    try {
+      const siteUrl = 'https://www.pisiqueoraculo.com.br';
+      const res = await fetch(`${siteUrl}/api/account/ad-reward`, { method: 'POST', headers: { 'Authorization': `Bearer ${session.access_token}` } });
+      const data = await res.json().catch(() => ({}));
+      if (data?.granted) {
+        setPaidReadings((n) => n + 1);
+        setMostrarFimTeste(false);
+        setModalAberto(null);
+        toast.success('Você ganhou 1 leitura grátis! ✨');
+      } else if (data?.reason === 'daily_cap') {
+        toast.info('Você já ganhou o máximo de leituras por anúncio hoje. Volte amanhã! 💛');
+      } else {
+        toast.info('Não consegui liberar a leitura agora. Tente de novo.');
+      }
+    } catch {
+      toast.info('Não consegui liberar a leitura agora. Tente de novo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Carrega o histórico de leituras (apenas para quem tem conta)
   // Excluir uma leitura do histórico (local ou da nuvem)
   const handleExcluirLeitura = async (item: any) => {
@@ -434,6 +492,8 @@ export default function OraculoJornada() {
   const [confirmarExclusao, setConfirmarExclusao] = useState('');
   // Id da leitura atual no servidor — usado pelo botão "Salvar" (marca salvo=true).
   const [ultimaLeituraId, setUltimaLeituraId] = useState<string | null>(null);
+  // Só mostra o botão de anúncio recompensado no Android (AdMob configurado só lá por ora).
+  const [isAndroid, setIsAndroid] = useState(false);
 
   const fecharNovidades = async () => {
     try {
@@ -833,6 +893,12 @@ export default function OraculoJornada() {
     initRevenueCat();
     // Inicializa o push do OneSignal (avisos/campanhas). Nativo apenas.
     initOneSignal();
+    // AdMob (anúncio recompensado) — só no Android por ora.
+    const ehAndroid = Capacitor.getPlatform() === 'android';
+    setIsAndroid(ehAndroid);
+    if (ehAndroid) {
+      AdMob.initialize().catch((e) => console.error('Falha ao iniciar AdMob', e));
+    }
   }, []);
 
   useEffect(() => {
@@ -1566,6 +1632,11 @@ export default function OraculoJornada() {
             <button onClick={() => { setMostrarFimTeste(false); setModalAberto('assinatura'); }} className="w-full py-4 mt-5 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
               Quero continuar • Ver planos
             </button>
+            {isAndroid && !isPremiumUser && (
+              <button onClick={assistirAnuncioGanhar} disabled={loading} className="w-full py-3 mt-3 rounded-[20px] border border-[#C4A484]/40 bg-[#C4A484]/10 text-[#8B735B] text-[11px] font-bold active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                🎁 {loading ? 'Carregando...' : 'Assistir um anúncio e ganhar 1 leitura'}
+              </button>
+            )}
             <button onClick={() => setMostrarFimTeste(false)} className="mt-3 text-[9px] font-bold uppercase tracking-[0.3em] text-[#8B735B]/60 hover:text-[#C4A484] transition-colors">
               Agora não
             </button>
@@ -1806,6 +1877,17 @@ export default function OraculoJornada() {
                         >
                           <Star size={14} className="text-[#D69E2E]" />
                           <span className="text-[11px] font-bold">Avaliar o app e ganhar 1 tiragem grátis ✨</span>
+                        </button>
+                      )}
+
+                      {/* Assistir anúncio e ganhar 1 leitura (só Android, só não-premium) */}
+                      {isAndroid && !isPremiumUser && (
+                        <button
+                          onClick={assistirAnuncioGanhar}
+                          disabled={loading}
+                          className="w-full py-3 rounded-[20px] border border-[#C4A484]/40 bg-[#C4A484]/10 text-[#8B735B] active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                        >
+                          <span className="text-[11px] font-bold">🎁 {loading ? 'Carregando...' : 'Assistir um anúncio e ganhar 1 leitura'}</span>
                         </button>
                       )}
                     </div>

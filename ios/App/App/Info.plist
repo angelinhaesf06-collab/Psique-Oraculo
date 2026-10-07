@@ -63,5 +63,10 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<!-- AdMob: ID do app iOS. Por ora usa o ID de TESTE do Google (a dona só criou o AdMob
+	     do Android). Isso evita o crash do SDK no launch do iOS. Quando houver anúncio no iOS,
+	     criar um app iOS no AdMob e trocar por ca-app-pub-5816565543895408~XXXXXXXX. -->
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-3940256099942544~1458002511</string>
 </dict>
 </plist>
