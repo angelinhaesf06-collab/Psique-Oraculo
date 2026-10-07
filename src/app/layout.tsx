@@ -52,7 +52,8 @@ export default function RootLayout({
         <div className="w-full max-w-md relative flex flex-col min-h-screen overflow-hidden">
           <CapgoReady />
           <DecorationOverlay />
-          <Toaster position="top-center" richColors />
+          {/* offset afasta o aviso da "ilha dinâmica"/câmera do iPhone (antes ficava escondido no topo) */}
+          <Toaster position="top-center" richColors offset="70px" />
           <div className="relative z-10 flex-1 flex flex-col overflow-hidden bg-transparent">
             {children}
           </div>
