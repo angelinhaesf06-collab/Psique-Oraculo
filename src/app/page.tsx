@@ -1368,7 +1368,7 @@ export default function OraculoJornada() {
              {/* 1. Síntese do Destino */}
              <div className="bg-[#2C2420] rounded-[32px] border border-white/5 p-8 shadow-2xl text-white/90 relative overflow-hidden backdrop-blur-sm">
                 <div className="absolute top-0 right-0 p-4 opacity-10"><Sparkles className="w-12 h-12 text-[#C4A484]" /></div>
-                <h3 className="text-[#C4A484] font-serif text-xl mb-4 text-center">{resultado.leitura_caminho?.titulo || "A Voz do Destino"}</h3>
+                <h3 className="text-[#C4A484] font-serif text-xl mb-4 text-center">{resultado.leitura_caminho?.titulo || (isIOS ? "Sua Síntese" : "A Voz do Destino")}</h3>
                 <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-center">{resultado.leitura_caminho?.analise_detalhada}</p>
                 {resultado.leitura_caminho?.veredito_direto && (
                   <div className="mt-6 pt-6 border-t border-white/10 flex flex-col items-center gap-2">
@@ -1542,7 +1542,7 @@ export default function OraculoJornada() {
                    <div style={{ fontSize: '17px', color: '#4A3B28', fontStyle: 'italic', lineHeight: 1.5 }}>{desabafo || resultado?.tema}</div>
                  </div>
                )}
-               <div style={{ textAlign: 'center', fontSize: '22px', color: '#C4A484', marginBottom: '10px' }}>{resultado?.leitura_caminho?.titulo || 'A Voz do Destino'}</div>
+               <div style={{ textAlign: 'center', fontSize: '22px', color: '#C4A484', marginBottom: '10px' }}>{resultado?.leitura_caminho?.titulo || (isIOS ? 'Sua Síntese' : 'A Voz do Destino')}</div>
                {(() => {
                  const cartas = resultado?.situacao_atual
                    ? [resultado.situacao_atual?.carta, resultado.caminho_acao?.carta, resultado.resultado_conselho?.carta].filter(Boolean).join('  ·  ')
@@ -1726,7 +1726,7 @@ export default function OraculoJornada() {
             {loadingConselho ? (
               <div className="flex flex-col items-center gap-3 py-8">
                 <Sparkles size={22} className="text-[#C4A484] animate-spin" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">Consultando o oráculo...</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">{isIOS ? 'Refletindo...' : 'Consultando o oráculo...'}</span>
               </div>
             ) : conselhoDia ? (
               <>
