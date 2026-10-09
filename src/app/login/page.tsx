@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { Mail, Lock, Sparkles } from 'lucide-react';
@@ -26,6 +26,9 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
+  // No iOS, linguagem de autoconhecimento (não "oráculo/misticismo") — Guideline 4.3 da Apple.
+  const [isIOS, setIsIOS] = useState(false);
+  useEffect(() => { setIsIOS(Capacitor.getPlatform() === 'ios'); }, []);
   const router = useRouter();
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -131,7 +134,7 @@ export default function LoginPage() {
               Psiquê Oráculo
             </h1>
             <h2 className="text-[10px] md:text-xs font-sans font-bold tracking-[0.4em] text-[#8B735B] uppercase text-center">
-              Seu Oráculo de Bolso
+              {isIOS ? 'Autoconhecimento e Reflexão' : 'Seu Oráculo de Bolso'}
             </h2>
           </div>
         </div>
@@ -192,7 +195,7 @@ export default function LoginPage() {
 
         <div className="mt-auto pb-4">
           <p className="text-[8px] font-bold text-[#C4A484]/40 tracking-[0.5em] uppercase">
-            Luxo • Misticismo • Psicologia
+            {isIOS ? 'Autoconhecimento • Reflexão • Bem-estar' : 'Luxo • Misticismo • Psicologia'}
           </p>
         </div>
       </div>

@@ -494,6 +494,9 @@ export default function OraculoJornada() {
   const [ultimaLeituraId, setUltimaLeituraId] = useState<string | null>(null);
   // Só mostra o botão de anúncio recompensado no Android (AdMob configurado só lá por ora).
   const [isAndroid, setIsAndroid] = useState(false);
+  // No iOS, apresentamos o app com linguagem de AUTOCONHECIMENTO/REFLEXÃO (não "tarô/adivinhação")
+  // — pra atender a Guideline 4.3 da Apple. Android fica igual (está convertendo bem).
+  const [isIOS, setIsIOS] = useState(false);
 
   const fecharNovidades = async () => {
     try {
@@ -896,6 +899,7 @@ export default function OraculoJornada() {
     // AdMob (anúncio recompensado) — só no Android por ora.
     const ehAndroid = Capacitor.getPlatform() === 'android';
     setIsAndroid(ehAndroid);
+    setIsIOS(Capacitor.getPlatform() === 'ios');
     if (ehAndroid) {
       AdMob.initialize().catch((e) => console.error('Falha ao iniciar AdMob', e));
     }
@@ -1177,7 +1181,7 @@ export default function OraculoJornada() {
                     <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
                   </div>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight tracking-tight drop-shadow-sm">Qual arcano você escolhe hoje?</h2>
+                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight tracking-tight drop-shadow-sm">{isIOS ? 'O que você quer compreender hoje?' : 'Qual arcano você escolhe hoje?'}</h2>
                 <div onClick={() => setModalAberto('mensagem_ampliada')} className="w-full max-w-[340px] p-2.5 bg-[#C4A484]/15 backdrop-blur-md rounded-[28px] border border-[#C4A484]/30 shadow-lg relative overflow-hidden group cursor-pointer flex flex-col items-center text-center space-y-1">
                   <div className="flex items-center gap-2">
                     <Sparkles size={12} className="text-[#C4A484] animate-pulse" /><span className="text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Sintonização do Dia</span><Sparkles size={12} className="text-[#C4A484] animate-pulse" />
@@ -1188,11 +1192,15 @@ export default function OraculoJornada() {
               </div>
 
               <div className="flex flex-col gap-2.5 w-full max-w-[360px] shrink-0">
-                {[
+                {(isIOS ? [
+                  { id: 'Tarô', title: 'CARTAS CLÁSSICAS', img: '/assets/decks/covers/taro.jpg', desc: 'Reflexão sobre a sua jornada' },
+                  { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Clareza e direção para o momento' },
+                  { id: 'Tarô dos Anjos', title: 'CARTAS DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Acolhimento e inspiração' }
+                ] : [
                   { id: 'Tarô', title: 'TARÔ CLÁSSICO', img: '/assets/decks/covers/taro.jpg', desc: 'A jornada épica da alma' },
                   { id: 'Baralho Cigano', title: 'BARALHO CIGANO', img: '/assets/decks/covers/cigano.jpg', desc: 'Respostas claras e objetivas' },
                   { id: 'Tarô dos Anjos', title: 'TARÔ DOS ANJOS', img: '/assets/decks/covers/anjos.jpg', desc: 'Aconselhamento celestial' }
-                ].map((o) => (
+                ]).map((o) => (
                   <button key={o.id} onClick={() => { setTipoOraculo(o.id); nextPasso(); }} className="flex items-center gap-4 md:gap-5 group w-full bg-white/15 backdrop-blur-lg border border-white/30 p-2.5 md:p-3 rounded-[32px] shadow-lg hover:shadow-xl active:scale-[0.96] transition-all">
                     <div className="w-14 h-20 md:w-16 md:h-24 bg-white/10 rounded-[18px] border border-white/20 p-1 overflow-hidden shrink-0 shadow-sm">
                       <img src={o.img} alt={o.title} className="w-full h-full object-cover rounded-[14px]" />
@@ -1257,7 +1265,7 @@ export default function OraculoJornada() {
               {/* Botão para revelar o Presságio do Dia (abre em pop-up, não corta a tela) */}
               <button onClick={abrirPressagio} className="flex items-center gap-2 rounded-full border border-[#C4A484]/40 bg-white/50 px-4 py-2 shadow-sm active:scale-95 transition-all">
                 <Sparkles size={12} className="text-[#C4A484]" />
-                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#8B735B]">Ver Presságio do Dia</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.25em] text-[#8B735B]">{isIOS ? 'Ver Reflexão do Dia' : 'Ver Presságio do Dia'}</span>
               </button>
 
               <div className="flex flex-col gap-2.5 w-full max-w-[340px]">
@@ -1551,7 +1559,9 @@ export default function OraculoJornada() {
           </div>
           <h1 className="text-3xl font-serif text-[#C4A484] leading-tight mb-2">Bem-vinda ✨</h1>
           <p className="text-sm text-[#8B735B] max-w-[300px] leading-relaxed mb-6">
-            Seu oráculo de bolso com <span className="font-bold">Tarô, Baralho Cigano e Tarô dos Anjos</span>, interpretado com sensibilidade e acolhimento.
+            {isIOS
+              ? <>Um espaço de <span className="font-bold">autoconhecimento e reflexão</span>, com cartas que ajudam você a olhar para dentro com sensibilidade e acolhimento.</>
+              : <>Seu oráculo de bolso com <span className="font-bold">Tarô, Baralho Cigano e Tarô dos Anjos</span>, interpretado com sensibilidade e acolhimento.</>}
           </p>
 
           <div className="w-full max-w-[320px] bg-[#C4A484]/10 border border-[#C4A484]/30 rounded-[28px] p-6 mb-8 flex flex-col items-center gap-2">
@@ -1688,7 +1698,7 @@ export default function OraculoJornada() {
           <div className="relative w-full max-w-sm bg-[#FDFBF7] rounded-[32px] border border-[#E5D9C3] shadow-2xl p-7 z-[120] flex flex-col items-center text-center animate-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center gap-2 mb-4">
               <Sparkles size={14} className="text-[#C4A484]" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C4A484]">Presságio do Dia</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C4A484]">{isIOS ? 'Reflexão do Dia' : 'Presságio do Dia'}</span>
               <Sparkles size={14} className="text-[#C4A484]" />
             </div>
             {loadingConselho ? (
