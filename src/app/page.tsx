@@ -1272,7 +1272,7 @@ export default function OraculoJornada() {
                   </div>
                 </div>
                 <div className="bg-[#C4A484]/15 backdrop-blur-md px-8 py-4 rounded-[28px] border border-[#C4A484]/30 shadow-sm">
-                  <h2 className="text-2xl md:text-3xl font-serif text-[#4A3B28] text-center leading-tight drop-shadow-sm">Onde sua alma busca luz?</h2>
+                  <h2 className="text-2xl md:text-3xl font-serif text-[#4A3B28] text-center leading-tight drop-shadow-sm">{isIOS ? 'Sobre o que você quer refletir?' : 'Onde sua alma busca luz?'}</h2>
                 </div>
               </div>
 
@@ -1292,7 +1292,7 @@ export default function OraculoJornada() {
                   </button>
                 ))}
               </div>
-              <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">‹ Voltar ao Oráculo</button>
+              <button onClick={prevPasso} className="py-2 px-10 rounded-full bg-white/50 border border-[#E5D9C3] shadow-sm text-[8px] font-black uppercase tracking-[0.4em] text-[#C4A484] active:scale-95 transition-all">{isIOS ? '‹ Voltar' : '‹ Voltar ao Oráculo'}</button>
             </div>
           )}
 
@@ -1322,10 +1322,13 @@ export default function OraculoJornada() {
                     <img src="/assets/brand/mandala-login.png" alt="" className="w-full h-full object-contain animate-spin-slow image-render-sharp" />
                   </div>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight drop-shadow-sm">Consulte o Invisível</h2>
+                <h2 className="text-2xl md:text-3xl font-serif text-[#8B735B] text-center px-4 leading-tight drop-shadow-sm">{isIOS ? 'Como você quer refletir?' : 'Consulte o Invisível'}</h2>
               </div>
               <div className="flex flex-col gap-3 w-full max-w-[340px]">
-                {[ { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' } ].map((m) => (
+                {(isIOS
+                  ? [ { id: 'foto', icon: Eye, title: 'Suas Cartas Físicas', color: 'bg-[#065f46]' }, { id: 'completa', icon: Wand2, title: 'Reflexão Aprofundada', color: 'bg-[#991b1b]' }, { id: 'sim_nao', icon: Compass, title: 'Clareza: Sim ou Não', color: 'bg-[#a16207]' } ]
+                  : [ { id: 'foto', icon: Eye, title: 'Visão do Jogo Físico', color: 'bg-[#065f46]' }, { id: 'completa', icon: Wand2, title: 'Caminho do Destino', color: 'bg-[#991b1b]' }, { id: 'sim_nao', icon: Compass, title: 'Bússola Sim ou Não', color: 'bg-[#a16207]' } ]
+                ).map((m) => (
                   <button key={m.id} onClick={() => handleLeitura(m.id)} className="w-full h-16 flex items-center gap-5 bg-white/10 backdrop-blur-md border border-white/20 px-6 rounded-full shadow-lg active:scale-[0.98] transition-all group">
                     <div className={`w-10 h-10 ${m.color} rounded-[14px] flex items-center justify-center text-white shadow-md group-hover:rotate-12 transition-transform duration-500`}><m.icon size={20} /></div>
                     <h4 className="font-black text-[10px] text-[#5C4D3C] uppercase tracking-[0.25em] text-left leading-relaxed">{m.title}</h4>
@@ -1344,7 +1347,7 @@ export default function OraculoJornada() {
         <div className="fixed inset-0 z-50 bg-[#FDFBF7] flex flex-col items-center px-6 py-10 overflow-y-auto no-scrollbar">
           <div className="mb-6 text-center shrink-0">
             <div className="inline-block px-3 py-1 bg-[#C4A484]/10 rounded-full text-[8px] font-bold text-[#C4A484] uppercase tracking-widest border border-[#C4A484]/20 mb-2">{resultado.tema}</div>
-            <h2 className="text-2xl font-serif text-[#C4A484] leading-tight">Sua Revelação</h2>
+            <h2 className="text-2xl font-serif text-[#C4A484] leading-tight">{isIOS ? 'Sua Reflexão' : 'Sua Revelação'}</h2>
           </div>
 
           <div className="flex flex-col items-center mb-8 w-full py-2">
@@ -1356,7 +1359,7 @@ export default function OraculoJornada() {
               </div>
             ) : resultado.carta_sorteada && (
               <div className="flex flex-col items-center gap-6">
-                <CardResult title="O Arcano" data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />
+                <CardResult title={isIOS ? 'Sua Carta' : 'O Arcano'} data={resultado.carta_sorteada} index={0} tipoOraculo={tipoOraculo} />
               </div>
             )}
           </div>
@@ -1369,7 +1372,7 @@ export default function OraculoJornada() {
                 <p className="text-sm leading-relaxed text-white/80 font-sans font-light text-center">{resultado.leitura_caminho?.analise_detalhada}</p>
                 {resultado.leitura_caminho?.veredito_direto && (
                   <div className="mt-6 pt-6 border-t border-white/10 flex flex-col items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">Veredito</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C4A484]">{isIOS ? 'Síntese' : 'Veredito'}</span>
                     <span className="text-2xl font-serif font-bold text-white tracking-widest">{resultado.leitura_caminho.veredito_direto}</span>
                   </div>
                 )}
@@ -1498,7 +1501,7 @@ export default function OraculoJornada() {
                    >
                      <Sparkles size={15} className={`text-[#C4A484] ${loadingRapida ? 'animate-spin' : 'animate-pulse'}`} />
                      <span className="text-[12px] font-bold text-[#5C4D3C]">
-                       {loadingRapida ? 'Consultando o oráculo...' : resultado.pergunta_sugerida}
+                       {loadingRapida ? (isIOS ? 'Refletindo...' : 'Consultando o oráculo...') : resultado.pergunta_sugerida}
                      </span>
                    </button>
                  ) : (
@@ -1603,15 +1606,20 @@ export default function OraculoJornada() {
                 <img src="/assets/brand/icon-512.png" alt="" className="w-full h-full object-cover" />
               </div>
               <h3 className="text-xl font-serif text-[#C4A484]">2 Leituras Grátis ✨</h3>
-              <p className="text-[11px] text-[#8B735B]/70 mt-1">Um presente pra você experimentar o oráculo</p>
+              <p className="text-[11px] text-[#8B735B]/70 mt-1">{isIOS ? 'Um presente pra começar sua jornada de autoconhecimento' : 'Um presente pra você experimentar o oráculo'}</p>
             </div>
             <div className="space-y-3 mb-6">
-              {[
+              {(isIOS ? [
+                { t: '2 reflexões grátis pra começar', d: 'Experimente sem pagar nada ✨' },
+                { t: 'Três caminhos de reflexão', d: 'Cartas Clássicas, Baralho Cigano e Anjos' },
+                { t: `Depois, planos a partir de ${precos.mensal}`, d: 'Continue sua jornada quando as grátis acabarem' },
+                { t: 'Avalie e ganhe', d: 'Avalie o app e ganhe 1 reflexão grátis 💜' },
+              ] : [
                 { t: '2 leituras grátis pra começar', d: 'Experimente o oráculo sem pagar nada 🔮' },
                 { t: 'Três oráculos pra explorar', d: 'Tarô, Baralho Cigano e Tarô dos Anjos' },
                 { t: `Depois, planos a partir de ${precos.mensal}`, d: 'Continue sua jornada quando as grátis acabarem' },
                 { t: 'Avalie e ganhe', d: 'Avalie o app e ganhe 1 tiragem grátis 💜' },
-              ].map((n) => (
+              ]).map((n) => (
                 <div key={n.t} className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#48BB78] shrink-0 mt-0.5" />
                   <div className="text-left">
@@ -1729,10 +1737,10 @@ export default function OraculoJornada() {
                 <p className="text-sm italic text-[#5C4D3C] leading-relaxed font-medium mb-6">&quot;{conselhoDia.texto}&quot;</p>
               </>
             ) : (
-              <p className="text-sm text-[#8B735B] py-8">O oráculo sussurra em silêncio. Tente novamente.</p>
+              <p className="text-sm text-[#8B735B] py-8">{isIOS ? 'A reflexão pede um instante de silêncio. Tente novamente.' : 'O oráculo sussurra em silêncio. Tente novamente.'}</p>
             )}
             <button onClick={() => setMostrarPressagio(false)} className="w-full py-4 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[20px] text-[10px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
-              Voltar ao Oráculo
+              {isIOS ? 'Voltar' : 'Voltar ao Oráculo'}
             </button>
           </div>
         </div>
@@ -1799,7 +1807,9 @@ export default function OraculoJornada() {
                     <div className="space-y-2">
                       <h4 className="text-2xl font-bold text-[#4A3B28]">Acesso Premium</h4>
                       <p className="text-sm text-[#8B735B] leading-relaxed">
-                        Desbloqueie <span className="font-bold">todos os oráculos</span>, rituais e leituras. Escolha o plano que combina com você.
+                        {isIOS
+                          ? <>Desbloqueie <span className="font-bold">todos os caminhos de reflexão</span> e leituras ilimitadas. Escolha o plano que combina com você.</>
+                          : <>Desbloqueie <span className="font-bold">todos os oráculos</span>, rituais e leituras. Escolha o plano que combina com você.</>}
                       </p>
                     </div>
 
@@ -1930,19 +1940,19 @@ export default function OraculoJornada() {
                     <div className="space-y-6">
                        <div className="space-y-3">
                           <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">1. Escolha seu Deck</h5>
-                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Navegue entre o Tarô Clássico, Baralho Cigano ou Tarô dos Anjos. Cada um possui uma vibração única para sua necessidade atual.</p>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">{isIOS ? 'Navegue entre as Cartas Clássicas, o Baralho Cigano ou as Cartas dos Anjos. Cada caminho traz um tom único para o seu momento atual.' : 'Navegue entre o Tarô Clássico, Baralho Cigano ou Tarô dos Anjos. Cada um possui uma vibração única para sua necessidade atual.'}</p>
                        </div>
                        <div className="space-y-3">
                           <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">2. Defina o Tema</h5>
-                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Selecione a área da vida (Amor, Trabalho, Saúde, etc.) que deseja iluminar com a sabedoria do oráculo.</p>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">{isIOS ? 'Selecione a área da vida (Amor, Trabalho, Saúde, etc.) sobre a qual você quer refletir com mais clareza.' : 'Selecione a área da vida (Amor, Trabalho, Saúde, etc.) que deseja iluminar com a sabedoria do oráculo.'}</p>
                        </div>
                        <div className="space-y-3">
                           <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">3. Abra o Coração</h5>
                           <p className="text-sm text-[#5C4D3C] leading-relaxed">Você pode escrever sua dúvida ou usar o comando de voz para desabafar. A sinceridade atrai as melhores respostas.</p>
                        </div>
                        <div className="space-y-3">
-                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">4. Consulte o Invisível</h5>
-                          <p className="text-sm text-[#5C4D3C] leading-relaxed">Escolha entre uma leitura completa de 3 cartas, uma resposta direta Sim/Não ou a leitura de um jogo físico via foto.</p>
+                          <h5 className="text-[11px] font-black uppercase tracking-widest text-[#C4A484]">{isIOS ? '4. Faça sua Reflexão' : '4. Consulte o Invisível'}</h5>
+                          <p className="text-sm text-[#5C4D3C] leading-relaxed">{isIOS ? 'Escolha entre uma reflexão aprofundada de 3 cartas, uma clareza direta Sim/Não ou a leitura de um jogo físico via foto.' : 'Escolha entre uma leitura completa de 3 cartas, uma resposta direta Sim/Não ou a leitura de um jogo físico via foto.'}</p>
                        </div>
                     </div>
 
