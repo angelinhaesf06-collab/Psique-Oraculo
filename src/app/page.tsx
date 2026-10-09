@@ -1434,7 +1434,7 @@ export default function OraculoJornada() {
                <div className="space-y-4">
                   <div className="flex items-center gap-3 px-2">
                     <div className="h-px flex-1 bg-[#E5D9C3]" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#8B735B]">Rituais de Ancoragem</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#8B735B]">{isIOS ? 'Práticas de Equilíbrio' : 'Rituais de Ancoragem'}</span>
                     <div className="h-px flex-1 bg-[#E5D9C3]" />
                   </div>
 
@@ -1450,7 +1450,7 @@ export default function OraculoJornada() {
                     {resultado.ancoragem_rituais.salmo && (
                       <div className="bg-white rounded-[24px] border border-[#E5D9C3] p-6 shadow-sm space-y-2">
                         <h5 className="text-[9px] font-black text-[#C4A484] uppercase tracking-widest flex items-center gap-2">
-                           {tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Sagrado' : 'Dica da Cigana'}
+                           {isIOS ? 'Inspiração do Dia' : (tipoOraculo === 'Tarô dos Anjos' ? 'Salmo Sagrado' : 'Dica da Cigana')}
                         </h5>
                         <p className="text-xs text-[#5C4D3C] leading-relaxed font-medium text-center">{resultado.ancoragem_rituais.salmo}</p>
                       </div>
@@ -1458,7 +1458,7 @@ export default function OraculoJornada() {
 
                     {resultado.ancoragem_rituais.banho && (
                       <div className="bg-[#C4A484]/5 rounded-[24px] border border-[#C4A484]/20 p-6 shadow-sm space-y-2">
-                        <h5 className="text-[9px] font-black text-[#C4A484] uppercase tracking-widest">Banho ou Erva Mística</h5>
+                        <h5 className="text-[9px] font-black text-[#C4A484] uppercase tracking-widest">{isIOS ? 'Prática de Autocuidado' : 'Banho ou Erva Mística'}</h5>
                         <p className="text-xs text-[#5C4D3C] leading-relaxed font-medium text-center">{resultado.ancoragem_rituais.banho}</p>
                       </div>
                     )}
@@ -1472,7 +1472,7 @@ export default function OraculoJornada() {
 
                     {resultado.ancoragem_rituais.dica_angelical && (
                       <div className="bg-[#4FD1C5]/5 rounded-[24px] border border-[#4FD1C5]/20 p-6 shadow-sm space-y-4">
-                        <h5 className="text-[9px] font-black text-[#4FD1C5] uppercase tracking-widest">Ritual Angelical</h5>
+                        <h5 className="text-[9px] font-black text-[#4FD1C5] uppercase tracking-widest">{isIOS ? 'Prática de Acolhimento' : 'Ritual Angelical'}</h5>
                         <div className="grid grid-cols-2 gap-4">
                            <div className="space-y-1">
                               <span className="text-[8px] font-bold text-[#8B735B]/60 uppercase">Foco</span>
