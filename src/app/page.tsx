@@ -582,7 +582,9 @@ export default function OraculoJornada() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setUser(session?.user ?? null);
-        const nomeCompleto = localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || '';
+        // Só usa o nome guardado SE houver sessão. Sem sessão (deslogado), volta ao padrão —
+        // evita o app continuar "chamando de Antonio" depois do logout.
+        const nomeCompleto = session ? (localStorage.getItem('psique_user_name') || session?.user?.user_metadata?.full_name || '') : '';
         setPrimeiroNome(nomeCompleto ? nomeCompleto.trim().split(' ')[0] : 'Alma Querida');
         let premium = false;
         let freeUsados = 0;
@@ -947,14 +949,26 @@ export default function OraculoJornada() {
 
   // replace (não push) para o logout: assim o botão "voltar" do Android NÃO
   // retorna à home já deslogado (a home sai do histórico).
-  const handleLogout = async () => { localStorage.removeItem('psique_demo_mode'); await limparHistoricoLocalAntigo(); await supabase.auth.signOut(); router.replace('/login'); };
-  // Sair: faz logout (se houver) e sempre leva à tela de login/entrada.
-  const handleSair = async () => {
+  // Limpa TUDO da sessão/identidade local no logout (resolve "continua me chamando de Antonio"
+  // ao reabrir): nome guardado, modo demo, histórico local e o token do Supabase no nativo.
+  const limparSessaoLocal = async () => {
     try { localStorage.removeItem('psique_demo_mode'); } catch {}
+    try { localStorage.removeItem('psique_user_name'); } catch {}
     try { await limparHistoricoLocalAntigo(); } catch {}
     try { await supabase.auth.signOut(); } catch {}
-    router.replace('/login');
+    // Garante a remoção do token do Supabase no armazenamento NATIVO (iOS às vezes não limpava).
+    try {
+      if (Capacitor.isNativePlatform()) {
+        await Preferences.remove({ key: 'sb-ouspsmuyzwglwxjdxkls-auth-token' });
+      }
+    } catch {}
+    setUser(null);
+    setIsPremiumUser(false);
+    setPrimeiroNome('Alma Querida');
   };
+  const handleLogout = async () => { await limparSessaoLocal(); router.replace('/login'); };
+  // Sair: faz logout (se houver) e sempre leva à tela de login/entrada.
+  const handleSair = async () => { await limparSessaoLocal(); router.replace('/login'); };
   // Exclui a conta DE VERDADE (apaga dados + usuário de auth) via endpoint seguro.
   const handleExcluirConta = async () => {
     if (confirmarExclusao.trim().toUpperCase() !== 'EXCLUIR') {
