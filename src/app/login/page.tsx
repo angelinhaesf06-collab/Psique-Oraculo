@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Mail, Lock, Sparkles } from 'lucide-react';
+import { Mail, Lock, Sparkles, ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Capacitor } from '@capacitor/core';
 
@@ -118,7 +118,18 @@ export default function LoginPage() {
   return (
     <div className="h-screen w-full bg-[#FDFBF7] flex flex-col items-center relative overflow-hidden">
       <DecorationOverlay />
-      
+
+      {/* Voltar: no iPhone não há botão físico de voltar; sem isto a pessoa fica
+          presa no login ao abrir a tela sem querer criar conta. Leva pra home. */}
+      <button
+        type="button"
+        onClick={() => irParaHome(router)}
+        aria-label="Voltar"
+        className="absolute z-30 top-[calc(env(safe-area-inset-top)+16px)] left-4 flex items-center gap-1 py-2 pl-2 pr-4 rounded-full bg-white/50 backdrop-blur-md border border-[#E5D9C3] shadow-sm text-[9px] font-black uppercase tracking-[0.3em] text-[#C4A484] active:scale-95 transition-all"
+      >
+        <ChevronLeft size={14} /> Voltar
+      </button>
+
       <div className="relative z-10 w-full max-w-[340px] h-full flex flex-col items-center justify-center px-6 pb-12 text-center pt-[calc(env(safe-area-inset-top)+20px)]">
         
         {/* Ícone Superior - Layout Unificado Web/App */}
