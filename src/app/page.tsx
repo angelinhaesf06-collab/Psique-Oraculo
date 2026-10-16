@@ -24,6 +24,9 @@ import { AdMob, RewardAdPluginEvents } from '@capacitor-community/admob';
 // Acesso grátis: 2 leituras no total por conta, controlado pelo SERVIDOR
 // (função check_and_consume_reading, coluna free_count). Depois, paywall.
 const FREE_READINGS_LIMIT = 2;
+// Anúncio recompensado (AdMob) DESLIGADO por ora — a dona preferiu trazer de volta
+// a compra avulsa no lugar. Quando o AdMob for aprovado, é só voltar pra true.
+const ADS_ENABLED = false;
 // Presságio do Dia: 1 acesso grátis por aparelho; depois, apenas assinantes.
 const FREE_PRESSAGIO_LIMIT = 1;
 
@@ -527,12 +530,29 @@ export default function OraculoJornada() {
       const { products } = await Purchases.getProducts({ productIdentifiers: ['leitura_avulsa'], type: PRODUCT_CATEGORY.NON_SUBSCRIPTION });
       if (!products || products.length === 0) { toast.error('Produto indisponível no momento. Tente novamente.'); return; }
       await Purchases.purchaseStoreProduct({ product: products[0] });
-      const novo = (await getPaidReadings()) + 1;
-      await setPaidReadingsStore(novo);
-      setPaidReadings(novo);
+
+      // JEITO SEGURO: o crédito é liberado pelo SERVIDOR, que confere na RevenueCat
+      // se a compra realmente aconteceu (não dá pra forjar nem duplicar). O crédito
+      // cai em profiles.bonus_readings e a leitura passa a ser liberada por ele.
+      const { data: { session } } = await supabase.auth.getSession();
+      const siteUrl = 'https://www.pisiqueoraculo.com.br';
+      const creditar = async () => {
+        const res = await fetch(`${siteUrl}/api/account/grant-avulsa`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
+        });
+        if (!res.ok) return 0;
+        const d = await res.json();
+        return d?.granted ?? 0;
+      };
+      // 2 tentativas: às vezes a RevenueCat leva 1-2s pra registrar a compra.
+      let granted = await creditar();
+      if (granted === 0) { await new Promise((r) => setTimeout(r, 1800)); granted = await creditar(); }
+
       // Conta a avulsa comprada (para o empurrão de assinatura).
       setAvulsasCompradas(await incAvulsasCompradas());
-      toast.success('Leitura liberada! ✨');
+      if (granted > 0) toast.success('Leitura liberada! ✨');
+      else toast.info('Pagamento recebido! Sua leitura já vai liberar — se não aparecer, toque de novo em instantes. ✨');
       setModalAberto(null);
     } catch (e: any) {
       const msg = (e?.message || '').toLowerCase();
@@ -855,6 +875,13 @@ export default function OraculoJornada() {
           await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
           await Purchases.configure({ apiKey });
 
+          // Identifica a pessoa na RevenueCat pelo id do Supabase, pra a COMPRA AVULSA
+          // ficar atrelada à conta — assim o servidor valida a compra por esse id.
+          try {
+            const { data: { session: rcSession } } = await supabase.auth.getSession();
+            if (rcSession?.user?.id) await Purchases.logIn({ appUserID: rcSession.user.id });
+          } catch (e) { console.error('RevenueCat logIn falhou', e); }
+
           // Busca os preços REAIS da loja (sempre batem com o que será cobrado).
           try {
             const offerings = await Purchases.getOfferings();
@@ -902,7 +929,7 @@ export default function OraculoJornada() {
     const ehAndroid = Capacitor.getPlatform() === 'android';
     setIsAndroid(ehAndroid);
     setIsIOS(Capacitor.getPlatform() === 'ios');
-    if (ehAndroid) {
+    if (ehAndroid && ADS_ENABLED) {
       AdMob.initialize().catch((e) => console.error('Falha ao iniciar AdMob', e));
     }
   }, []);
@@ -1664,7 +1691,13 @@ export default function OraculoJornada() {
             <button onClick={() => { setMostrarFimTeste(false); setModalAberto('assinatura'); }} className="w-full py-4 mt-5 bg-gradient-to-br from-[#4A3B28] to-[#1A1614] text-white rounded-[20px] text-[11px] font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
               Quero continuar • Ver planos
             </button>
+            {/* Compra avulsa: 1 leitura única pra quem não quer assinar agora. */}
             {isAndroid && !isPremiumUser && (
+              <button onClick={handleComprarAvulsa} disabled={loading} className="w-full py-3 mt-3 rounded-[20px] border border-[#C4A484]/40 bg-[#C4A484]/10 text-[#8B735B] text-[11px] font-bold active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2">
+                ✨ {loading ? 'Processando...' : `Comprar 1 leitura avulsa • R$ ${PRECO_AVULSA.toFixed(2).replace('.', ',')}`}
+              </button>
+            )}
+            {ADS_ENABLED && isAndroid && !isPremiumUser && (
               <button onClick={assistirAnuncioGanhar} disabled={loading} className="w-full py-3 mt-3 rounded-[20px] border border-[#C4A484]/40 bg-[#C4A484]/10 text-[#8B735B] text-[11px] font-bold active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2">
                 🎁 {loading ? 'Carregando...' : 'Assistir um anúncio e ganhar 1 leitura'}
               </button>
@@ -1902,6 +1935,18 @@ export default function OraculoJornada() {
                         <div className="h-px flex-1 bg-[#E5D9C3]/60" />
                       </div>
 
+                      {/* Comprar 1 leitura avulsa (só Android, só não-premium) */}
+                      {isAndroid && !isPremiumUser && (
+                        <button
+                          onClick={handleComprarAvulsa}
+                          disabled={loading}
+                          className="w-full py-3 rounded-[20px] border border-[#C4A484]/40 bg-[#C4A484]/10 text-[#8B735B] active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                        >
+                          <Sparkles size={14} className="text-[#C4A484]" />
+                          <span className="text-[11px] font-bold">{loading ? 'Processando...' : `Comprar 1 leitura avulsa • R$ ${PRECO_AVULSA.toFixed(2).replace('.', ',')}`}</span>
+                        </button>
+                      )}
+
                       {/* Avaliar o app e ganhar 1 tiragem grátis (só enquanto não resgatou) */}
                       {!jaAvaliou && (
                         <button
@@ -1914,8 +1959,8 @@ export default function OraculoJornada() {
                         </button>
                       )}
 
-                      {/* Assistir anúncio e ganhar 1 leitura (só Android, só não-premium) */}
-                      {isAndroid && !isPremiumUser && (
+                      {/* Assistir anúncio e ganhar 1 leitura (DESLIGADO por ora — ADS_ENABLED) */}
+                      {ADS_ENABLED && isAndroid && !isPremiumUser && (
                         <button
                           onClick={assistirAnuncioGanhar}
                           disabled={loading}
