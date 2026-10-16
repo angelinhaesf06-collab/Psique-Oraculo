@@ -50,15 +50,17 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>O microfone é usado para você fazer sua pergunta ao oráculo por voz.</string>
+	<string>O microfone é usado para você registrar sua reflexão por voz.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>O reconhecimento de fala transforma sua pergunta falada em texto para a leitura.</string>
+	<string>O reconhecimento de fala transforma o que você fala em texto para a sua reflexão.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>A câmera é usada para fotografar suas cartas físicas e o oráculo identificá-las.</string>
+	<string>A câmera é usada para fotografar suas cartas físicas e incluí-las na sua reflexão.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Suas fotos são usadas para escolher uma imagem das cartas para a leitura.</string>
+	<string>Suas fotos são usadas para escolher uma imagem das cartas para a sua reflexão.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Usado para salvar sua leitura como imagem na sua galeria.</string>
+	<string>Usado para salvar sua reflexão como imagem na sua galeria.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>A localização pode ser usada para tornar os lembretes e avisos mais relevantes para você. O app funciona normalmente mesmo sem conceder esta permissão.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
