@@ -93,7 +93,7 @@ export async function POST(req: Request) {
     // 2. Validação e Consumo de Créditos
     // Regra de negócio (função check_and_consume_reading no banco):
     //   - Premium: até 5 leituras por dia
-    //   - Não premium: 2 leituras grátis no total; depois, paywall
+    //   - Não premium: 1 leitura grátis no total; depois, paywall
     let creditStatus: any = { allowed: true, type: "open" };
 
     // VIP: emails da allowlist têm tiragens ILIMITADAS — nunca passam pelo controle
@@ -119,7 +119,7 @@ export async function POST(req: Request) {
 
     // A "mensagem do dia" é sempre gratuita e nunca consome créditos.
     // Para qualquer OUTRA leitura de conta comum (não VIP, sem bônus confirmado), o
-    // acesso SÓ é liberado se o servidor confirmar pela regra "2 grátis por conta".
+    // acesso SÓ é liberado se o servidor confirmar pela regra "1 grátis por conta".
     // FAIL-CLOSED: sem identidade válida ou com erro no banco, NÃO liberamos — caso
     // contrário a trava perde o efeito e a pessoa faz leituras ilimitadas de graça.
     if (tipoLeitura !== 'mensagem_dia' && !isVip && !usouBonus) {

@@ -21,9 +21,9 @@ import { AdMob, RewardAdPluginEvents } from '@capacitor-community/admob';
 
 // Modelo de conversão: a pessoa usa o app sem login. Após 1 consulta grátis
 // (contada NO APARELHO), aparece o paywall para cadastrar e assinar.
-// Acesso grátis: 2 leituras no total por conta, controlado pelo SERVIDOR
+// Acesso grátis: 1 leitura no total por conta, controlado pelo SERVIDOR
 // (função check_and_consume_reading, coluna free_count). Depois, paywall.
-const FREE_READINGS_LIMIT = 2;
+const FREE_READINGS_LIMIT = 1;
 // Anúncio recompensado (AdMob) DESLIGADO por ora — a dona preferiu trazer de volta
 // a compra avulsa no lugar. Quando o AdMob for aprovado, é só voltar pra true.
 const ADS_ENABLED = false;
@@ -50,7 +50,7 @@ async function incPressagioUsed(): Promise<void> {
 }
 
 // Id único do APARELHO (gerado uma vez e guardado). Usado pela trava anti-abuso:
-// limita as 2 leituras grátis por celular, não só por conta (barra vários e-mails falsos).
+// limita a leitura grátis por celular, não só por conta (barra vários e-mails falsos).
 async function getDeviceId(): Promise<string> {
   const key = 'psique_device_id';
   try {
@@ -1065,7 +1065,7 @@ export default function OraculoJornada() {
         bonusSaldo = prof?.bonus_readings ?? 0;
       } catch {}
     }
-    // As 2 leituras grátis são controladas pelo SERVIDOR. Aqui só sinalizamos a INTENÇÃO
+    // A leitura grátis é controlada pelo SERVIDOR. Aqui só sinalizamos a INTENÇÃO
     // de usar um crédito de BÔNUS (avaliar o app) quando as grátis já acabaram — mas quem
     // VALIDA e debita o bônus é o servidor (saldo por conta), então não dá pra forjar.
     let usarCredito = false;
@@ -1094,7 +1094,7 @@ export default function OraculoJornada() {
       const isNative = Capacitor.isNativePlatform();
       const siteUrl = 'https://www.pisiqueoraculo.com.br';
       const apiUrl = isNative ? `${siteUrl}/api/oracle/read` : `/api/oracle/read`;
-      const deviceId = await getDeviceId(); // trava anti-abuso: 2 grátis por aparelho
+      const deviceId = await getDeviceId(); // trava anti-abuso: 1 grátis por aparelho
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': session?.access_token ? `Bearer ${session.access_token}` : '' },
@@ -1130,7 +1130,7 @@ export default function OraculoJornada() {
         }
       }
       setResultado(data); setUltimaLeituraId(data?.historicoId || null); setPasso(4); setRespostaRapida(null);
-      // Consumo: as 2 grátis são contadas no servidor; aqui só refletimos na tela.
+      // Consumo: a grátis é contada no servidor; aqui só refletimos na tela.
       if (!isPremium && !usarCredito) setFreeRestantes((r) => Math.max(0, r - 1));
       // O bônus é debitado no SERVIDOR (saldo por conta). Aqui só atualizamos o visual.
       if (!isPremium && usarCredito) setPaidReadings((n) => Math.max(0, n - 1));
@@ -1610,7 +1610,7 @@ export default function OraculoJornada() {
 
           <div className="w-full max-w-[320px] bg-[#C4A484]/10 border border-[#C4A484]/30 rounded-[28px] p-6 mb-8 flex flex-col items-center gap-2">
             <Sparkles size={20} className="text-[#C4A484]" />
-            <span className="text-2xl font-serif font-bold text-[#4A3B28]">2 leituras grátis</span>
+            <span className="text-2xl font-serif font-bold text-[#4A3B28]">1 leitura grátis</span>
             <span className="text-[10px] font-black uppercase tracking-widest text-[#8B735B]/70">para começar sua jornada</span>
           </div>
 
@@ -1632,19 +1632,19 @@ export default function OraculoJornada() {
               <div className="w-16 h-16 rounded-[20px] overflow-hidden border border-[#E5D9C3] mb-3">
                 <img src="/assets/brand/icon-512.png" alt="" className="w-full h-full object-cover" />
               </div>
-              <h3 className="text-xl font-serif text-[#C4A484]">2 Leituras Grátis ✨</h3>
+              <h3 className="text-xl font-serif text-[#C4A484]">1 Leitura Grátis ✨</h3>
               <p className="text-[11px] text-[#8B735B]/70 mt-1">{isIOS ? 'Um presente pra começar sua jornada de autoconhecimento' : 'Um presente pra você experimentar o oráculo'}</p>
             </div>
             <div className="space-y-3 mb-6">
               {(isIOS ? [
-                { t: '2 reflexões grátis pra começar', d: 'Experimente sem pagar nada ✨' },
+                { t: '1 reflexão grátis pra começar', d: 'Experimente sem pagar nada ✨' },
                 { t: 'Três caminhos de reflexão', d: 'Cartas Clássicas, Baralho Cigano e Anjos' },
-                { t: `Depois, planos a partir de ${precos.mensal}`, d: 'Continue sua jornada quando as grátis acabarem' },
+                { t: `Depois, planos a partir de ${precos.mensal}`, d: 'Continue sua jornada depois da grátis' },
                 { t: 'Avalie e ganhe', d: 'Avalie o app e ganhe 1 reflexão grátis 💜' },
               ] : [
-                { t: '2 leituras grátis pra começar', d: 'Experimente o oráculo sem pagar nada 🔮' },
+                { t: '1 leitura grátis pra começar', d: 'Experimente o oráculo sem pagar nada 🔮' },
                 { t: 'Três oráculos pra explorar', d: 'Tarô, Baralho Cigano e Tarô dos Anjos' },
-                { t: `Depois, planos a partir de ${precos.mensal}`, d: 'Continue sua jornada quando as grátis acabarem' },
+                { t: `Depois, planos a partir de ${precos.mensal}`, d: 'Continue sua jornada depois da grátis' },
                 { t: 'Avalie e ganhe', d: 'Avalie o app e ganhe 1 tiragem grátis 💜' },
               ]).map((n) => (
                 <div key={n.t} className="flex items-start gap-3">
