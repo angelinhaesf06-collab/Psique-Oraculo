@@ -67,7 +67,7 @@ async function getDeviceId(): Promise<string> {
   } catch { return ''; }
 }
 
-// Créditos de leitura avulsa (comprados a R$ 2,06 cada), guardados no aparelho.
+// Créditos de leitura avulsa (comprados a R$ 2,09 cada), guardados no aparelho.
 async function getPaidReadings(): Promise<number> {
   try {
     if (Capacitor.isNativePlatform()) {
@@ -88,7 +88,8 @@ async function setPaidReadingsStore(n: number): Promise<void> {
 
 // Quantas avulsas a pessoa JÁ COMPROU na vida (não é saldo — só cresce). Usado
 // para o empurrão "compre o plano" para quem já paga avulso com frequência.
-const PRECO_AVULSA = 2.06;
+// Fallback: o preço real vem da loja (precoAvulsa, carregado com o RevenueCat).
+const PRECO_AVULSA = 2.09;
 async function getAvulsasCompradas(): Promise<number> {
   try {
     if (Capacitor.isNativePlatform()) {
@@ -521,8 +522,10 @@ export default function OraculoJornada() {
     semestral: 'R$ 39,90', semestralMes: 'R$ 6,65',
     mensal: 'R$ 9,90',
   });
+  // Preço da leitura avulsa: fallback fixo, trocado pelo preço REAL da loja na inicialização.
+  const [precoAvulsa, setPrecoAvulsa] = useState(PRECO_AVULSA);
 
-  // Compra avulsa: paga R$ 2,06 e libera 1 leitura (produto consumível 'leitura_avulsa').
+  // Compra avulsa: paga R$ 2,09 e libera 1 leitura (produto consumível 'leitura_avulsa').
   const handleComprarAvulsa = async () => {
     try {
       setLoading(true);
@@ -916,6 +919,15 @@ export default function OraculoJornada() {
             }));
           } catch (e) {
             console.error("Não consegui buscar os preços da loja", e);
+          }
+          // Preço REAL da leitura avulsa (produto consumível, fora das offerings).
+          if (!isIOS) {
+            try {
+              const { products } = await Purchases.getProducts({ productIdentifiers: ['leitura_avulsa'], type: PRODUCT_CATEGORY.NON_SUBSCRIPTION });
+              if (products?.[0]?.price) setPrecoAvulsa(products[0].price);
+            } catch (e) {
+              console.error("Não consegui buscar o preço da avulsa", e);
+            }
           }
         } catch (e) {
           console.error("Falha ao inicializar o RevenueCat", e);
@@ -1694,7 +1706,7 @@ export default function OraculoJornada() {
             {/* Compra avulsa: 1 leitura única pra quem não quer assinar agora. */}
             {isAndroid && !isPremiumUser && (
               <button onClick={handleComprarAvulsa} disabled={loading} className="w-full py-3 mt-3 rounded-[20px] border border-[#C4A484]/40 bg-[#C4A484]/10 text-[#8B735B] text-[11px] font-bold active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2">
-                ✨ {loading ? 'Processando...' : `Comprar 1 leitura avulsa • R$ ${PRECO_AVULSA.toFixed(2).replace('.', ',')}`}
+                ✨ {loading ? 'Processando...' : `Comprar 1 leitura avulsa • R$ ${precoAvulsa.toFixed(2).replace('.', ',')}`}
               </button>
             )}
             {ADS_ENABLED && isAndroid && !isPremiumUser && (
@@ -1851,7 +1863,7 @@ export default function OraculoJornada() {
                       <div className="w-full bg-[#C4A484]/10 border border-[#C4A484]/40 rounded-[24px] p-5 text-center space-y-1.5">
                         <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#C4A484]">Feito pra você ✨</span>
                         <p className="text-sm text-[#4A3B28] leading-relaxed">
-                          Você já investiu <span className="font-bold">R$ {(avulsasCompradas * PRECO_AVULSA).toFixed(2).replace('.', ',')}</span> em leituras avulsas. Com o plano <span className="font-bold">mensal de {precos.mensal}</span> você teria leituras o mês inteiro. 💜
+                          Você já investiu <span className="font-bold">R$ {(avulsasCompradas * precoAvulsa).toFixed(2).replace('.', ',')}</span> em leituras avulsas. Com o plano <span className="font-bold">mensal de {precos.mensal}</span> você teria leituras o mês inteiro. 💜
                         </p>
                       </div>
                     )}
@@ -1943,7 +1955,7 @@ export default function OraculoJornada() {
                           className="w-full py-3 rounded-[20px] border border-[#C4A484]/40 bg-[#C4A484]/10 text-[#8B735B] active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                         >
                           <Sparkles size={14} className="text-[#C4A484]" />
-                          <span className="text-[11px] font-bold">{loading ? 'Processando...' : `Comprar 1 leitura avulsa • R$ ${PRECO_AVULSA.toFixed(2).replace('.', ',')}`}</span>
+                          <span className="text-[11px] font-bold">{loading ? 'Processando...' : `Comprar 1 leitura avulsa • R$ ${precoAvulsa.toFixed(2).replace('.', ',')}`}</span>
                         </button>
                       )}
 
