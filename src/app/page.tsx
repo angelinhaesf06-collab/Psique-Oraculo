@@ -483,7 +483,7 @@ export default function OraculoJornada() {
   };
 
   const [isPremiumUser, setIsPremiumUser] = useState(false);
-  // Leituras grátis restantes (2 no total). O servidor é a fonte da verdade;
+  // Leituras grátis restantes (1 no total). O servidor é a fonte da verdade;
   // aqui é só para exibir na tela.
   const [freeRestantes, setFreeRestantes] = useState<number>(FREE_READINGS_LIMIT);
   const [primeiroNome, setPrimeiroNome] = useState('Alma Querida');
@@ -1670,9 +1670,9 @@ export default function OraculoJornada() {
             <div className="w-16 h-16 rounded-[20px] overflow-hidden border border-[#E5D9C3] mb-3 mx-auto">
               <img src="/assets/brand/icon-512.png" alt="" className="w-full h-full object-cover" />
             </div>
-            <h3 className="text-xl font-serif text-[#C4A484]">Suas leituras grátis acabaram 🌙</h3>
+            <h3 className="text-xl font-serif text-[#C4A484]">Sua leitura grátis acabou 🌙</h3>
             <p className="text-[12px] text-[#8B735B] leading-relaxed mt-2">
-              Você aproveitou suas leituras grátis. Gostou do Psiquê Oráculo? ✨
+              Você aproveitou sua leitura grátis. Gostou do Psiquê Oráculo? ✨
             </p>
 
             <div className="mt-5 rounded-2xl bg-[#C4A484]/10 border border-[#C4A484]/25 p-4 text-left space-y-2">
@@ -1680,7 +1680,7 @@ export default function OraculoJornada() {
                 💰 Uma consulta com cartomante custa de <b>R$ 50 a R$ 150</b> — e responde <b>uma única pergunta</b>.
               </p>
               <p className="text-[12px] text-[#4A3B28] leading-relaxed">
-                🔮 Aqui, por <b>{precos.mensal}/mês</b> você tem <b>tiragens ILIMITADAS</b>: amor, trabalho, saúde, o que quiser, quando quiser.
+                🔮 Aqui, por <b>{precos.mensal}/mês</b> você tem <b>até 5 tiragens por dia</b>: amor, trabalho, saúde, o que quiser, todos os dias.
               </p>
             </div>
 
@@ -1841,7 +1841,7 @@ export default function OraculoJornada() {
                       <h4 className="text-2xl font-bold text-[#4A3B28]">Acesso Premium</h4>
                       <p className="text-sm text-[#8B735B] leading-relaxed">
                         {isIOS
-                          ? <>Desbloqueie <span className="font-bold">todos os caminhos de reflexão</span> e leituras ilimitadas. Escolha o plano que combina com você.</>
+                          ? <>Desbloqueie <span className="font-bold">todos os caminhos de reflexão</span> e até 5 reflexões por dia. Escolha o plano que combina com você.</>
                           : <>Desbloqueie <span className="font-bold">todos os oráculos</span>, rituais e leituras. Escolha o plano que combina com você.</>}
                       </p>
                     </div>

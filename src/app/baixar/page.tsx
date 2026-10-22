@@ -5,7 +5,7 @@ const PLAY_URL = "https://play.google.com/store/apps/details?id=com.psiqueoracul
 export const metadata: Metadata = {
   title: "Psiquê Oráculo — Tarô, Baralho Cigano e Anjos no seu celular",
   description:
-    "Faça leituras de Tarô, Baralho Cigano e Tarô dos Anjos com acolhimento e clareza. Pergunte por voz ou texto. Comece com leituras grátis. Baixe agora.",
+    "Faça leituras de Tarô, Baralho Cigano e Tarô dos Anjos com acolhimento e clareza. Pergunte por voz ou texto. Comece com uma leitura grátis. Baixe agora.",
   openGraph: {
     title: "Psiquê Oráculo — Seu oráculo de bolso",
     description:
@@ -62,10 +62,10 @@ export default function BaixarPage() {
           Faça sua leitura de Tarô, Baralho Cigano ou Tarô dos Anjos a qualquer hora, com sensibilidade e acolhimento.
         </p>
         <div className="inline-flex items-center gap-2 rounded-full bg-[#C4A484]/15 border border-[#C4A484]/40 px-5 py-2 mb-7">
-          <span className="text-[13px] font-black uppercase tracking-widest text-[#8B735B]">🎁 3 leituras grátis</span>
+          <span className="text-[13px] font-black uppercase tracking-widest text-[#8B735B]">🎁 1 leitura grátis</span>
         </div>
         <CTA />
-        <p className="text-[11px] text-[#8B735B]/60 uppercase tracking-widest mt-4">Sem cadastro · Sem cartão · Android</p>
+        <p className="text-[11px] text-[#8B735B]/60 uppercase tracking-widest mt-4">Cadastro rápido · Sem cartão · Android</p>
 
         {/* Mockup do app */}
         <div className="mt-12 w-[250px] rounded-[42px] border-[7px] border-[#2C2420] bg-[#2C2420] shadow-2xl overflow-hidden">
@@ -143,7 +143,7 @@ export default function BaixarPage() {
               { i: "🔒", t: "Privado e seguro", d: "Suas perguntas são confidenciais e criptografadas." },
               { i: "💛", t: "Acolhimento de verdade", d: "Une a sabedoria das cartas com uma escuta empática." },
               { i: "🕊️", t: "Disponível 24 horas", d: "Sua resposta a qualquer momento, onde você estiver." },
-              { i: "🎁", t: "Sem compromisso", d: "Comece grátis, sem cadastro e sem cartão." },
+              { i: "🎁", t: "Sem compromisso", d: "Comece com 1 leitura grátis, sem cartão." },
             ].map((c) => (
               <div key={c.t} className="flex items-start gap-4 bg-white rounded-[22px] border border-[#E5D9C3] p-5 text-left shadow-sm">
                 <span className="text-2xl shrink-0">{c.i}</span>
@@ -161,7 +161,7 @@ export default function BaixarPage() {
           <h2 className="text-2xl font-serif text-[#C4A484] mb-6">Perguntas frequentes</h2>
           <div className="flex flex-col gap-3">
             {[
-              { q: "É grátis mesmo?", a: "Sim! Suas primeiras leituras são gratuitas e você nem precisa criar conta pra começar." },
+              { q: "É grátis mesmo?", a: "Sim! Sua primeira leitura é gratuita. Basta um cadastro rápido, sem cartão de crédito." },
               { q: "Preciso pagar depois?", a: "Só se quiser mais leituras. Você escolhe: uma leitura avulsa ou um plano — sem obrigação." },
               { q: "É confiável?", a: "Suas leituras são privadas e criptografadas. É uma ferramenta de autoconhecimento e acolhimento." },
               { q: "Funciona no meu celular?", a: "Sim, em qualquer aparelho Android. É só baixar na Google Play." },
@@ -177,7 +177,7 @@ export default function BaixarPage() {
         {/* CTA final */}
         <div className="w-full mt-16 bg-[#2C2420] rounded-[32px] p-10 flex flex-col items-center">
           <p className="text-2xl font-serif text-[#E5D9C3] mb-2">Sua resposta está a um toque ✨</p>
-          <p className="text-sm text-white/70 mb-8">Comece agora com 3 leituras grátis. Sem cadastro, sem cartão.</p>
+          <p className="text-sm text-white/70 mb-8">Comece agora com 1 leitura grátis. Cadastro rápido, sem cartão.</p>
           <CTA />
         </div>
 

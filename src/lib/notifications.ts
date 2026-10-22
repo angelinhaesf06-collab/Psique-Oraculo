@@ -12,7 +12,7 @@ const FRASES_PREMIUM = [
 ];
 
 // Frases para NÃO PREMIUM (tom de NOITE): curiosidade/engajamento SEM prometer
-// "grátis" (o grátis é só o teste de 24h; depois é paywall — prometer grátis todo
+// "grátis" (o grátis é só 1 leitura; depois é paywall — prometer grátis todo
 // dia seria enganoso pra quem já usou o teste). Inclui empurrão sutil ao premium.
 const FRASES_GRATIS = [
   'Seu oráculo tem um recado pra você hoje 🌙 Toque e veja.',
@@ -20,7 +20,7 @@ const FRASES_GRATIS = [
   'A noite pede reflexão 🔮 Consulte as cartas antes de dormir.',
   'Amor, trabalho, saúde... pergunte ao oráculo hoje 🌙',
   'Feche o dia com clareza ✨ Veja o que as cartas trazem.',
-  'Continue sua jornada: tiragens ilimitadas te esperam no app 🔮',
+  'Continue sua jornada: as cartas te esperam no app 🔮',
 ];
 
 // Agenda um lembrete diário (21:00) para trazer a pessoa de volta ao app.
@@ -85,7 +85,7 @@ export async function agendarMensagemDiaria(isPremium: boolean = false) {
 export async function agendarAvisoOferta() {
   if (!Capacitor.isNativePlatform()) return;
   try {
-    // v2 = campanha do teste de 24h (troca da versão faz reenviar para todos).
+    // v2 = aviso da leitura grátis (só para quem ainda não recebeu; trocar a versão reenvia para todos).
     const chave = 'psique_aviso_oferta_v2';
     const jaAvisou = (await Preferences.get({ key: chave })).value;
     if (jaAvisou === '1') return;
@@ -110,8 +110,8 @@ export async function agendarAvisoOferta() {
       notifications: [{
         id: 780,
         channelId: 'mensagem_dia',
-        title: '24h grátis liberado no Psiquê Oráculo ✨',
-        body: 'Ganhe 24 horas de tiragens ILIMITADAS! Toque e faça quantas leituras quiser hoje. 🔮',
+        title: 'Sua leitura grátis te espera ✨',
+        body: 'Faça sua primeira leitura no Psiquê Oráculo, é por nossa conta. Toque e pergunte às cartas. 🔮',
         schedule: { at: new Date(Date.now() + 2 * 60 * 60 * 1000), allowWhileIdle: true },
       }],
     });
